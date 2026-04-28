@@ -145,12 +145,24 @@
     button.reset:hover{background:var(--red-bg)}
 
     /* ── Search ── */
-    .search-row{display:flex;gap:10px;align-items:center;margin-bottom:8px}
-    .search-row input{flex:1}
+    .search-row{display:flex;gap:10px;align-items:center;margin-bottom:8px;position:relative}
+    .search-row::before{
+      content:'\1F50D';position:absolute;left:10px;top:50%;transform:translateY(-50%);
+      font-size:16px;z-index:1;pointer-events:none;opacity:0.5;
+    }
+    .search-row input{
+      flex:1;padding-left:36px;border:2px solid var(--border);
+      transition:border-color 0.2s,box-shadow 0.2s;
+    }
+    .search-row input::placeholder{font-style:italic}
+    .search-row input:focus{
+      border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,110,240,0.15),0 0 12px rgba(59,110,240,0.1);
+    }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
     .search-dropdown{
       position:absolute;top:100%;left:0;right:0;max-height:280px;overflow-y:auto;
       background:var(--surface);border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);
-      z-index:100;box-shadow:var(--shadow-md);
+      z-index:100;box-shadow:var(--shadow-md);animation:fadeIn 0.15s ease-out;
     }
     .search-item{
       padding:9px 14px;cursor:pointer;border-bottom:1px solid var(--border-light);
@@ -299,11 +311,11 @@
     }
     .np-sticky-card .np-sticky-title{font-size:var(--font-xs);color:var(--text-secondary);font-weight:700;letter-spacing:0.06em;margin-bottom:12px;text-transform:uppercase}
     .np-sticky-card .np-sticky-values{display:flex;gap:10px;justify-content:center}
-    .np-sticky-card .np-sticky-val{flex:1;text-align:center}
+    .np-sticky-card .np-sticky-val{flex:1;text-align:center;min-width:0}
     .np-sticky-card .np-sticky-val .vlabel{font-size:var(--font-xs);color:var(--text-muted);font-weight:700;letter-spacing:0.05em}
-    .np-sticky-card .np-sticky-val .vnum{font-size:var(--font-xl);font-weight:800;line-height:1.1}
+    .np-sticky-card .np-sticky-val .vnum{font-size:clamp(16px,5vw,var(--font-xl));font-weight:800;line-height:1.1;overflow-wrap:break-word}
     .np-sticky-card .vnum.min{color:var(--blue)}
-    .np-sticky-card .vnum.avg{font-size:var(--font-hero);color:var(--green)}
+    .np-sticky-card .vnum.avg{font-size:clamp(20px,7vw,var(--font-hero));color:var(--green)}
     .np-sticky-card .vnum.max{color:var(--red)}
 
     /* ── Interaction Feedback ── */
@@ -874,9 +886,9 @@ function aggregateBuffs(buffs, servant, options) {
     for (const src of sources) {
       val += (buffs[src] && buffs[src][k] !== undefined) ? (buffs[src][k] || 0) : 0;
     }
-    // Add servant passives if enabled
+    // Add servant passives
     const sv = servant;
-    if (options && options.enablePassives && sv) {
+    if (sv) {
       if (k === 'busterUp') val += getSv(sv, 'passiveBuster');
       if (k === 'artsUp') val += getSv(sv, 'passiveArts');
       if (k === 'quickUp') val += getSv(sv, 'passiveQuick');
@@ -1419,13 +1431,21 @@ function LevelConfig({ config, onChange }) {
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px 14px'}}>
         <div>
           <label htmlFor="lcfg-level">从者 LV: <b>{config.level}</b></label>
-          <input id="lcfg-level" type="range" min="1" max="120" value={config.level}
-            onChange={e => update('level', parseInt(e.target.value))} />
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <input id="lcfg-level" type="range" min="1" max="120" value={config.level} style={{flex:1}}
+              onChange={e => update('level', parseInt(e.target.value))} />
+            <input type="number" min="1" max="120" value={config.level} style={{width:62}}
+              onChange={e => update('level', parseInt(e.target.value)||1)} />
+          </div>
         </div>
         <div>
           <label htmlFor="lcfg-np">宝具 NP Lv.<b>{config.npLevel}</b></label>
-          <input id="lcfg-np" type="range" min="1" max="5" value={config.npLevel}
-            onChange={e => update('npLevel', parseInt(e.target.value))} />
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <input id="lcfg-np" type="range" min="1" max="5" value={config.npLevel} style={{flex:1}}
+              onChange={e => update('npLevel', parseInt(e.target.value))} />
+            <input type="number" min="1" max="5" value={config.npLevel} style={{width:62}}
+              onChange={e => update('npLevel', parseInt(e.target.value)||1)} />
+          </div>
         </div>
         <div>
           <label htmlFor="lcfg-fou">芙芙 ATK</label>
@@ -1485,10 +1505,6 @@ function OptionsPanel({ options, onChange }) {
     <div className="section">
       <h2 className="panel-title">Options</h2>
       <div className="options-row">
-        <button className={options.enablePassives?'active':''} onClick={() => toggle('enablePassives')}
-          aria-pressed={options.enablePassives} aria-label="启用被动技能">
-          {options.enablePassives?'\u2713':'\u25CB'} 被动
-        </button>
         <button className={options.overkill?'active':''} onClick={() => toggle('overkill')}
           aria-pressed={options.overkill} aria-label="鞭尸/过量击杀">
           {options.overkill?'\u2713':'\u25CB'} 鞭尸
@@ -1524,6 +1540,7 @@ const CORE_BUFF_KEYS = new Set(['atkUp','defDown','busterUp','artsUp','quickUp',
 
 function BuffTable({ buffs, servant, options, onChange }) {
   const [showAll, setShowAll] = useState(false);
+  const [visibleSources, setVisibleSources] = useState(['self']);
   const agg = useMemo(() => {
     if (!servant) return {};
     return aggregateBuffs(buffs, servant, options);
@@ -1535,6 +1552,18 @@ function BuffTable({ buffs, servant, options, onChange }) {
     onChange(newBuffs);
   };
 
+  const removeSource = (src) => {
+    setVisibleSources(prev => prev.filter(s => s !== src));
+  };
+
+  const addSource = (src) => {
+    if (!visibleSources.includes(src)) {
+      setVisibleSources(prev => [...prev, src]);
+    }
+  };
+
+  const availableSources = SOURCE_KEYS.filter(s => !visibleSources.includes(s));
+
   const visibleDefs = showAll ? BUFF_DEFS : BUFF_DEFS.filter(d => CORE_BUFF_KEYS.has(d.key));
 
   return (
@@ -1544,8 +1573,22 @@ function BuffTable({ buffs, servant, options, onChange }) {
         <thead>
           <tr>
             <th style={{textAlign:'right',minWidth:100}}>Buff</th>
-            {SOURCE_KEYS.map(src => (
-              <th key={src}>{SOURCE_LABELS[src]}</th>
+            {visibleSources.map(src => (
+              <th key={src}>
+                <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>
+                  <span>{SOURCE_LABELS[src]}</span>
+                  <button
+                    onClick={() => removeSource(src)}
+                    style={{
+                      fontSize:10,padding:'0 4px',lineHeight:'16px',border:'none',
+                      background:'transparent',color:'var(--text-muted)',cursor:'pointer',
+                      fontWeight:400
+                    }}
+                    title={`移除 ${SOURCE_LABELS[src]}`}>
+                    ×
+                  </button>
+                </div>
+              </th>
             ))}
             <th>Total (cap)</th>
           </tr>
@@ -1563,7 +1606,7 @@ function BuffTable({ buffs, servant, options, onChange }) {
                     {def.label}
                   </span>
                 </td>
-                {SOURCE_KEYS.map(src => (
+                {visibleSources.map(src => (
                   <td key={src}>
                     <input type="number" min="0" max={def.cap}
                       value={buffs[src][def.key]||0}
@@ -1580,10 +1623,23 @@ function BuffTable({ buffs, servant, options, onChange }) {
           })}
         </tbody>
       </table>
-      <button onClick={() => setShowAll(!showAll)}
-        style={{display:'block',margin:'8px auto 0',fontSize:'var(--font-xs)',padding:'4px 16px',cursor:'pointer',background:'none',border:'1px dashed var(--border)',borderRadius:4,color:'var(--text-muted)'}}>
-        {showAll ? '\u25B2 收起 Collapse' : '\u25BC 展开全部 Show All (' + BUFF_DEFS.length + ' buffs)'}
-      </button>
+      <div style={{display:'flex',gap:8,alignItems:'center',marginTop:8}}>
+        {availableSources.length > 0 && (
+          <select
+            value=""
+            onChange={e => { if (e.target.value) addSource(e.target.value); e.target.value = ''; }}
+            style={{width:'auto',padding:'4px 8px',fontSize:'var(--font-sm)'}}>
+            <option value="">+ 添加来源</option>
+            {availableSources.map(src => (
+              <option key={src} value={src}>{SOURCE_LABELS[src]}</option>
+            ))}
+          </select>
+        )}
+        <button onClick={() => setShowAll(!showAll)}
+          style={{fontSize:'var(--font-xs)',padding:'4px 12px',cursor:'pointer',background:'none',border:'1px dashed var(--border)',borderRadius:4,color:'var(--text-muted)'}}>
+          {showAll ? '\u25B2 收起 Collapse' : '\u25BC 展开全部 Show All (' + BUFF_DEFS.length + ' buffs)'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -1670,6 +1726,12 @@ function NPDamageResult({ result, servant, config, buffs, enemy, options }) {
 function CardChainPanel({ servant, config, buffs, enemy, options }) {
   const [slots, setSlots] = useState(['Buster','Arts','Quick']);
   const [showExtra, setShowExtra] = useState(false);
+  const [cardOptions, setCardOptions] = useState([
+    {isCrit:false, overkill:false},
+    {isCrit:false, overkill:false},
+    {isCrit:false, overkill:false},
+    {isCrit:false, overkill:false}
+  ]);
 
   if (!servant) return null;
 
@@ -1681,14 +1743,31 @@ function CardChainPanel({ servant, config, buffs, enemy, options }) {
     });
   };
 
+  const toggleCardCrit = (i) => {
+    setCardOptions(prev => {
+      const next = [...prev];
+      next[i] = {...next[i], isCrit: !next[i].isCrit};
+      return next;
+    });
+  };
+
+  const toggleCardOverkill = (i) => {
+    setCardOptions(prev => {
+      const next = [...prev];
+      next[i] = {...next[i], overkill: !next[i].overkill};
+      return next;
+    });
+  };
+
   const cards = showExtra ? [...slots, 'Extra'] : slots;
   const firstCard = cards[0];
   const results = cards.map((cardType, i) => {
     const position = i === 0 ? 'first' : i === 1 ? 'second' : i === 2 ? 'third' : 'extra';
-    const dmg = calcCardDamage(servant, config, buffs, enemy, options, cardType, position, firstCard);
-    const npGain = calcNPGainForCard(servant, buffs, enemy, options, cardType, position, firstCard);
-    const stars = calcStars(servant, buffs, enemy, options, cardType, position, firstCard);
-    return { cardType, position, dmg, npGain, stars };
+    const cardOpt = cardOptions[i] || {isCrit:false, overkill:false};
+    const dmg = calcCardDamage(servant, config, buffs, enemy, cardOpt, cardType, position, firstCard);
+    const npGain = calcNPGainForCard(servant, buffs, enemy, cardOpt, cardType, position, firstCard);
+    const stars = calcStars(servant, buffs, enemy, cardOpt, cardType, position, firstCard);
+    return { cardType, position, dmg, npGain, stars, cardOpt };
   });
 
   const totalDmg = results.reduce((s,r) => s + r.dmg, 0);
@@ -1701,17 +1780,43 @@ function CardChainPanel({ servant, config, buffs, enemy, options }) {
   return (
     <div className="section-card">
       <h2 className="panel-title">Card Chain</h2>
-      <div className="card-slots">
-        {slots.map((ct, i) => (
-          <button key={i} className={'card-slot ' + ct}
-            onClick={() => cycleCard(i)}
-            onKeyDown={e => {(e.key==='Enter'||e.key===' ')&&(e.preventDefault(),cycleCard(i))}}
-            aria-label={`卡牌${i+1}: ${ct}`}>
-            <span className="slot-pos">{i+1}</span>
-            {cardLabel[ct]}
-          </button>
-        ))}
-        <span className="plus-sep">+</span>
+      {slots.map((ct, i) => (
+        <div key={i} style={{marginBottom:6}}>
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:2}}>
+            <button className={'card-slot ' + ct}
+              onClick={() => cycleCard(i)}
+              onKeyDown={e => {(e.key==='Enter'||e.key===' ')&&(e.preventDefault(),cycleCard(i))}}
+              aria-label={`卡牌${i+1}: ${ct}`}>
+              <span className="slot-pos">{i+1}</span>
+              {cardLabel[ct]}
+            </button>
+            <div style={{display:'flex',flexDirection:'column',gap:2}}>
+              <button
+                onClick={() => toggleCardCrit(i)}
+                style={{
+                  fontSize:10,fontWeight:700,padding:'2px 6px',borderRadius:3,
+                  background:cardOptions[i]?.isCrit?'var(--gold)':'var(--surface)',
+                  color:cardOptions[i]?.isCrit?'#fff':'var(--text-muted)',
+                  border:`1px solid ${cardOptions[i]?.isCrit?'var(--gold)':'var(--border)'}`
+                }}>
+                CRIT
+              </button>
+              <button
+                onClick={() => toggleCardOverkill(i)}
+                style={{
+                  fontSize:10,fontWeight:700,padding:'2px 6px',borderRadius:3,
+                  background:cardOptions[i]?.overkill?'var(--red)':'var(--surface)',
+                  color:cardOptions[i]?.overkill?'#fff':'var(--text-muted)',
+                  border:`1px solid ${cardOptions[i]?.overkill?'var(--red)':'var(--border)'}`
+                }}>
+                OK
+              </button>
+            </div>
+            {i < slots.length - 1 && <span className="plus-sep">+</span>}
+          </div>
+        </div>
+      ))}
+      <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:8}}>
         <button className={'extra-toggle' + (showExtra?' on':'')}
           onClick={() => setShowExtra(!showExtra)}
           onKeyDown={e => {(e.key==='Enter'||e.key===' ')&&(e.preventDefault(),setShowExtra(!showExtra))}}
@@ -1719,10 +1824,23 @@ function CardChainPanel({ servant, config, buffs, enemy, options }) {
           aria-label="切换Extra攻击">
           EX
         </button>
+        {showExtra && (
+          <div style={{display:'flex',flexDirection:'column',gap:2}}>
+            <button
+              onClick={() => toggleCardOverkill(3)}
+              style={{
+                fontSize:10,fontWeight:700,padding:'2px 6px',borderRadius:3,
+                background:cardOptions[3]?.overkill?'var(--red)':'var(--surface)',
+                color:cardOptions[3]?.overkill?'#fff':'var(--text-muted)',
+                border:`1px solid ${cardOptions[3]?.overkill?'var(--red)':'var(--border)'}`
+              }}>
+              OK
+            </button>
+          </div>
+        )}
       </div>
       <div style={{fontSize:'var(--font-sm)',color:'var(--text-muted)',marginBottom:8}}>
         点击卡牌切换颜色 B&rarr;A&rarr;Q | 首卡: <span style={{color:cardColors[firstCard],fontWeight:700}}>{firstCard}</span>
-        {' '}| 暴击:{options.isCrit?'ON':'OFF'} | 鞭尸:{options.overkill?'ON':'OFF'}
       </div>
       <div className="chain-result">
         <div className="chain-header">Card</div>
@@ -1731,7 +1849,11 @@ function CardChainPanel({ servant, config, buffs, enemy, options }) {
         <div className="chain-header">Stars</div>
         {results.map((r, i) => (
           <React.Fragment key={i}>
-            <div style={{fontWeight:700,color:cardColors[r.cardType]}}>{r.cardType} [{r.position}]</div>
+            <div style={{fontWeight:700,color:cardColors[r.cardType]}}>
+              {r.cardType} [{r.position}]
+              {r.cardOpt.isCrit && <span style={{color:'var(--gold)',fontSize:10}}> CRIT</span>}
+              {r.cardOpt.overkill && <span style={{color:'var(--red)',fontSize:10}}> OK</span>}
+            </div>
             <div>{r.dmg.toLocaleString()}</div>
             <div>{r.npGain.toFixed(1)}</div>
             <div>{r.stars.expected}</div>
@@ -1773,10 +1895,10 @@ function ThreeTResult({ servant, config, buffs, enemy, options }) {
 
 // ── Presets v2: Fills source columns ──
 const PRESETS = {
-  '黑杯Lv100': { ce: { npStrength: 80 } },
-  '满破黑杯': { ce: { npStrength: 60 } },
-  '双C呆+黑杯': { ce: { npStrength: 80 }, support: { artsUp: 100, npRate: 60, atkUp: 40 } },
-  '双杀狐+黑杯': { ce: { npStrength: 80 }, support: { busterUp: 100, critDmg: 100, atkUp: 40, npRate: 50 } },
+  '黑杯Lv100': { ce: { npStrength: 80 }, ceAtk: 2400 },
+  '满破黑杯': { ce: { npStrength: 80 } },
+  '双C呆+黑杯': { ce: { npStrength: 80 }, ceAtk: 2400, support: { artsUp: 100, npRate: 60, atkUp: 40 } },
+  '双杀狐+黑杯': { ce: { npStrength: 80 }, ceAtk: 2400, support: { busterUp: 100, critDmg: 100, atkUp: 40, npRate: 50 } },
   '双RBA+绿': { ce: { npStrength: 60 }, support: { quickUp: 100, critDmg: 100, atkUp: 40, npRate: 30 } },
   '奥伯龙3技能': { self: { busterUp: 50, npStrength: 50, atkUp: 20 } },
 };
@@ -1794,15 +1916,15 @@ function PresetButtons({ onApply }) {
   return (
     <div className="preset-row">
       <span className="preset-label">预设 Presets</span>
-      {Object.entries(PRESETS).map(([label, partialBuffs]) => (
+      {Object.entries(PRESETS).map(([label, preset]) => (
         <button key={label} className={PRESET_COLORS[label]||''} onClick={() => {
           const fresh = JSON.parse(JSON.stringify(defaultBuffs));
           for (const src of SOURCE_KEYS) {
-            if (partialBuffs[src]) {
-              Object.assign(fresh[src], partialBuffs[src]);
+            if (preset[src]) {
+              Object.assign(fresh[src], preset[src]);
             }
           }
-          onApply(fresh);
+          onApply(fresh, preset.ceAtk);
         }}>{label}</button>
       ))}
     </div>
@@ -1958,7 +2080,7 @@ function App() {
   const [config, setConfig] = useState({level:90, npLevel:1, fou:1000, ceAtk:0, extraAtk:0});
   const [buffs, setBuffs] = useState(defaultBuffs);
   const [enemy, setEnemy] = useState({class:'Saber', attr:'Human', def:0});
-  const [options, setOptions] = useState({enablePassives:true, overkill:false, isCrit:false});
+  const [options, setOptions] = useState({overkill:false, isCrit:false});
 
   const servant = isCustom ? customServant : (selectedIndex !== null ? SERVANT_DB[selectedIndex] : null);
 
@@ -1974,7 +2096,7 @@ function App() {
     setConfig({level:90, npLevel:1, fou:1000, ceAtk:0, extraAtk:0});
     setBuffs(JSON.parse(JSON.stringify(defaultBuffs)));
     setEnemy({class:'Saber', attr:'Human', def:0});
-    setOptions({enablePassives:true, overkill:false, isCrit:false});
+    setOptions({overkill:false, isCrit:false});
   };
 
   return (
@@ -2013,7 +2135,7 @@ function App() {
           )}
 
           {/* Presets */}
-          <PresetButtons onApply={setBuffs} />
+          <PresetButtons onApply={(buffs, ceAtk) => { setBuffs(buffs); if (ceAtk !== undefined) setConfig(prev => ({...prev, ceAtk})); }} />
 
           {/* Level Config + Enemy + Options */}
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
