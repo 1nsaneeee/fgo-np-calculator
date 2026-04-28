@@ -946,7 +946,7 @@ function calcNPDamage(servant, config, buffs, enemy, options) {
   else if (npColor === 'Quick') colorBuff = agg.quickUp;
 
   // Enemy defense (defDown reduces enemy def, not add to atkUp)
-  const netEnemyDef = clamp((enemy.def || 0) - agg.defDown, 0, 100);
+  const netEnemyDef = clamp((enemy.def || 0) - agg.defDown, 100);
   const defMultiplier = 1 - netEnemyDef / 100;
 
   // ATK multiplier (defDown NOT included here)
@@ -982,7 +982,7 @@ function calcNPDamage(servant, config, buffs, enemy, options) {
   };
 }
 
-function calcNPGainPerHit(servant, buffs, enemy, options, isNP, cardType, position) {
+function calcNPGainPerHit(servant, buffs, enemy, options, isNP, cardType, position, firstCardType) {
   if (!servant) return 0;
   const sv = servant;
   const agg = aggregateBuffs(buffs, sv, options);
@@ -1000,7 +1000,7 @@ function calcNPGainPerHit(servant, buffs, enemy, options, isNP, cardType, positi
 
   // First card Arts bonus: +1.0 cardValue for non-NP, non-first cards
   let firstCardArtsBonus = 0;
-  if (!isNP && position !== 'first' && options && options.firstCard === 'Arts') {
+  if (!isNP && position !== 'first' && firstCardType === 'Arts') {
     firstCardArtsBonus = 1;
   }
 
@@ -1033,7 +1033,7 @@ function calcNPGainPerHit(servant, buffs, enemy, options, isNP, cardType, positi
   return Math.max(0, perHit);
 }
 
-function calcNPGainForCard(servant, buffs, enemy, options, cardType, position) {
+function calcNPGainForCard(servant, buffs, enemy, options, cardType, position, firstCardType) {
   if (!servant) return 0;
   const sv = servant;
   const hits = cardType === 'Buster' ? getSv(sv, 'bHits')
@@ -1044,7 +1044,7 @@ function calcNPGainForCard(servant, buffs, enemy, options, cardType, position) {
   if (hits === 0) return 0;
 
   const isNP = (cardType === getSv(sv, 'npColor'));
-  const perHit = calcNPGainPerHit(servant, buffs, enemy, options, isNP, cardType, position);
+  const perHit = calcNPGainPerHit(servant, buffs, enemy, options, isNP, cardType, position, firstCardType);
 
   return Math.floor(perHit * hits * 100) / 100;
 }
@@ -1074,7 +1074,7 @@ function calcCardDamage(servant, config, buffs, enemy, options, cardType, positi
   const classAdv = (CLASS_ADVANTAGE[svClass] && CLASS_ADVANTAGE[svClass][enemy.class]) || 1;
   const classCorr = CLASS_CORRECTION[svClass] || 1;
   const attrAdv = getAttributeAdvantage(getSv(sv, 'attr') || 'Human', enemy.attr || 'Human');
-  const defMultiplier = 1 - clamp((enemy.def || 0) - agg.defDown, 0, 100) / 100;
+  const defMultiplier = 1 - clamp((enemy.def || 0) - agg.defDown, 100) / 100;
 
   const critMult = (options && options.isCrit) ? 2 : 1;
   let critBuff = 0;
@@ -1098,7 +1098,7 @@ function calcCardDamage(servant, config, buffs, enemy, options, cardType, positi
   return Math.floor(dmg);
 }
 
-function calcStarPerHit(servant, buffs, enemy, options, cardType, position) {
+function calcStarPerHit(servant, buffs, enemy, options, cardType, position, firstCardType) {
   if (!servant) return 0;
   const sv = servant;
   const agg = aggregateBuffs(buffs, sv, options);
@@ -1122,15 +1122,19 @@ function calcStarPerHit(servant, buffs, enemy, options, cardType, position) {
 
   const overkillBonus = (options && options.overkill) ? 30 : 0;
 
+  // Quick first card bonus: +20% star rate to all non-first cards
+  const quickFirstBonus = (firstCardType === 'Quick' && position !== 'first') ? 20 : 0;
+
   const starRate = baseStarRate * 100
     + cardStarValue * (1 + colorBuff / 100)
     + agg.starGen
-    + overkillBonus;
+    + overkillBonus
+    + quickFirstBonus;
 
-  return clamp(starRate, 0, 300) / 100;
+  return clamp(starRate, 300) / 100;
 }
 
-function calcStars(servant, buffs, enemy, options, cardType, position) {
+function calcStars(servant, buffs, enemy, options, cardType, position, firstCardType) {
   if (!servant) return {floor:0, expected:0, ceil:0};
   const sv = servant;
   const hits = cardType === 'Buster' ? getSv(sv, 'bHits')
@@ -1139,7 +1143,7 @@ function calcStars(servant, buffs, enemy, options, cardType, position) {
     : cardType === 'Extra' ? getSv(sv, 'eHits') : 0;
   if (hits === 0) return {floor:0, expected:0, ceil:0};
 
-  const perHit = calcStarPerHit(servant, buffs, enemy, options, cardType, position);
+  const perHit = calcStarPerHit(servant, buffs, enemy, options, cardType, position, firstCardType);
   return {
     floor: Math.floor(perHit) * hits,
     expected: Math.round(perHit * hits * 10) / 10,
@@ -1493,12 +1497,6 @@ function OptionsPanel({ options, onChange }) {
           aria-pressed={options.isCrit} aria-label="暴击判定">
           {options.isCrit?'\u2713':'\u25CB'} 暴击
         </button>
-        <label htmlFor="opt-firstcard" style={{margin:0}}>首卡:</label>
-        <select id="opt-firstcard" value={options.firstCard} onChange={e => set('firstCard', e.target.value)}>
-          <option value="Buster">Buster</option>
-          <option value="Arts">Arts</option>
-          <option value="Quick">Quick</option>
-        </select>
       </div>
     </div>
   );
@@ -1688,8 +1686,8 @@ function CardChainPanel({ servant, config, buffs, enemy, options }) {
   const results = cards.map((cardType, i) => {
     const position = i === 0 ? 'first' : i === 1 ? 'second' : i === 2 ? 'third' : 'extra';
     const dmg = calcCardDamage(servant, config, buffs, enemy, options, cardType, position, firstCard);
-    const npGain = calcNPGainForCard(servant, buffs, enemy, options, cardType, position);
-    const stars = calcStars(servant, buffs, enemy, options, cardType, position);
+    const npGain = calcNPGainForCard(servant, buffs, enemy, options, cardType, position, firstCard);
+    const stars = calcStars(servant, buffs, enemy, options, cardType, position, firstCard);
     return { cardType, position, dmg, npGain, stars };
   });
 
@@ -1960,7 +1958,7 @@ function App() {
   const [config, setConfig] = useState({level:90, npLevel:1, fou:1000, ceAtk:0, extraAtk:0});
   const [buffs, setBuffs] = useState(defaultBuffs);
   const [enemy, setEnemy] = useState({class:'Saber', attr:'Human', def:0});
-  const [options, setOptions] = useState({enablePassives:true, overkill:false, firstCard:'Buster', isCrit:false});
+  const [options, setOptions] = useState({enablePassives:true, overkill:false, isCrit:false});
 
   const servant = isCustom ? customServant : (selectedIndex !== null ? SERVANT_DB[selectedIndex] : null);
 
@@ -1976,7 +1974,7 @@ function App() {
     setConfig({level:90, npLevel:1, fou:1000, ceAtk:0, extraAtk:0});
     setBuffs(JSON.parse(JSON.stringify(defaultBuffs)));
     setEnemy({class:'Saber', attr:'Human', def:0});
-    setOptions({enablePassives:true, overkill:false, firstCard:'Buster', isCrit:false});
+    setOptions({enablePassives:true, overkill:false, isCrit:false});
   };
 
   return (
