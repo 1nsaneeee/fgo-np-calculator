@@ -1,4 +1,6 @@
 .claude/
 .omc/
 *.xlsx
-*.json
+node_modules/
+.omc/
+.claude/
