@@ -9,9 +9,9 @@ import LevelConfig from '@/components/LevelConfig';
 import EnemyPanel from '@/components/EnemyPanel';
 import OptionsPanel from '@/components/OptionsPanel';
 import BuffTable from '@/components/BuffTable';
-import NPDamageSticky from '@/components/NPDamageSticky';
 import NPDamageResult from '@/components/NPDamageResult';
 import CardChainPanel from '@/components/CardChainPanel';
+import CardDrawPanel from '@/components/CardDrawPanel';
 import ThreeTResult from '@/components/ThreeTResult';
 import PresetButtons from '@/components/PresetButtons';
 import CustomServantForm from '@/components/CustomServantForm';
@@ -24,10 +24,6 @@ export default function App() {
   const resetBuffs = useStore((s) => s.resetBuffs);
   const resetEnemy = useStore((s) => s.resetEnemy);
   const resetOptions = useStore((s) => s.resetOptions);
-  const config = useStore((s) => s.config);
-  const buffs = useStore((s) => s.buffs);
-  const enemy = useStore((s) => s.enemy);
-  const options = useStore((s) => s.options);
   const servant = useServant();
   const npResult = useNpResult();
 
@@ -41,80 +37,71 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1 className="app-title">FGO NP Damage Calculator // 宝具伤害计算器</h1>
+      <header className="app-header">
+        <h1 className="app-title">FGO NP Damage Calculator // 宝具伤害计算器</h1>
+      </header>
 
-      <div className="layout-2col">
-        {/* LEFT COLUMN: Inputs */}
-        <div className="left-col">
-          {/* Mode toggle + Search */}
-          <div className="section">
-            <div style={{ display: 'flex', gap: 0, marginBottom: 12 }}>
-              <Button
-                variant={!isCustom ? 'contained' : 'outlined'}
-                onClick={() => setCustomMode(false)}
-                sx={{ flex: 1, borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)' }}
-              >
-                数据库 Database
-              </Button>
-              <Button
-                variant={isCustom ? 'contained' : 'outlined'}
-                onClick={() => setCustomMode(true)}
-                sx={{ flex: 1, borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}
-              >
-                自定义 Custom
-              </Button>
-            </div>
-            {!isCustom && <ServantSelector />}
+      <main className="main-col">
+        <div className="section">
+          <div style={{ display: 'flex', gap: 0, marginBottom: 'var(--space-sm)' }}>
+            <Button
+              variant={!isCustom ? 'contained' : 'outlined'}
+              onClick={() => setCustomMode(false)}
+              sx={{ flex: 1, borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)' }}
+            >
+              数据库 Database
+            </Button>
+            <Button
+              variant={isCustom ? 'contained' : 'outlined'}
+              onClick={() => setCustomMode(true)}
+              sx={{ flex: 1, borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}
+            >
+              自定义 Custom
+            </Button>
           </div>
-
-          {/* Servant Info / Custom Form */}
+          {!isCustom && <ServantSelector />}
           {isCustom ? <CustomServantForm /> : <ServantStats servant={servant} />}
+        </div>
 
-          {/* Presets */}
-          <PresetButtons />
-
-          {/* Level Config + Enemy + Options */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="config-row">
+          <div className="section">
+            <h2 className="panel-title">Level Config</h2>
             <LevelConfig />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <EnemyPanel />
+          </div>
+          <div className="section">
+            <h2 className="panel-title">Enemy & Options</h2>
+            <EnemyPanel />
+            <div style={{ marginTop: 'var(--space-sm)' }}>
               <OptionsPanel />
             </div>
           </div>
+        </div>
 
-          {/* Buff Table */}
+        <PresetButtons />
+
+        <div className="section">
           <BuffTable />
-
-          {/* NP Damage Detail */}
-          <NPDamageResult result={npResult} servant={servant} config={config}
-            buffs={buffs} enemy={enemy} options={options} />
-
-          {/* Card Chain */}
-          <CardChainPanel />
-
-          {/* Reset */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={handleReset}
-              sx={{ fontSize: 'var(--font-sm)' }}
-            >
-              {'\u27F2'} Reset All
-            </Button>
-          </div>
         </div>
 
-        {/* RIGHT COLUMN: Sticky Results */}
-        <div className="right-col">
-          <NPDamageSticky result={npResult} servant={servant} config={config} />
-          <ThreeTResult />
-        </div>
-      </div>
+        <NPDamageResult result={npResult} servant={servant} />
 
-      <div style={{ textAlign: 'center', marginTop: 40, fontSize: 'var(--font-sm)', color: 'var(--text-muted)' }}>
-        FGO Damage Calculator v3.0 · Data from FGO计算器Ver9.9 · React 18 + Vite + MUI + Zustand
-      </div>
+        <ThreeTResult />
+
+        <CardChainPanel />
+
+        <CardDrawPanel />
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: 'var(--space-md) 0' }}>
+          <Button variant="outlined" color="error" onClick={handleReset}
+            sx={{ fontSize: 'var(--font-sm)' }}>
+            {'\u27F2'} Reset All
+          </Button>
+        </div>
+      </main>
+
+      <footer className="app-footer">
+        FGO Damage Calculator v4.0 · Data from FGO计算器Ver9.9 · React 18 + Vite + MUI + Zustand
+      </footer>
     </div>
   );
 }

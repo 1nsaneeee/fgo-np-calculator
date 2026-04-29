@@ -4,12 +4,12 @@ import { CLASS_ADVANTAGE, CLASS_CORRECTION, NP_COLOR_CARD_MULT, ENEMY_NP_MOD } f
 export function aggregateBuffs(buffs, servant, options) {
   const keys = ['atkUp','defDown','busterUp','artsUp','quickUp','critDmg','starGen','npStrength','npRate','powerMod','flatDmg'];
   const raw = {};
-  const sources = ['ce','self','support','enemy','debuff'];
+  const sources = buffs.sources || [];
 
   for (const k of keys) {
     let val = 0;
     for (const src of sources) {
-      val += (buffs[src] && buffs[src][k] !== undefined) ? (buffs[src][k] || 0) : 0;
+      val += (src.buffs && src.buffs[k] !== undefined) ? (src.buffs[k] || 0) : 0;
     }
     const sv = servant;
     if (sv) {

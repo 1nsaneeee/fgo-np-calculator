@@ -1,131 +1,130 @@
 import { useMemo, useState } from 'react'
-import cloneDeep from 'lodash/cloneDeep'
-import {
-  Table, TableHead, TableBody, TableRow, TableCell,
-  TextField, Button, Select, MenuItem, Box
-} from '@mui/material'
 import useStore from '@/store/index'
-import { BUFF_DEFS, SOURCE_KEYS, SOURCE_LABELS, CORE_BUFF_KEYS } from '@/constants/buffDefs'
+import { BUFF_DEFS, CORE_BUFF_KEYS } from '@/constants/buffDefs'
 import { useServant } from '@/hooks/useServant'
 import { aggregateBuffs } from '@/utils/calculations'
 
 export default function BuffTable() {
   const [showAll, setShowAll] = useState(false)
-  const [visibleSources, setVisibleSources] = useState(['self'])
+  const [newName, setNewName] = useState('')
+  const [adding, setAdding] = useState(false)
 
   const servant = useServant()
   const buffs = useStore(s => s.buffs)
   const options = useStore(s => s.options)
-  const setBuffs = useStore(s => s.setBuffs)
+  const addBuffSource = useStore(s => s.addBuffSource)
+  const removeBuffSource = useStore(s => s.removeBuffSource)
+  const renameBuffSource = useStore(s => s.renameBuffSource)
+  const updateBuffValue = useStore(s => s.updateBuffValue)
+
+  const sources = buffs.sources || []
 
   const agg = useMemo(
     () => aggregateBuffs(buffs, servant, options),
     [buffs, servant, options]
   )
 
-  function updateBuffSource(source, key, val) {
-    const next = cloneDeep(buffs)
-    if (!next[source]) next[source] = {}
-    next[source][key] = val
-    setBuffs(next)
-  }
-
-  function removeSource(src) {
-    setVisibleSources(prev => prev.filter(s => s !== src))
-  }
-
-  function addSource(src) {
-    if (src) setVisibleSources(prev => [...prev, src])
-  }
-
   const visibleDefs = showAll
     ? BUFF_DEFS
     : BUFF_DEFS.filter(d => CORE_BUFF_KEYS.has(d.key))
 
-  const availableSources = SOURCE_KEYS.filter(s => !visibleSources.includes(s))
+  const handleAddSource = () => {
+    if (newName.trim()) {
+      addBuffSource(newName.trim())
+      setNewName('')
+      setAdding(false)
+    }
+  }
 
   return (
-    <div className="section" style={{ overflowX: 'auto' }}>
+    <div style={{ overflowX: 'auto' }}>
       <h2 className="panel-title">Buff配置</h2>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell style={{ textAlign: 'right', minWidth: 100 }}>Buff</TableCell>
-            {visibleSources.map(src => (
-              <TableCell key={src}>
-                {SOURCE_LABELS[src]}
-                <button
-                  style={{ marginLeft: 4, fontSize: '0.75em', cursor: 'pointer' }}
-                  onClick={() => removeSource(src)}
-                >
-                  ×
-                </button>
-              </TableCell>
+      <table className="buff-table">
+        <thead>
+          <tr>
+            <th className="buff-label-col">Buff</th>
+            {sources.map(src => (
+              <th key={src.id}>
+                <div className="source-header">
+                  <input
+                    className="source-name-input"
+                    value={src.name}
+                    onChange={e => renameBuffSource(src.id, e.target.value)}
+                    aria-label={`来源名称: ${src.name}`}
+                  />
+                  {sources.length > 1 && (
+                    <button
+                      className="source-remove-btn"
+                      onClick={() => removeBuffSource(src.id)}
+                      title="删除此来源"
+                      aria-label={`删除来源: ${src.name}`}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              </th>
             ))}
-            <TableCell>Total (cap)</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+            <th className="total-col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
           {visibleDefs.map(def => {
-            const totalRaw = SOURCE_KEYS.reduce((sum, src) => {
-              return sum + (buffs[src]?.[def.key] || 0)
-            }, 0)
-            const totalCapped = agg[def.key] !== undefined ? Math.round(agg[def.key]) : Math.round(totalRaw)
+            const totalCapped = agg[def.key] !== undefined ? Math.round(agg[def.key]) : 0
             const isFlat = def.key === 'flatDmg'
             const isCapped = totalCapped >= def.cap
-            const displayValue = isFlat
-              ? totalCapped.toLocaleString()
-              : totalCapped + '%'
 
             return (
-              <TableRow
-                key={def.key}
-                className={def.groupEnd ? 'group-end' : ''}
-              >
-                <TableCell
-                  className="buff-label"
-                  title={`cap: ${def.cap}`}
-                >
+              <tr key={def.key} className={def.groupEnd ? 'group-end' : ''}>
+                <td className="buff-label" title={`cap: ${def.cap}`}>
                   {def.label}
-                </TableCell>
-                {visibleSources.map(src => (
-                  <TableCell key={src}>
-                    <TextField
+                </td>
+                {sources.map(src => (
+                  <td key={src.id}>
+                    <input
+                      className="buff-input"
                       type="number"
-                      size="small"
-                      value={buffs[src]?.[def.key] || 0}
-                      onChange={e => updateBuffSource(src, def.key, parseFloat(e.target.value) || 0)}
+                      value={src.buffs?.[def.key] || 0}
+                      onChange={e => updateBuffValue(src.id, def.key, parseFloat(e.target.value) || 0)}
+                      aria-label={`${def.label} - ${src.name}`}
                     />
-                  </TableCell>
+                  </td>
                 ))}
-                <TableCell className={'total-cell' + (isCapped ? ' capped' : '')}>
-                  {displayValue}
-                </TableCell>
-              </TableRow>
+                <td className={'total-cell' + (isCapped ? ' capped' : '')}>
+                  {isFlat ? totalCapped.toLocaleString() : totalCapped + '%'}
+                  {isCapped && <span className="cap-badge">CAP</span>}
+                </td>
+              </tr>
             )
           })}
-        </TableBody>
-      </Table>
-      <Box display="flex" gap={1} marginTop={1}>
-        {availableSources.length > 0 && (
-          <Select
-            displayEmpty
-            value=""
-            onChange={e => addSource(e.target.value)}
-            size="small"
-          >
-            <MenuItem value="" disabled>+ 添加来源</MenuItem>
-            {availableSources.map(src => (
-              <MenuItem key={src} value={src}>{SOURCE_LABELS[src]}</MenuItem>
-            ))}
-          </Select>
+        </tbody>
+      </table>
+      <div className="buff-actions">
+        {adding ? (
+          <div className="add-source-row">
+            <input
+              className="source-name-input"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAddSource()}
+              placeholder="来源名称..."
+              aria-label="新来源名称"
+              autoFocus
+            />
+            <button className="add-source-confirm" onClick={handleAddSource} aria-label="确认添加来源">确定</button>
+            <button className="add-source-cancel" onClick={() => { setAdding(false); setNewName(''); }} aria-label="取消添加来源">取消</button>
+          </div>
+        ) : (
+          <button className="add-source-btn" onClick={() => setAdding(true)}>
+            + 添加来源 Add Source
+          </button>
         )}
-        <Button onClick={() => setShowAll(prev => !prev)}>
+        <button className="toggle-btn" onClick={() => setShowAll(prev => !prev)}>
           {showAll
             ? '▲ 收起 Collapse'
-            : `▼ 展开全部 Show All (${BUFF_DEFS.length} buffs)`}
-        </Button>
-      </Box>
+            : `▼ 展开全部 Show All (${BUFF_DEFS.length})`}
+        </button>
+      </div>
     </div>
   )
 }

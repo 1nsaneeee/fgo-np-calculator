@@ -1,5 +1,4 @@
 import { useState, Fragment } from 'react';
-import { Box } from '@mui/material';
 import { useServant } from '@/hooks/useServant';
 import useStore from '@/store/index';
 import { calcCardDamage, calcNPGainForCard, calcStars } from '@/utils/calculations';
@@ -65,11 +64,14 @@ export default function CardChainPanel() {
   const totalNp = results.reduce((s, r) => s + r.npGain, 0);
   const totalStars = results.reduce((s, r) => s + r.stars.expected, 0);
 
+  const sameChain = slots[0] === slots[1] && slots[1] === slots[2];
+  const triColor = new Set(slots).size === 3;
+
   return (
-    <div className="section-card">
+    <div className="section">
       <h2 className="panel-title">Card Chain</h2>
 
-      <div className="card-slots" style={{ marginBottom: 8 }}>
+      <div className="card-slots" style={{ marginBottom: 'var(--space-sm)' }}>
         {slots.map((ct, i) => (
           <Fragment key={i}>
             <button
@@ -84,24 +86,28 @@ export default function CardChainPanel() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <button
                 onClick={() => toggleCardCrit(i)}
+                aria-pressed={cardOptions[i]?.isCrit || false}
+                aria-label={`卡牌${i + 1}暴击`}
                 style={{
-                  fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3,
+                  fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
                   background: cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--surface)',
                   color: cardOptions[i]?.isCrit ? '#fff' : 'var(--text-muted)',
                   border: `1px solid ${cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--border)'}`,
-                  cursor: 'pointer',
+                  cursor: 'pointer', minHeight: 28, minWidth: 36,
                 }}
               >
                 CRIT
               </button>
               <button
                 onClick={() => toggleCardOverkill(i)}
+                aria-pressed={cardOptions[i]?.overkill || false}
+                aria-label={`卡牌${i + 1}overkill`}
                 style={{
-                  fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3,
+                  fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
                   background: cardOptions[i]?.overkill ? 'var(--red)' : 'var(--surface)',
                   color: cardOptions[i]?.overkill ? '#fff' : 'var(--text-muted)',
                   border: `1px solid ${cardOptions[i]?.overkill ? 'var(--red)' : 'var(--border)'}`,
-                  cursor: 'pointer',
+                  cursor: 'pointer', minHeight: 28, minWidth: 36,
                 }}
               >
                 OK
@@ -112,7 +118,7 @@ export default function CardChainPanel() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
         <button
           className={'extra-toggle' + (showExtra ? ' on' : '')}
           onClick={() => setShowExtra(!showExtra)}
@@ -126,12 +132,14 @@ export default function CardChainPanel() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <button
               onClick={() => toggleCardOverkill(3)}
+              aria-pressed={cardOptions[3]?.overkill || false}
+              aria-label="Extra卡overkill"
               style={{
-                fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 3,
+                fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
                 background: cardOptions[3]?.overkill ? 'var(--red)' : 'var(--surface)',
                 color: cardOptions[3]?.overkill ? '#fff' : 'var(--text-muted)',
                 border: `1px solid ${cardOptions[3]?.overkill ? 'var(--red)' : 'var(--border)'}`,
-                cursor: 'pointer',
+                cursor: 'pointer', minHeight: 28, minWidth: 36,
               }}
             >
               OK
@@ -140,8 +148,25 @@ export default function CardChainPanel() {
         )}
       </div>
 
-      <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginBottom: 8 }}>
-        点击卡牌切换颜色 B&rarr;A&rarr;Q | 首卡: <span style={{ color: cardColors[firstCard], fontWeight: 700 }}>{firstCard}</span>
+      <div className="chain-bonus">
+        <span style={{ color: 'var(--text-muted)' }}>点击卡牌切换 B→A→Q</span>
+        <span>
+          首卡 <span style={{ color: cardColors[firstCard], fontWeight: 700 }}>{firstCard}</span>
+          {' → '}
+          <span style={{ fontWeight: 500 }}>
+            {firstCard === 'Buster' ? '全卡伤害加成' : firstCard === 'Arts' ? '全卡NP获取加成' : '全卡掉星加成'}
+          </span>
+        </span>
+        {sameChain && (
+          <span style={{ color: cardColors[slots[0]], fontWeight: 700 }}>
+            {slots[0]} Chain: {slots[0] === 'Buster' ? '每卡+20%ATK' : slots[0] === 'Arts' ? '额外+20%NP' : '额外+10星'}
+          </span>
+        )}
+        {triColor && (
+          <span style={{ fontWeight: 700 }}>
+            三色链: <span style={{ color: 'var(--buster)' }}>伤害</span>+<span style={{ color: 'var(--arts)' }}>NP</span>+<span style={{ color: 'var(--quick)' }}>掉星</span> 全首卡效果
+          </span>
+        )}
       </div>
 
       <div className="chain-result">

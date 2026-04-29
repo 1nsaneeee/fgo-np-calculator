@@ -12,24 +12,28 @@ export const BUFF_DEFS = [
   {key:'flatDmg', label:'固定伤害', cap:100000, capUnit:'', group:4},
 ];
 
-export const SOURCE_KEYS = ['ce','self','support','enemy','debuff'];
-
-export const SOURCE_LABELS = {
-  ce:'礼装CE',
-  self:'自身Self',
-  support:'助战Support',
-  enemy:'敌方Enemy',
-  debuff:'减益Debuff'
-};
-
 export const CORE_BUFF_KEYS = new Set([
   'atkUp','defDown','busterUp','artsUp','quickUp','npStrength','npRate','powerMod'
 ]);
 
-export const defaultBuffs = {};
-for (const src of SOURCE_KEYS) {
-  defaultBuffs[src] = {};
+export function createEmptyBuffs() {
+  const buffs = {};
   for (const def of BUFF_DEFS) {
-    defaultBuffs[src][def.key] = 0;
+    buffs[def.key] = 0;
   }
+  return buffs;
 }
+
+export const DEFAULT_SOURCES = [
+  { id: 'src_1', name: '自身Self', buffs: createEmptyBuffs() }
+];
+
+export const DEFAULT_NEXT_ID = 2;
+
+export const SOURCE_KEY_NAMES = {
+  ce: '礼装CE',
+  self: '自身Self',
+  support: '助战Support',
+  enemy: '敌方Enemy',
+  debuff: '减益Debuff',
+};

@@ -1,8 +1,7 @@
-import { Button, Box } from '@mui/material';
+import { Button } from '@mui/material';
 import useStore from '@/store/index';
 import { PRESETS } from '@/constants/presets';
-import { SOURCE_KEYS, defaultBuffs } from '@/constants/buffDefs';
-import cloneDeep from 'lodash/cloneDeep';
+import { createEmptyBuffs, SOURCE_KEY_NAMES } from '@/constants/buffDefs';
 
 const presetColors = {
   '黑杯Lv100': 'inherit',
@@ -18,13 +17,34 @@ export default function PresetButtons() {
   const updateConfig = useStore((s) => s.updateConfig);
 
   const handleApply = (preset) => {
-    const fresh = cloneDeep(defaultBuffs);
-    for (const src of SOURCE_KEYS) {
-      if (preset[src]) {
-        Object.assign(fresh[src], preset[src]);
+    const sourceKeys = ['ce', 'self', 'support', 'enemy', 'debuff'];
+    const sources = [];
+    let nextId = 1;
+
+    for (const key of sourceKeys) {
+      if (preset[key]) {
+        const buffs = createEmptyBuffs();
+        Object.assign(buffs, preset[key]);
+        sources.push({
+          id: 'src_' + nextId,
+          name: SOURCE_KEY_NAMES[key] || key,
+          buffs,
+        });
+        nextId++;
       }
     }
-    setBuffs(fresh);
+
+    if (sources.length === 0) {
+      sources.push({
+        id: 'src_1',
+        name: '自身Self',
+        buffs: createEmptyBuffs(),
+      });
+      nextId = 2;
+    }
+
+    setBuffs({ sources, _nextId: nextId });
+
     if (preset.ceAtk !== undefined) {
       updateConfig('ceAtk', preset.ceAtk);
     }

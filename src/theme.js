@@ -4,7 +4,7 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     background: {
-      default: '#f0f2f5',
+      default: '#ffffff',
       paper: '#ffffff',
     },
     text: {
@@ -26,13 +26,13 @@ const theme = createTheme({
   typography: {
     fontFamily:
       "-apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif",
-    fontSize: 15,
+    fontSize: 14,
     fontWeightRegular: 400,
     fontWeightMedium: 600,
     fontWeightBold: 700,
   },
   shape: {
-    borderRadius: 6,
+    borderRadius: 10,
   },
   components: {
     MuiCssBaseline: {
