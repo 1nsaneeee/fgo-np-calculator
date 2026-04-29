@@ -69,9 +69,9 @@ export default function CardChainPanel() {
     <div className="section-card">
       <h2 className="panel-title">Card Chain</h2>
 
-      {slots.map((ct, i) => (
-        <div key={i} style={{ marginBottom: 6 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+      <div className="card-slots" style={{ marginBottom: 8 }}>
+        {slots.map((ct, i) => (
+          <Fragment key={i}>
             <button
               className={'card-slot ' + ct}
               onClick={() => cycleCard(i)}
@@ -108,9 +108,9 @@ export default function CardChainPanel() {
               </button>
             </div>
             {i < slots.length - 1 && <span className="plus-sep">+</span>}
-          </div>
-        </div>
-      ))}
+          </Fragment>
+        ))}
+      </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
         <button

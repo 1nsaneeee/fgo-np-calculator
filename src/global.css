@@ -264,6 +264,12 @@
   background: #f4fdf9;
 }
 
+.card-slot.Extra {
+  border-color: #e6d08c;
+  color: var(--gold);
+  background: #fef9f2;
+}
+
 .card-slot:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -301,6 +307,31 @@
 }
 
 .card-slots .extra-toggle.on {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-bg);
+  border-style: solid;
+}
+
+.extra-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 800;
+  transition: all 0.15s;
+  font-family: inherit;
+  padding: 0;
+  border: 2px dashed var(--border);
+  color: var(--text-muted);
+  background: var(--surface);
+}
+
+.extra-toggle.on {
   border-color: var(--gold);
   color: var(--gold);
   background: var(--gold-bg);

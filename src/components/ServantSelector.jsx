@@ -12,16 +12,25 @@ export default function ServantSelector() {
   const [inputValue, setInputValue] = useState('');
 
   const filteredOptions = useMemo(() => {
-    let options = SERVANT_DB.map((s, i) => ({ ...s, _idx: i }));
+    let options = SERVANT_DB.map((s, i) => {
+      const arr = [...s];
+      arr._idx = i;
+      return arr;
+    });
     if (classFilter) {
       options = options.filter((s) => getSv(s, 'class') === classFilter);
     }
     return options;
   }, [classFilter]);
 
-  const selectedOption = selectedIndex !== null && selectedIndex >= 0
-    ? { ...SERVANT_DB[selectedIndex], _idx: selectedIndex }
-    : null;
+  const selectedOption = useMemo(() => {
+    if (selectedIndex !== null && selectedIndex >= 0) {
+      const arr = [...SERVANT_DB[selectedIndex]];
+      arr._idx = selectedIndex;
+      return arr;
+    }
+    return null;
+  }, [selectedIndex]);
 
   const handleClassToggle = (cls) => {
     setClassFilter((prev) => (prev === cls ? null : cls));
