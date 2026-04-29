@@ -4,10 +4,13 @@ import { BUFF_DEFS, CORE_BUFF_KEYS } from '@/constants/buffDefs'
 import { useServant } from '@/hooks/useServant'
 import { aggregateBuffs } from '@/utils/calculations'
 
+const CRIT_CHILDREN = new Set(['busterCritDmg', 'artsCritDmg', 'quickCritDmg']);
+
 export default function BuffTable() {
   const [showAll, setShowAll] = useState(false)
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
+  const [critExpanded, setCritExpanded] = useState(false)
 
   const servant = useServant()
   const buffs = useStore(s => s.buffs)
@@ -24,9 +27,10 @@ export default function BuffTable() {
     [buffs, servant, options]
   )
 
+  // Crit children always included when critDmg is visible, but toggle controls display
   const visibleDefs = showAll
     ? BUFF_DEFS
-    : BUFF_DEFS.filter(d => CORE_BUFF_KEYS.has(d.key))
+    : BUFF_DEFS.filter(d => CORE_BUFF_KEYS.has(d.key) || CRIT_CHILDREN.has(d.key))
 
   const handleAddSource = () => {
     if (newName.trim()) {
@@ -35,6 +39,22 @@ export default function BuffTable() {
       setAdding(false)
     }
   }
+
+  // Pre-compute shared crit cap: distribute 500% budget in definition order
+  const CRIT_KEYS = ['critDmg', 'busterCritDmg', 'artsCritDmg', 'quickCritDmg']
+  const critRaw = {}
+  const critDisplay = {}
+  let critRemaining = 500
+  for (const k of CRIT_KEYS) {
+    const raw = Math.round(agg[k] || 0)
+    critRaw[k] = raw
+    const effective = Math.min(raw, Math.max(0, critRemaining))
+    critDisplay[k] = effective
+    critRemaining -= effective
+  }
+  const critTotal = CRIT_KEYS.reduce((s, k) => s + critRaw[k], 0)
+  const critEffective = Math.min(critTotal, 500)
+  const critCapped = critTotal > 500
 
   return (
     <div style={{ overflowX: 'auto' }}>
@@ -70,14 +90,46 @@ export default function BuffTable() {
         </thead>
         <tbody>
           {visibleDefs.map(def => {
+            // Hide crit children when collapsed
+            if (CRIT_CHILDREN.has(def.key) && !critExpanded) return null
+
             const totalCapped = agg[def.key] !== undefined ? Math.round(agg[def.key]) : 0
             const isFlat = def.key === 'flatDmg'
-            const isCapped = totalCapped >= def.cap
+
+            // Shared cap logic for crit group
+            const isCritParent = def.key === 'critDmg'
+            const isCritChild = CRIT_CHILDREN.has(def.key)
+            const isCritRow = isCritParent || isCritChild
+            let isCapped
+            if (isCritRow) {
+              isCapped = critCapped
+            } else {
+              isCapped = totalCapped >= def.cap
+            }
+
+            // For crit rows, show the effective share of the 500% pool
+            const displayValue = isCritRow
+              ? (isCritParent && !critExpanded ? critEffective : critDisplay[def.key])
+              : totalCapped
 
             return (
-              <tr key={def.key} className={def.groupEnd ? 'group-end' : ''}>
-                <td className="buff-label" title={`cap: ${def.cap}`}>
+              <tr key={def.key} className={
+                (def.groupEnd ? 'group-end' : '') +
+                (isCritChild ? ' crit-child-row' : '')
+              }>
+                <td className={`buff-label buff-c-${def.color || ''}`} title={`cap: ${def.cap}`}>
+                  {isCritParent && (
+                    <button
+                      className="crit-toggle"
+                      onClick={() => setCritExpanded(!critExpanded)}
+                      aria-expanded={critExpanded}
+                      aria-label="展开/折叠色卡暴击"
+                    >
+                      {critExpanded ? '▼' : '▶'}
+                    </button>
+                  )}
                   {def.label}
+                  {def.note && !isCritParent && <span className="buff-note">{def.note}</span>}
                 </td>
                 {sources.map(src => (
                   <td key={src.id}>
@@ -91,8 +143,13 @@ export default function BuffTable() {
                   </td>
                 ))}
                 <td className={'total-cell' + (isCapped ? ' capped' : '')}>
-                  {isFlat ? totalCapped.toLocaleString() : totalCapped + '%'}
+                  {isFlat ? displayValue.toLocaleString() : displayValue + '%'}
                   {isCapped && <span className="cap-badge">CAP</span>}
+                  {isCritParent && !critExpanded && critCapped && (
+                    <div className="crit-summary">
+                      <span className="crit-overflow">输入{critTotal}%</span>
+                    </div>
+                  )}
                 </td>
               </tr>
             )

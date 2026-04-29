@@ -1,10 +1,12 @@
 import { useState, Fragment } from 'react';
 import { useServant } from '@/hooks/useServant';
 import useStore from '@/store/index';
-import { calcCardDamage, calcNPGainForCard, calcStars } from '@/utils/calculations';
+import { getSv } from '@/utils/helpers';
+import { calcCardDamage, calcNPGainForCard, calcStars, calcNPInChain, calcBreakProb } from '@/utils/calculations';
 
-const cardLabel = { Buster: 'B', Arts: 'A', Quick: 'Q', Extra: 'EX' };
+const cardLabel = { Buster: 'B', Arts: 'A', Quick: 'Q', Extra: 'EX', NP: 'NP' };
 const cardColors = { Buster: 'var(--buster)', Arts: 'var(--arts)', Quick: 'var(--quick)', Extra: 'var(--gold)' };
+const CYCLE = ['Buster', 'Arts', 'Quick', 'NP'];
 
 export default function CardChainPanel() {
   const servant = useServant();
@@ -21,13 +23,20 @@ export default function CardChainPanel() {
     { isCrit: false, overkill: false },
     { isCrit: false, overkill: false },
   ]);
+  const [breakHP, setBreakHP] = useState('');
 
   if (!servant) return null;
+
+  const npColor = getSv(servant, 'npColor') || 'Buster';
 
   const cycleCard = (idx) => {
     setSlots((prev) => {
       const next = [...prev];
-      next[idx] = next[idx] === 'Buster' ? 'Arts' : next[idx] === 'Arts' ? 'Quick' : 'Buster';
+      let cur = CYCLE.indexOf(next[idx]);
+      do {
+        cur = (cur + 1) % CYCLE.length;
+      } while (CYCLE[cur] === 'NP' && next.some((s, j) => j !== idx && s === 'NP'));
+      next[idx] = CYCLE[cur];
       return next;
     });
   };
@@ -48,24 +57,48 @@ export default function CardChainPanel() {
     });
   };
 
+  // Resolve NP to its color for chain detection and first-card bonus
+  const resolvedSlots = slots.map((s) => s === 'NP' ? npColor : s);
   const cards = showExtra ? [...slots, 'Extra'] : slots;
-  const firstCard = cards[0];
+  const firstCard = resolvedSlots[0];
 
   const results = cards.map((cardType, i) => {
     const position = i === 0 ? 'first' : i === 1 ? 'second' : i === 2 ? 'third' : 'extra';
     const cardOpt = cardOptions[i] || { isCrit: false, overkill: false };
+
+    if (cardType === 'NP') {
+      const npResult = calcNPInChain(servant, config, buffs, enemy, { overkill: cardOpt.overkill }, position, firstCard);
+      return {
+        cardType: 'NP', displayColor: npColor, position,
+        dmg: npResult.dmg,
+        npGain: npResult.npGain, stars: npResult.stars,
+        cardOpt, isNP: true,
+        breakInfo: { baseDmg: npResult.baseDmg, flatDmg: npResult.flatDmg },
+      };
+    }
+
     const dmg = calcCardDamage(servant, config, buffs, enemy, cardOpt, cardType, position, firstCard);
     const npGain = calcNPGainForCard(servant, buffs, enemy, cardOpt, cardType, position, firstCard);
     const stars = calcStars(servant, buffs, enemy, cardOpt, cardType, position, firstCard);
-    return { cardType, position, dmg, npGain, stars, cardOpt };
+    return {
+      cardType, position, dmg, npGain, stars, cardOpt, isNP: false,
+      breakInfo: { baseDmg: dmg.baseDmg, flatDmg: 0 },
+    };
   });
 
-  const totalDmg = results.reduce((s, r) => s + r.dmg, 0);
+  const totalMin = results.reduce((s, r) => s + r.dmg.min, 0);
+  const totalAvg = results.reduce((s, r) => s + r.dmg.avg, 0);
+  const totalMax = results.reduce((s, r) => s + r.dmg.max, 0);
   const totalNp = results.reduce((s, r) => s + r.npGain, 0);
   const totalStars = results.reduce((s, r) => s + r.stars.expected, 0);
 
-  const sameChain = slots[0] === slots[1] && slots[1] === slots[2];
-  const triColor = new Set(slots).size === 3;
+  const sameChain = resolvedSlots[0] === resolvedSlots[1] && resolvedSlots[1] === resolvedSlots[2];
+  const triColor = new Set(resolvedSlots).size === 3;
+
+  const hp = parseInt(breakHP) || 0;
+  const breakProb = hp > 0 ? calcBreakProb(results.map(r => r.breakInfo), hp) : null;
+
+  const getSlotColor = (ct) => ct === 'NP' ? cardColors[npColor] : cardColors[ct];
 
   return (
     <div className="section">
@@ -75,29 +108,31 @@ export default function CardChainPanel() {
         {slots.map((ct, i) => (
           <Fragment key={i}>
             <button
-              className={'card-slot ' + ct}
+              className={'card-slot ' + (ct === 'NP' ? npColor : ct) + (ct === 'NP' ? ' is-np' : '')}
               onClick={() => cycleCard(i)}
               onKeyDown={(e) => { (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), cycleCard(i)); }}
-              aria-label={`卡牌${i + 1}: ${ct}`}
+              aria-label={`卡牌${i + 1}: ${ct === 'NP' ? 'NP(' + npColor + ')' : ct}`}
             >
               <span className="slot-pos">{i + 1}</span>
               {cardLabel[ct]}
             </button>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <button
-                onClick={() => toggleCardCrit(i)}
-                aria-pressed={cardOptions[i]?.isCrit || false}
-                aria-label={`卡牌${i + 1}暴击`}
-                style={{
-                  fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
-                  background: cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--surface)',
-                  color: cardOptions[i]?.isCrit ? '#fff' : 'var(--text-muted)',
-                  border: `1px solid ${cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--border)'}`,
-                  cursor: 'pointer', minHeight: 28, minWidth: 36,
-                }}
-              >
-                CRIT
-              </button>
+              {ct !== 'NP' && (
+                <button
+                  onClick={() => toggleCardCrit(i)}
+                  aria-pressed={cardOptions[i]?.isCrit || false}
+                  aria-label={`卡牌${i + 1}暴击`}
+                  style={{
+                    fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
+                    background: cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--surface)',
+                    color: cardOptions[i]?.isCrit ? '#fff' : 'var(--text-muted)',
+                    border: `1px solid ${cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--border)'}`,
+                    cursor: 'pointer', minHeight: 28, minWidth: 36,
+                  }}
+                >
+                  CRIT
+                </button>
+              )}
               <button
                 onClick={() => toggleCardOverkill(i)}
                 aria-pressed={cardOptions[i]?.overkill || false}
@@ -149,17 +184,22 @@ export default function CardChainPanel() {
       </div>
 
       <div className="chain-bonus">
-        <span style={{ color: 'var(--text-muted)' }}>点击卡牌切换 B→A→Q</span>
+        <span style={{ color: 'var(--text-muted)' }}>点击卡牌切换 B→A→Q→NP</span>
         <span>
-          首卡 <span style={{ color: cardColors[firstCard], fontWeight: 700 }}>{firstCard}</span>
+          首卡 <span style={{ color: cardColors[firstCard], fontWeight: 700 }}>
+            {slots[0] === 'NP' ? 'NP(' + npColor + ')' : firstCard}
+          </span>
           {' → '}
           <span style={{ fontWeight: 500 }}>
             {firstCard === 'Buster' ? '全卡伤害加成' : firstCard === 'Arts' ? '全卡NP获取加成' : '全卡掉星加成'}
           </span>
+          {slots[0] === 'NP' && (
+            <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}> (NP自身不受染色)</span>
+          )}
         </span>
         {sameChain && (
-          <span style={{ color: cardColors[slots[0]], fontWeight: 700 }}>
-            {slots[0]} Chain: {slots[0] === 'Buster' ? '每卡+20%ATK' : slots[0] === 'Arts' ? '额外+20%NP' : '额外+10星'}
+          <span style={{ color: cardColors[resolvedSlots[0]], fontWeight: 700 }}>
+            {resolvedSlots[0]} Chain: {resolvedSlots[0] === 'Buster' ? '每卡+20%ATK' : resolvedSlots[0] === 'Arts' ? '额外+20%NP' : '额外+10星'}
           </span>
         )}
         {triColor && (
@@ -176,20 +216,56 @@ export default function CardChainPanel() {
         <div className="chain-header">Stars</div>
         {results.map((r, i) => (
           <Fragment key={i}>
-            <div style={{ fontWeight: 700, color: cardColors[r.cardType] }}>
-              {r.cardType} [{r.position}]
-              {r.cardOpt.isCrit && <span style={{ color: 'var(--gold)', fontSize: 10 }}> CRIT</span>}
+            <div style={{ fontWeight: 700, color: r.isNP ? getSlotColor('NP') : cardColors[r.cardType] }}>
+              {r.isNP ? 'NP' : r.cardType} [{r.position}]
+              {!r.isNP && r.cardOpt.isCrit && <span style={{ color: 'var(--gold)', fontSize: 10 }}> CRIT</span>}
               {r.cardOpt.overkill && <span style={{ color: 'var(--red)', fontSize: 10 }}> OK</span>}
             </div>
-            <div>{r.dmg.toLocaleString()}</div>
+            <div>
+              {r.dmg.avg.toLocaleString()}
+              <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>
+                {' '}({r.dmg.min.toLocaleString()}~{r.dmg.max.toLocaleString()})
+              </span>
+            </div>
             <div>{r.npGain.toFixed(1)}</div>
             <div>{r.stars.expected}</div>
           </Fragment>
         ))}
         <div className="chain-total">TOTAL</div>
-        <div className="chain-total">{totalDmg.toLocaleString()}</div>
+        <div className="chain-total">
+          {totalAvg.toLocaleString()}
+          <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>
+            {' '}({totalMin.toLocaleString()}~{totalMax.toLocaleString()})
+          </span>
+        </div>
         <div className="chain-total">{totalNp.toFixed(1)}</div>
         <div className="chain-total">{totalStars.toFixed(1)}</div>
+      </div>
+
+      <div className="break-bar">
+        <label style={{ fontSize: 'var(--font-xs)', fontWeight: 600, color: 'var(--text-muted)' }}>
+          击破率 Break
+        </label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>敌方HP</span>
+          <input
+            className="buff-input"
+            type="number"
+            style={{ width: 120 }}
+            value={breakHP}
+            onChange={(e) => setBreakHP(e.target.value)}
+            placeholder="0"
+            min="0"
+          />
+          {breakProb !== null && (
+            <span style={{
+              fontSize: 'var(--font-lg)', fontWeight: 800, whiteSpace: 'nowrap',
+              color: breakProb >= 1 ? 'var(--green)' : breakProb > 0 ? 'var(--accent)' : 'var(--red)',
+            }}>
+              {(breakProb * 100).toFixed(1)}%
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

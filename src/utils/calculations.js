@@ -2,7 +2,7 @@ import { getSv, clamp, getAttributeAdvantage } from './helpers';
 import { CLASS_ADVANTAGE, CLASS_CORRECTION, NP_COLOR_CARD_MULT, ENEMY_NP_MOD } from '@/constants/gameData';
 
 export function aggregateBuffs(buffs, servant, options) {
-  const keys = ['atkUp','defDown','busterUp','artsUp','quickUp','critDmg','starGen','npStrength','npRate','powerMod','flatDmg'];
+  const keys = ['atkUp','defDown','busterUp','artsUp','quickUp','critDmg','busterCritDmg','artsCritDmg','quickCritDmg','starGen','npStrength','npRate','powerMod','independentMod','flatDmg'];
   const raw = {};
   const sources = buffs.sources || [];
 
@@ -31,10 +31,14 @@ export function aggregateBuffs(buffs, servant, options) {
   agg.artsUp = clamp(raw.artsUp, 400);
   agg.quickUp = clamp(raw.quickUp, 400);
   agg.critDmg = clamp(raw.critDmg, 500);
+  agg.busterCritDmg = clamp(raw.busterCritDmg, 500);
+  agg.artsCritDmg = clamp(raw.artsCritDmg, 500);
+  agg.quickCritDmg = clamp(raw.quickCritDmg, 500);
   agg.starGen = clamp(raw.starGen, 300);
   agg.npStrength = clamp(raw.npStrength, 500);
   agg.npRate = clamp(raw.npRate, 1000);
   agg.powerMod = clamp(raw.powerMod, 400);
+  agg.independentMod = clamp(raw.independentMod, 500);
   agg.flatDmg = clamp(raw.flatDmg, 100000);
 
   return agg;
@@ -85,7 +89,8 @@ export function calcNPDamage(servant, config, buffs, enemy, options) {
     * (1 + atkUp)
     * classAdv * attrAdv * classCorr
     * defMultiplier
-    * (1 + npStrength + powerMod);
+    * (1 + npStrength + powerMod)
+    * (1 + agg.independentMod / 100);
 
   const minDmg = Math.floor(baseDmg * 0.9 + agg.flatDmg);
   const avgDmg = Math.floor(baseDmg * 1.0 + agg.flatDmg);
@@ -164,7 +169,7 @@ export function calcNPGainForCard(servant, buffs, enemy, options, cardType, posi
 }
 
 export function calcCardDamage(servant, config, buffs, enemy, options, cardType, position, firstCardType) {
-  if (!servant || cardType === 'NP') return 0;
+  if (!servant || cardType === 'NP') return {min:0, avg:0, max:0, baseDmg:0};
   const sv = servant;
   const agg = aggregateBuffs(buffs, sv, options);
 
@@ -190,26 +195,32 @@ export function calcCardDamage(servant, config, buffs, enemy, options, cardType,
   const critMult = (options && options.isCrit) ? 2 : 1;
   let critBuff = 0;
   if (options && options.isCrit) {
-    critBuff = agg.critDmg;
+    critBuff = agg.critDmg + agg.busterCritDmg + agg.artsCritDmg + agg.quickCritDmg;
     if (cardType === 'Buster') critBuff += getSv(sv, 'passiveBusterCrit');
     if (cardType === 'Arts') critBuff += getSv(sv, 'passiveArtsCrit');
     if (cardType === 'Quick') critBuff += getSv(sv, 'passiveQuickCrit');
     critBuff = clamp(critBuff, 500);
   }
 
-  const dmg = 0.23 * totalAtk * dmgCoef * (1 + posBonus)
+  const baseDmg = 0.23 * totalAtk * dmgCoef * (1 + posBonus)
     * (1 + firstCardBusterBonus)
     * (1 + colorBuff / 100)
     * (1 + agg.atkUp / 100)
     * (1 + agg.powerMod / 100)
     * (critMult + critBuff / 100)
     * classAdv * attrAdv * classCorr
-    * defMultiplier;
+    * defMultiplier
+    * (1 + agg.independentMod / 100);
 
-  return Math.floor(dmg);
+  return {
+    min: Math.floor(baseDmg * 0.9),
+    avg: Math.floor(baseDmg),
+    max: Math.floor(baseDmg * 1.099),
+    baseDmg
+  };
 }
 
-function calcStarPerHit(servant, buffs, enemy, options, cardType, position, firstCardType) {
+function calcStarPerHit(servant, buffs, enemy, options, cardType, position, firstCardType, isNP = false) {
   if (!servant) return 0;
   const sv = servant;
   const agg = aggregateBuffs(buffs, sv, options);
@@ -231,7 +242,7 @@ function calcStarPerHit(servant, buffs, enemy, options, cardType, position, firs
   else if (cardType === 'Quick') colorBuff = agg.quickUp;
 
   const overkillBonus = (options && options.overkill) ? 30 : 0;
-  const quickFirstBonus = (firstCardType === 'Quick' && position !== 'first') ? 20 : 0;
+  const quickFirstBonus = (!isNP && firstCardType === 'Quick' && position !== 'first') ? 20 : 0;
 
   const starRate = baseStarRate * 100
     + cardStarValue * (1 + colorBuff / 100)
@@ -257,6 +268,63 @@ export function calcStars(servant, buffs, enemy, options, cardType, position, fi
     expected: Math.round(perHit * hits * 10) / 10,
     ceil: Math.min(3, Math.ceil(perHit)) * hits
   };
+}
+
+export function calcNPInChain(servant, config, buffs, enemy, options, position, firstCardType) {
+  if (!servant) return { dmg: {min:0,avg:0,max:0}, npGain: 0, stars: {floor:0,expected:0,ceil:0} };
+
+  const npColor = getSv(servant, 'npColor');
+  const npHits = getSv(servant, 'npHits') || 1;
+
+  const dmg = calcNPDamage(servant, config, buffs, enemy, options);
+
+  const npOpts = { overkill: options && options.overkill, isCrit: false };
+  const gainPerHit = calcNPGainPerHit(servant, buffs, enemy, npOpts, true, npColor, position, firstCardType);
+  const npGain = Math.floor(gainPerHit * npHits * 100) / 100;
+
+  const starPerHit = calcStarPerHit(servant, buffs, enemy, npOpts, npColor, position, firstCardType, true);
+  const stars = {
+    floor: Math.floor(starPerHit) * npHits,
+    expected: Math.round(starPerHit * npHits * 10) / 10,
+    ceil: Math.min(3, Math.ceil(starPerHit)) * npHits
+  };
+
+  return { dmg, npGain, stars, baseDmg: dmg.details.baseDmg, flatDmg: dmg.details.agg.flatDmg };
+}
+
+export function calcBreakProb(cards, enemyHP) {
+  if (enemyHP <= 0 || cards.length === 0) return 1;
+  if (cards.every(c => c.baseDmg === 0)) return 0;
+
+  // DP histogram: total_damage → combination_count
+  let dist = new Map([[0, 1]]);
+
+  for (const card of cards) {
+    if (card.baseDmg === 0) continue;
+    const newDist = new Map();
+    // Count how many of the 200 rolls produce each distinct damage value
+    const dmgCounts = new Map();
+    for (let r = 900; r < 1100; r++) {
+      const d = Math.floor(card.baseDmg * r / 1000 + (card.flatDmg || 0));
+      dmgCounts.set(d, (dmgCounts.get(d) || 0) + 1);
+    }
+    for (const [total, existingCount] of dist) {
+      for (const [d, rollCount] of dmgCounts) {
+        const key = total + d;
+        newDist.set(key, (newDist.get(key) || 0) + existingCount * rollCount);
+      }
+    }
+    dist = newDist;
+  }
+
+  let success = 0;
+  let totalCount = 0;
+  for (const [, count] of dist) totalCount += count;
+  for (const [dmg, count] of dist) {
+    if (dmg >= enemyHP) success += count;
+  }
+
+  return totalCount > 0 ? success / totalCount : 0;
 }
 
 export function calc3TValues(servant, config, buffs, enemy, options) {

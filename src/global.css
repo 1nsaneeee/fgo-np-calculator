@@ -253,6 +253,18 @@
 .card-slot.Arts { border-color: var(--arts-border); color: var(--arts); background: var(--arts-bg); }
 .card-slot.Quick { border-color: var(--quick-border); color: var(--quick); background: var(--quick-bg); }
 .card-slot.Extra { border-color: var(--ex-border); color: var(--gold); background: var(--ex-bg); }
+.card-slot.is-np { border-style: double; border-width: 4px; font-size: var(--font-sm); letter-spacing: 1px; }
+
+.break-bar {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
 
 .card-slot:hover {
   transform: translateY(-2px);
@@ -420,8 +432,50 @@
   color: var(--text-secondary);
   font-weight: 500;
   padding-right: 10px;
+  border-left: 3px solid transparent;
+}
+
+.buff-label.buff-c-atk { border-left-color: var(--text-muted); }
+.buff-label.buff-c-buster { border-left-color: var(--buster); }
+.buff-label.buff-c-arts { border-left-color: var(--arts); }
+.buff-label.buff-c-quick { border-left-color: var(--quick); }
+.buff-label.buff-c-crit { border-left-color: var(--gold); }
+.buff-label.buff-c-star { border-left-color: var(--gold); }
+.buff-label.buff-c-np { border-left-color: var(--accent); }
+.buff-label.buff-c-special { border-left-color: var(--red); }
+
+.buff-note {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-left: 4px;
+  font-weight: 400;
+}
+
+.crit-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0 4px 0 0;
+  color: var(--text-muted);
+  line-height: 1;
+}
+.crit-toggle:hover { color: var(--gold); }
+
+.crit-summary {
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 2px;
   white-space: nowrap;
 }
+
+.crit-overflow {
+  font-weight: 400;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.crit-child-row td { background: var(--surface-alt); white-space: nowrap; }
 
 .buff-table .group-end td {
   border-bottom: 2px solid var(--border);
