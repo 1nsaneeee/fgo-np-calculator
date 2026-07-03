@@ -1,12 +1,13 @@
 // src/services/transform.js
 import servantNames from '@/translations/servant-names.json';
 
-const CLASS_MAP = {
+export const CLASS_MAP = {
   saber: 'Saber', archer: 'Archer', lancer: 'Lancer', rider: 'Rider',
   caster: 'Caster', assassin: 'Assassin', berserker: 'Berserker',
   ruler: 'Ruler', avenger: 'Avenger', alterEgo: 'Alterego',
   moonCancer: 'MoonCancer', foreigner: 'Foreigner', pretender: 'Pretender',
   shielder: 'Shielder', beast: 'Beast',
+  beastEresh: 'Beast', unBeastOlgaMarie: 'Beast',
 };
 
 const CARD_TO_COLOR = { '1': 'Arts', '2': 'Buster', '3': 'Quick' };
@@ -45,7 +46,7 @@ function getAtkAtLevel(s, level) {
 function getNpMultipliers(nps) {
   if (!nps || !nps.length) return { np1: 0, np2: 0, np3: 0, np4: 0, np5: 0 };
   const funcs = nps[0].functions || [];
-  const damageFunc = funcs.find(f => f.funcType === 'damageNp');
+  const damageFunc = funcs.find(f => f.funcType && f.funcType.startsWith('damageNp'));
   if (!damageFunc) return { np1: 0, np2: 0, np3: 0, np4: 0, np5: 0 };
   const getVal = (arr, i) => (arr[i] ? arr[i].Value / 10 : 0);
   return {

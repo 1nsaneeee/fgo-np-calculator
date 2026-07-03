@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, TextField, MenuItem, Select, FormControl, InputLabel, Pagination, Typography, CircularProgress, Alert } from '@mui/material';
 import useStore from '@/store/index';
 import { fetchServantList, fetchNiceServant } from '@/services/atlasApi';
-import { transformNiceToCalc } from '@/services/transform';
+import { transformNiceToCalc, CLASS_MAP } from '@/services/transform';
 import ServantCard from '@/components/ServantCard';
 import ServantFilterPanel from '@/components/ServantFilterPanel';
 import npColors from '@/translations/npColors.json';
@@ -42,11 +42,10 @@ export default function ServantListPage() {
     let results = servantList;
 
     if (classFilter.length > 0) {
-      results = results.filter(s =>
-        classFilter.includes(
-          (s.className || '').charAt(0).toUpperCase() + (s.className || '').slice(1)
-        )
-      );
+      results = results.filter(s => {
+        const normalized = CLASS_MAP[s.className] || ((s.className || '').charAt(0).toUpperCase() + (s.className || '').slice(1));
+        return classFilter.includes(normalized);
+      });
     }
 
     if (rarityFilter.length < 3) {
