@@ -1,17 +1,17 @@
+// src/hooks/useServant.js
 import { useMemo } from 'react';
 import useStore from '@/store/index';
-import { SERVANT_DB } from '@/data/servantDb';
 
 export function useServant() {
-  const selectedIndex = useStore((s) => s.selectedIndex);
+  const servantData = useStore((s) => s.servantData);
   const isCustom = useStore((s) => s.isCustom);
   const customServant = useStore((s) => s.customServant);
 
   const servant = useMemo(() => {
     if (isCustom) return customServant;
-    if (selectedIndex !== null && selectedIndex >= 0) return SERVANT_DB[selectedIndex];
+    if (servantData) return servantData;
     return null;
-  }, [isCustom, customServant, selectedIndex]);
+  }, [isCustom, customServant, servantData]);
 
   return servant;
 }

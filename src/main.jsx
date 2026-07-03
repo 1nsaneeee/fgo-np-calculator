@@ -7,7 +7,7 @@ import theme from './theme';
 import './global.css';
 
 console.log(
-  '%c FGO Calculator %c v3.0 ',
+  '%c FGO Calculator %c v4.0 ',
   'color:oklch(0.78 0.18 195);font-family:monospace;font-size:22px;font-weight:900;letter-spacing:3px',
   'color:oklch(0.58 0.02 240);font-family:monospace;font-size:12px'
 );
