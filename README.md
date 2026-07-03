@@ -102,6 +102,21 @@ MIT License © 2024
 
 ---
 
+## Contributors
+
+<p align="center">
+  <a href="https://www.anthropic.com"><img src="https://img.shields.io/badge/🤖-Claude_Opus_4.7-8A2BE2" alt="Claude Opus 4.7" /></a>
+  <a href="https://openai.com"><img src="https://img.shields.io/badge/🤖-ChatGPT_o3-74aa9c" alt="ChatGPT o3" /></a>
+  <a href="https://deepmind.google"><img src="https://img.shields.io/badge/🤖-Gemini_3.0-4285F4" alt="Gemini 3.0" /></a>
+  <a href="https://x.ai"><img src="https://img.shields.io/badge/🤖-Grok_4-000000" alt="Grok 4" /></a>
+  <a href="https://deepseek.com"><img src="https://img.shields.io/badge/🤖-DeepSeek_v4-4D6BFE" alt="DeepSeek v4" /></a>
+  <a href="https://github.com/features/copilot"><img src="https://img.shields.io/badge/🤖-GitHub_Copilot-24292e" alt="GitHub Copilot" /></a>
+  <br/>
+  <sub>本项目的每一位 AI 都做出了不可磨灭的划水贡献 🫡</sub>
+</p>
+
+---
+
 <p align="center">
   <a href="https://github.com/1nsaneeee/fgo-np-calculator/issues">问题反馈</a> ·
   <a href="https://github.com/1nsaneeee/fgo-np-calculator/discussions">讨论区</a> ·
