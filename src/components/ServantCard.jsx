@@ -3,6 +3,7 @@ import { Box, Card, CardActionArea, Rating } from '@mui/material';
 import { CLASS_COLORS } from '@/constants/gameData';
 import npColors from '@/translations/npColors.json';
 import servantNames from '@/translations/servant-names.json';
+import servantNamesById from '@/translations/servant-names-by-id.json';
 
 const NPC_LABEL = { Buster: 'B', Arts: 'A', Quick: 'Q' };
 
@@ -14,7 +15,7 @@ export default function ServantCard({ basic, onClick }) {
   const npColor = npColors[basic.id] || 'Buster';
   const npChar = NPC_LABEL[npColor] || 'B';
   const nameJp = basic.originalName || basic.name || '';
-  const nameCn = servantNames[nameJp] || nameJp;
+  const nameCn = servantNamesById[basic.id] || servantNames[nameJp] || nameJp;
   const npColorHex = npColor === 'Buster' ? '#c0392b' : npColor === 'Arts' ? '#2980b9' : '#27ae60';
 
   return (

@@ -1,5 +1,6 @@
 // src/services/transform.js
 import servantNames from '@/translations/servant-names.json';
+import servantNamesById from '@/translations/servant-names-by-id.json';
 
 export const CLASS_MAP = {
   saber: 'Saber', archer: 'Archer', lancer: 'Lancer', rider: 'Rider',
@@ -13,7 +14,8 @@ export const CLASS_MAP = {
 const CARD_TO_COLOR = { '1': 'Arts', '2': 'Buster', '3': 'Quick' };
 const CARD_TO_CHAR = { '1': 'A', '2': 'B', '3': 'Q' };
 
-function translateName(jpName) {
+function translateName(jpName, svId) {
+  if (svId && servantNamesById[svId]) return servantNamesById[svId];
   return servantNames[jpName] || jpName;
 }
 
@@ -107,7 +109,7 @@ export function transformNiceToCalc(nice) {
 
   return {
     id: nice.id,
-    name: translateName(nameJp),
+    name: translateName(nameJp, nice.id),
     nameEn: nice.ruby || nice.name,
     class: CLASS_MAP[nice.className] || nice.className,
     attr: (nice.attribute || 'human').charAt(0).toUpperCase() + (nice.attribute || 'human').slice(1),
