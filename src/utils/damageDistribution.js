@@ -179,30 +179,33 @@ export function calcDamageDistribution(pool, servantStats, buffs, enemy, options
 /**
  * Build histogram buckets from distribution results.
  * Uses maxDamage for each hand.
+ * Buckets are ~1000 damage wide — appropriate for FGO's damage granularity.
  */
-export function buildHistogram(results, numBuckets = 40) {
+export function buildHistogram(results, bucketWidth = 1000) {
   const damages = results.map(r => r.maxDamage);
   const maxVal = Math.max(...damages);
   const minVal = Math.min(...damages);
   const range = (maxVal - minVal) || 1;
-  const bucketWidth = range / numBuckets;
+  // At least 5 buckets, at most 60, target width ~1000 each
+  let numBuckets = Math.round(range / bucketWidth);
+  if (numBuckets < 5) numBuckets = 5;
+  if (numBuckets > 60) numBuckets = 60;
+  const actualWidth = range / numBuckets;
 
   const buckets = [];
   for (let i = 0; i < numBuckets; i++) {
-    const low = minVal + i * bucketWidth;
-    const high = low + bucketWidth;
-    // Use Math.round for both to keep displayed boundaries self-consistent
-    // (Math.floor on both would make adjacent buckets appear to overlap, e.g. [0,108] and [108,216])
+    const low = minVal + i * actualWidth;
+    const high = low + actualWidth;
     buckets.push({ low: Math.round(low), high: Math.round(high), count: 0 });
   }
 
   // Assign each damage value to its bucket via floating-point comparison
   for (const dmg of damages) {
-    const idx = Math.min(numBuckets - 1, Math.floor((dmg - minVal) / bucketWidth));
+    const idx = Math.min(numBuckets - 1, Math.floor((dmg - minVal) / actualWidth));
     buckets[idx].count++;
   }
 
-  return { buckets, total: results.length, minVal, maxVal };
+  return { buckets, total: results.length, minVal, maxVal, numBuckets };
 }
 
 /**

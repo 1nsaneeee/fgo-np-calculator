@@ -41,7 +41,7 @@ function CustomTooltip({ active, payload, hpThreshold }) {
 export default function DamageHistogram({ results, hpThreshold }) {
   const data = useMemo(() => {
     if (!results || results.length === 0) return null;
-    const { buckets, total } = buildHistogram(results, 40);
+    const { buckets, total } = buildHistogram(results, 1000);
     return buckets.map(b => ({ ...b, total }));
   }, [results]);
 
@@ -68,8 +68,8 @@ export default function DamageHistogram({ results, hpThreshold }) {
               tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
               axisLine={{ stroke: 'var(--border)' }}
               tickLine={false}
-              interval="preserveStartEnd"
-              minTickGap={40}
+              minTickGap={28}
+              tickCount={10}
             />
             <YAxis
               tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
