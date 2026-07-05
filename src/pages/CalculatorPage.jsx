@@ -12,10 +12,10 @@ import OptionsPanel from '@/components/OptionsPanel';
 import BuffTable from '@/components/BuffTable';
 import NPDamageResult from '@/components/NPDamageResult';
 import CardChainPanel from '@/components/CardChainPanel';
-import CardDrawPanel from '@/components/CardDrawPanel';
 import ThreeTResult from '@/components/ThreeTResult';
 import PresetButtons from '@/components/PresetButtons';
 import CustomServantForm from '@/components/CustomServantForm';
+import SingleDamageDist from '@/components/SingleDamageDist';
 
 export default function CalculatorPage() {
   const navigate = useNavigate();
@@ -98,6 +98,7 @@ export default function CalculatorPage() {
         <Tab label="伤害计算" />
         <Tab label="三回合模拟" />
         <Tab label="指令卡链" />
+        <Tab label="伤害分布" />
       </Tabs>
 
       {/* Tab 0: Damage calc */}
@@ -167,6 +168,11 @@ export default function CalculatorPage() {
         <div className="section-card">
           <CardChainPanel />
         </div>
+      )}
+
+      {/* Tab 3: Damage distribution */}
+      {tab === 3 && (
+        <SingleDamageDist />
       )}
 
       {/* Reset button */}

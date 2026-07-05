@@ -19,7 +19,7 @@ function validateDeck(raw) {
   return raw.toUpperCase().replace(/[^BAQ]/g, '').slice(0, 5);
 }
 
-const pct = (v) => (v * 100).toFixed(1) + '%';
+const pct = (v) => (v * 100).toFixed(3) + '%';
 
 const CARD_PRESETS = [
   { label: 'S1武勇链', query: 'B1B1B1', color: 'error' },

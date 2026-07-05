@@ -193,6 +193,7 @@ export function calcDamageDistribution(pool, servantStats, aggs, enemy, options)
 export function calcAllPlayDamages(pool, servantStats, aggs, enemy, options) {
   const n = pool.length;
   const damages = [];
+  const seen = new Set(); // dedup key: type+servant sequence
 
   for (let a = 0; a < n; a++) {
     for (let b = 0; b < n; b++) {
@@ -201,6 +202,10 @@ export function calcAllPlayDamages(pool, servantStats, aggs, enemy, options) {
         if (c === a || c === b) continue;
 
         const cards = [pool[a], pool[b], pool[c]];
+        // Skip duplicate card sequences (e.g. two B cards from same servant)
+        const key = cards.map(c => c.type + c.servant).join('');
+        if (seen.has(key)) continue;
+        seen.add(key);
         const firstCard = cards[0];
         const firstType = firstCard.type === 'NP'
           ? (firstCard.npColor || 'Buster')
@@ -299,7 +304,17 @@ export function calcAllPlayDamagesDetailed(pool, servantStats, aggs, enemy, opti
   }
 
   results.sort((a, b) => b.damage - a.damage);
-  return results;
+
+  // Deduplicate by card sequence (type+servant key).
+  // pools may have duplicate card types from the same servant (e.g. BBAAQ has two B),
+  // causing P(n,3) to treat B₀ and B₁ as distinct permutations with identical damage.
+  const seen = new Set();
+  return results.filter(p => {
+    const key = p.cards.map(c => c.type + c.servant).join('');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /**

@@ -4,7 +4,6 @@ import TeamServantSelector from '@/components/TeamServantSelector';
 import TeamBuffPanel from '@/components/TeamBuffPanel';
 import TeamResultPanel from '@/components/TeamResultPanel';
 import TeamCardQueryPanel from '@/components/TeamCardQueryPanel';
-import TurnSimulator from '@/components/TurnSimulator';
 
 export default function TeamPlannerPage() {
   return (
@@ -27,9 +26,6 @@ export default function TeamPlannerPage() {
 
       {/* Damage distribution & clear rate */}
       <TeamResultPanel />
-
-      {/* 3-turn simulation */}
-      <TurnSimulator />
     </Box>
   );
 }

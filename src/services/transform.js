@@ -93,6 +93,97 @@ function getPassives(classPassive) {
   return result;
 }
 
+/**
+ * Extract skill buff effects from nice servant data.
+ * Active skills use funcType "addState"/"addStateShort" with actual buff type in buffs[].type.
+ * Direct effects (gainNp, gainStar) have no buffs array.
+ * Returns structured skill data compatible with the TurnSimulator interface.
+ */
+function getSkillBuffs(nice) {
+  if (!nice.skills) return [];
+
+  // Card type mapping from buff.ckSelfIndv[0].id
+  const CARD_TYPE_MAP = { 4001: 'artsUp', 4002: 'busterUp', 4003: 'quickUp' };
+
+  // Deduplicate: only keep the highest-priority version of each skill num (1,2,3)
+  const skillMap = new Map();
+  for (const skill of nice.skills) {
+    const num = skill.num;
+    if (num < 1 || num > 3) continue;
+    const existing = skillMap.get(num);
+    if (!existing || (skill.priority || 0) >= (existing.priority || 0)) {
+      skillMap.set(num, skill);
+    }
+  }
+
+  const result = [];
+  for (let num = 1; num <= 3; num++) {
+    const skill = skillMap.get(num);
+    if (!skill) {
+      result.push({ id: `api_${nice.id}_s${num}`, name: '—', effects: [], npCharge: 0, cooldown: 0 });
+      continue;
+    }
+
+    const effects = [];
+    let npCharge = 0;
+
+    for (const f of (skill.functions || [])) {
+      // svals[0] = level 1 values (index = skillLevel - 1)
+      const sv = (f.svals && f.svals[0]) || {};
+
+      if (f.funcType === 'gainNp') {
+        // Value is in permille: 5000 = 50% NP charge
+        npCharge += Math.round((sv.Value || 0) / 100);
+        continue;
+      }
+
+      if (f.funcType !== 'addState' && f.funcType !== 'addStateShort') continue;
+
+      const duration = sv.Turn || 1;
+
+      for (const buff of (f.buffs || [])) {
+        const val = Math.round((sv.Value || 0) / 10); // permille → percentage
+
+        switch (buff.type) {
+          case 'upAtk':
+            effects.push({ buffKey: 'atkUp', value: val, duration });
+            break;
+          case 'upCommandall':
+            // Card type from buff.ckSelfIndv[0].id: 4001=Arts, 4002=Buster, 4003=Quick
+            const cardIndv = buff.ckSelfIndv?.[0]?.id;
+            const buffKey = CARD_TYPE_MAP[cardIndv];
+            if (buffKey) effects.push({ buffKey, value: val, duration });
+            break;
+          case 'upNpdamage':
+            effects.push({ buffKey: 'npStrength', value: val, duration });
+            break;
+          case 'upCriticaldamage':
+            effects.push({ buffKey: 'critDmg', value: val, duration });
+            break;
+          case 'upCriticalpoint':
+            effects.push({ buffKey: 'starGen', value: val, duration });
+            break;
+          case 'upDamage':
+            effects.push({ buffKey: 'powerMod', value: val, duration });
+            break;
+        }
+      }
+    }
+
+    // Cooldown at skill level 10
+    const cooldown = (skill.coolDown?.length >= 10) ? skill.coolDown[9] : (skill.coolDown?.[0] || 7);
+
+    result.push({
+      id: `api_${nice.id}_s${num}`,
+      name: skill.name || `Skill ${num}`,
+      effects,
+      npCharge,
+      cooldown,
+    });
+  }
+  return result;
+}
+
 export function transformNiceToCalc(nice) {
   const nameJp = nice.originalName || nice.name;
   const hits = getHitCounts(nice.hitsDistribution);
@@ -106,6 +197,7 @@ export function transformNiceToCalc(nice) {
   }
 
   const starRate = (nice.starGen || 100) / 1000;
+  const skills = getSkillBuffs(nice);
 
   return {
     id: nice.id,
@@ -124,6 +216,7 @@ export function transformNiceToCalc(nice) {
     atk120: getAtkAtLevel(nice, 120),
     ...npMults,
     ...passives,
+    skills,
     _face: nice.extraAssets?.faces?.ascension?.['1'] || '',
     _rarity: nice.rarity || 1,
   };

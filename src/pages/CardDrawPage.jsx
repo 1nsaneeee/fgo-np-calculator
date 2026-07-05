@@ -1,7 +1,6 @@
 // src/pages/CardDrawPage.jsx
 import { Box } from '@mui/material';
 import CardDrawPanel from '@/components/CardDrawPanel';
-import DamageDistPanel from '@/components/DamageDistPanel';
 
 export default function CardDrawPage() {
   return (
@@ -9,8 +8,6 @@ export default function CardDrawPage() {
       <div className="section-card">
         <CardDrawPanel />
       </div>
-
-      <DamageDistPanel />
     </Box>
   );
 }

@@ -8,6 +8,13 @@ import { calcAllPlayDamages } from '@/utils/damageDistribution';
 import { BUFF_DEFS } from '@/constants/buffDefs';
 import { SERVANT_DB } from '@/data/servantDb';
 
+/** Get skills from resolved servant data (API) with SKILL_DB fallback */
+function getServantSkills(sv, servantId) {
+  if (sv?.skills?.length > 0) return { skills: sv.skills };
+  if (servantId) return getSkillsForServant(servantId);
+  return null;
+}
+
 /** Resolve servant data from list by ID or customServant */
 function resolveServant(slot, servantList) {
   if (!slot) return null;
@@ -36,26 +43,22 @@ function getTotalAtk(sv, config) {
  * merging all activated skill effects from ALL servants (party-wide simplification).
  * Returns a flat buffs object { atkUp: 30, artsUp: 50, ... }
  */
-function computeSkillBuffs(turn, dpsIndex, team) {
+function computeSkillBuffs(turn, team, servants) {
   const active = {};
   const BUFF_KEYS = BUFF_DEFS.map(d => d.key);
 
   for (let si = 0; si < 3; si++) {
     const s = team.servants[si];
     if (!s || !s.servantId) continue;
-    const servantSkills = getSkillsForServant(s.servantId);
+    const servantSkills = getServantSkills(servants[si], s.servantId);
     if (!servantSkills) continue;
 
     for (let ski = 0; ski < 3; ski++) {
       const skillsActivated = s.skillsActivated || [null, null, null];
-      const skills = s.skills || [null, null, null];
       const activatedTurn = skillsActivated[ski];
       if (activatedTurn === null || activatedTurn === undefined || activatedTurn > turn) continue;
 
-      const skillId = skills[ski];
-      if (!skillId) continue;
-
-      const skillDef = servantSkills.skills.find(sk => sk.id === skillId);
+      const skillDef = servantSkills.skills[ski];
       if (!skillDef) continue;
 
       const turnsElapsed = turn - activatedTurn;
@@ -248,7 +251,7 @@ export default function TurnSimulator() {
 
     for (let turn = 1; turn <= 3; turn++) {
       // Compute skill buffs active this turn
-      const skillBuffs = computeSkillBuffs(turn, dpsIndex, team);
+      const skillBuffs = computeSkillBuffs(turn, team, servants);
 
       // Merge with base buffs for each servant
       const mergedBuffSets = slots.map((slot, i) => {
@@ -303,16 +306,14 @@ export default function TurnSimulator() {
       for (let si = 0; si < 3; si++) {
         const s = team.servants[si];
         if (!s || !s.servantId) continue;
-        const servantSkills = getSkillsForServant(s.servantId);
+        const servantSkills = getServantSkills(servants[si], s.servantId);
         if (!servantSkills) continue;
         for (let ski = 0; ski < 3; ski++) {
           const skillsActivated = s.skillsActivated || [null, null, null];
           const skills = s.skills || [null, null, null];
           const activatedTurn = skillsActivated[ski];
           if (activatedTurn !== turn) continue;
-          const skillId = skills[ski];
-          if (!skillId) continue;
-          const skillDef = servantSkills.skills.find(sk => sk.id === skillId);
+          const skillDef = servantSkills.skills[ski];
           if (!skillDef) continue;
           npChargeThisTurn += (skillDef.npCharge || 0);
         }
@@ -377,15 +378,13 @@ export default function TurnSimulator() {
       for (let si = 0; si < 3; si++) {
         const s = team.servants[si];
         if (!s || !s.servantId) continue;
-        const servantSkills = getSkillsForServant(s.servantId);
+        const servantSkills = getServantSkills(servants[si], s.servantId);
         if (!servantSkills) continue;
         for (let ski = 0; ski < 3; ski++) {
           const skillsActivated = s.skillsActivated || [null, null, null];
           const skills = s.skills || [null, null, null];
           if (skillsActivated[ski] === turn) {
-            const skillId = skills[ski];
-            if (!skillId) continue;
-            const skillDef = servantSkills.skills.find(sk => sk.id === skillId);
+            const skillDef = servantSkills.skills[ski];
             if (skillDef) {
               activeSkillsList.push({ servant: si + 1, name: skillDef.name, npCharge: skillDef.npCharge || 0 });
             }
@@ -477,7 +476,7 @@ export default function TurnSimulator() {
         {slots.map((slot, si) => {
           const sv = servants[si];
           const svName = sv ? getSv(sv, 'name') : '—';
-          const servantSkills = slot.servantId ? getSkillsForServant(slot.servantId) : null;
+          const servantSkills = slot.servantId ? getServantSkills(sv, slot.servantId) : null;
 
           return (
             <div key={si} style={{
@@ -496,11 +495,9 @@ export default function TurnSimulator() {
                 S{si + 1} {svName.length > 6 ? svName.slice(0, 6) + '…' : svName}
               </span>
               {[0, 1, 2].map(ski => {
-                const skillId = slot.skills[ski];
-                const skillDef = servantSkills
-                  ? servantSkills.skills.find(sk => sk.id === skillId)
-                  : null;
-                const isActivated = slot.skillsActivated[ski] === activeTurn;
+                const skillDef = servantSkills?.skills?.[ski];
+                const skillId = skillDef?.id || slot.skills[ski];
+                const isActivated = skillId ? slot.skillsActivated[ski] === activeTurn : false;
                 const hasSkill = !!skillDef;
 
                 return (
@@ -542,13 +539,12 @@ export default function TurnSimulator() {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
             {slots.map((slot, si) => {
-              const servantSkills = slot.servantId ? getSkillsForServant(slot.servantId) : null;
+              const sv = servants[si];
+              const servantSkills = slot.servantId ? getServantSkills(sv, slot.servantId) : null;
               if (!servantSkills) return null;
               return slot.skillsActivated.map((actTurn, ski) => {
                 if (actTurn === null || actTurn === undefined) return null;
-                const skillId = slot.skills[ski];
-                if (!skillId) return null;
-                const skillDef = servantSkills.skills.find(sk => sk.id === skillId);
+                const skillDef = servantSkills.skills[ski];
                 if (!skillDef) return null;
                 return (
                   <span key={`${si}-${ski}`} style={{

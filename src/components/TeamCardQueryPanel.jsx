@@ -12,7 +12,7 @@ import { SERVANT_DB } from '@/data/servantDb';
 
 // ── Helpers ──
 
-const pct = (v) => (v * 100).toFixed(1) + '%';
+const pct = (v) => (v * 100).toFixed(3) + '%';
 const fmtNum = (v) => Math.round(v).toLocaleString();
 
 function findServantById(id, slots) {
