@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer,
+  LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine,
+  ResponsiveContainer, Area,
 } from 'recharts';
-import { buildHistogram } from '@/utils/damageDistribution';
+import { calcClearRate } from '@/utils/damageDistribution';
 
 function fmtDmg(n) {
   if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
@@ -11,9 +11,12 @@ function fmtDmg(n) {
   return n.toLocaleString();
 }
 
+function fmtPct(v) { return v.toFixed(0) + '%'; }
+
 function CustomTooltip({ active, payload, hpThreshold }) {
   if (!active || !payload || !payload.length) return null;
   const d = payload[0].payload;
+  const above = hpThreshold > 0 && d.damage >= hpThreshold;
   return (
     <div style={{
       background: 'var(--surface)',
@@ -24,120 +27,117 @@ function CustomTooltip({ active, payload, hpThreshold }) {
       boxShadow: 'var(--shadow-md)',
     }}>
       <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-xs)', marginBottom: 2 }}>
-        {fmtDmg(d.low)} – {fmtDmg(d.high)}
+        第 {d.rank} 手牌 · 百分位 {fmtPct(d.pct)}
       </div>
       <div style={{ fontWeight: 700, color: 'var(--text)' }}>
-        {d.count} 种 ({((d.count / d.total) * 100).toFixed(1)}%)
+        伤害 {fmtDmg(d.damage)}
       </div>
+      {above && (
+        <div style={{ color: 'var(--green)', fontSize: 'var(--font-xs)', fontWeight: 600 }}>
+          超过阈值
+        </div>
+      )}
     </div>
   );
 }
 
 export default function DamageHistogram({ results, hpThreshold }) {
-  const data = useMemo(() => {
-    if (!results || results.length === 0) return null;
-    const { buckets, total } = buildHistogram(results, 1000, hpThreshold);
+  // Build exact sorted data — no buckets, no approximations
+  const { data, clearRate, passCount } = useMemo(() => {
+    if (!results || results.length === 0) return { data: null, clearRate: 0, passCount: 0 };
+    const damages = results.map(r => r.maxDamage);
+    damages.sort((a, b) => a - b);
 
-    if (hpThreshold <= 0) return buckets.map(b => ({ ...b, total }));
+    const rate = calcClearRate(results, hpThreshold);
+    const pass = hpThreshold > 0
+      ? damages.filter(d => d >= hpThreshold).length
+      : 0;
 
-    // Split the bucket that crosses hpThreshold so the green area
-    // starts exactly at the threshold instead of at the bucket's low edge.
-    const split = [];
-    for (const b of buckets) {
-      if (b.low < hpThreshold && b.high > hpThreshold && b.aboveCount > 0) {
-        // Bucket crosses threshold — split into [low, threshold) and [threshold, high]
-        split.push({
-          low: b.low, high: hpThreshold,
-          count: b.count, aboveCount: 0, total,
-        });
-        split.push({
-          low: hpThreshold, high: b.high,
-          count: b.count, aboveCount: b.aboveCount, total,
-        });
-      } else {
-        split.push({ ...b, total });
-      }
-    }
-    return split;
+    const points = damages.map((d, i) => ({
+      rank: i + 1,
+      damage: d,
+      pct: ((i + 1) / damages.length) * 100,
+    }));
+
+    return { data: points, clearRate: rate, passCount: pass };
   }, [results, hpThreshold]);
 
   if (!data) return null;
 
   return (
     <div className="section" style={{ marginTop: 'var(--space-md)' }}>
-      <h3 className="panel-title">伤害分布图 Damage Distribution</h3>
+      <h3 className="panel-title">伤害分布 Damage CDF</h3>
       <div style={{
         background: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius)',
         padding: 'var(--space-md)',
       }}>
-        <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={data} margin={{ top: 12, right: 8, bottom: 4, left: 0 }}>
-            <defs>
-              <linearGradient id="fillBelow" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.04} />
-              </linearGradient>
-              <linearGradient id="fillAbove" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--green)" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="var(--green)" stopOpacity={0.06} />
-              </linearGradient>
-            </defs>
+        <ResponsiveContainer width="100%" height={260}>
+          <LineChart data={data} margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
             <XAxis
-              dataKey="low"
+              dataKey="pct"
               type="number"
-              domain={['dataMin', 'dataMax']}
-              tickFormatter={(v) => fmtDmg(v)}
+              domain={[0, 100]}
+              tickFormatter={fmtPct}
               tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
               axisLine={{ stroke: 'var(--border)' }}
               tickLine={false}
-              minTickGap={28}
-              tickCount={10}
+              tickCount={6}
+              label={{ value: '累计百分位', position: 'insideBottom', offset: -4, fontSize: 10, fill: 'var(--text-muted)' }}
             />
             <YAxis
+              dataKey="damage"
+              type="number"
+              tickFormatter={fmtDmg}
               tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
               axisLine={false}
               tickLine={false}
-              width={32}
-              allowDecimals={false}
+              width={48}
+              domain={['dataMin', 'dataMax']}
             />
-            <Tooltip
-              content={<CustomTooltip hpThreshold={hpThreshold} />}
-            />
-            {/* Full distribution — accent/blue */}
-            <Area
-              type="monotone"
-              dataKey="count"
-              stroke="var(--accent)"
-              strokeWidth={1.5}
-              fill="url(#fillBelow)"
-              isAnimationActive={false}
-            />
-            {/* Above-threshold overlay — green */}
+            <Tooltip content={<CustomTooltip hpThreshold={hpThreshold} />} />
+            {/* Threshold line */}
             {hpThreshold > 0 && (
-              <Area
-                type="monotone"
-                dataKey="aboveCount"
-                stroke="none"
-                fill="url(#fillAbove)"
-                isAnimationActive={false}
+              <ReferenceLine
+                y={hpThreshold}
+                stroke="var(--red)"
+                strokeDasharray="6 4"
+                strokeWidth={1.5}
+                ifOverflow="extendDomain"
+                label={{
+                  value: fmtDmg(hpThreshold),
+                  position: 'right',
+                  fill: 'var(--red)',
+                  fontSize: 11,
+                  fontWeight: 600,
+                }}
               />
             )}
-          </AreaChart>
+            <Line
+              type="monotone"
+              dataKey="damage"
+              stroke="var(--accent)"
+              strokeWidth={1.5}
+              dot={false}
+              isAnimationActive={false}
+            />
+          </LineChart>
         </ResponsiveContainer>
-        {hpThreshold > 0 && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 'var(--space-sm)',
-            justifyContent: 'center', marginTop: 'var(--space-sm)',
-            fontSize: 'var(--font-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
-          }}>
-            <span style={{ display: 'inline-block', width: 12, height: 12, background: 'var(--green)', borderRadius: 2, opacity: 0.4 }} />
-            <span>超过 {fmtDmg(hpThreshold)}</span>
-            <span style={{ display: 'inline-block', width: 12, height: 12, background: 'var(--accent)', borderRadius: 2, opacity: 0.25 }} />
-            <span>低于 {fmtDmg(hpThreshold)}</span>
-          </div>
-        )}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 'var(--space-lg)',
+          justifyContent: 'center', marginTop: 'var(--space-sm)',
+          fontSize: 'var(--font-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
+        }}>
+          <span>总手牌: <b style={{ color: 'var(--text)' }}>{data.length.toLocaleString()}</b></span>
+          {hpThreshold > 0 && (
+            <>
+              <span>超过 {fmtDmg(hpThreshold)}: <b style={{ color: 'var(--green)' }}>{passCount.toLocaleString()}</b></span>
+              <span>通关率: <b style={{ color: 'var(--green)' }}>{(clearRate * 100).toFixed(1)}%</b></span>
+            </>
+          )}
+          <span style={{ color: 'var(--red)' }}>— 阈值线 {fmtDmg(hpThreshold)}</span>
+        </div>
       </div>
     </div>
   );
