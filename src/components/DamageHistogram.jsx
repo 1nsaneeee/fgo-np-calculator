@@ -37,17 +37,12 @@ export default function DamageHistogram({ results, hpThreshold }) {
   const data = useMemo(() => {
     if (!results || results.length === 0) return null;
     const { buckets, total } = buildHistogram(results, 1000);
-    return buckets.map(b => ({ ...b, total }));
-  }, [results]);
-
-  // Above-threshold overlay: only counts where low >= threshold
-  const aboveData = useMemo(() => {
-    if (!data || hpThreshold <= 0) return data;
-    return data.map(d => ({
-      ...d,
-      aboveCount: d.low >= hpThreshold ? d.count : 0,
+    return buckets.map(b => ({
+      ...b,
+      total,
+      aboveCount: hpThreshold > 0 && b.low >= hpThreshold ? b.count : 0,
     }));
-  }, [data, hpThreshold]);
+  }, [results, hpThreshold]);
 
   if (!data) return null;
 
@@ -123,7 +118,6 @@ export default function DamageHistogram({ results, hpThreshold }) {
               <Area
                 type="monotone"
                 dataKey="aboveCount"
-                data={aboveData}
                 stroke="none"
                 fill="url(#fillAbove)"
                 isAnimationActive={false}
