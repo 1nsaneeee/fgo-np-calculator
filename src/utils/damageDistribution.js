@@ -179,30 +179,35 @@ export function calcDamageDistribution(pool, servantStats, buffs, enemy, options
 /**
  * Build histogram buckets from distribution results.
  * Uses maxDamage for each hand.
- * Buckets are ~1000 damage wide — appropriate for FGO's damage granularity.
- * @param {number} hpThreshold — if > 0, each bucket gets an aboveCount of hands exceeding the threshold
+ * Bucket boundaries align to multiples of targetWidth (default 1000) so labels
+ * are always clean: [12000,13000), [13000,14000), etc.
+ * @param {number} hpThreshold — if > 0, each bucket gets an aboveCount of hands >= threshold
  */
-export function buildHistogram(results, bucketWidth = 1000, hpThreshold = 0) {
+export function buildHistogram(results, targetWidth = 1000, hpThreshold = 0) {
   const damages = results.map(r => r.maxDamage);
   const maxVal = Math.max(...damages);
   const minVal = Math.min(...damages);
-  const range = (maxVal - minVal) || 1;
-  // At least 5 buckets, at most 60, target width ~1000 each
-  let numBuckets = Math.round(range / bucketWidth);
-  if (numBuckets < 5) numBuckets = 5;
-  if (numBuckets > 60) numBuckets = 60;
-  const actualWidth = range / numBuckets;
+
+  // Align start down to nearest targetWidth multiple, end up
+  let start = Math.floor(minVal / targetWidth) * targetWidth;
+  let end   = Math.ceil(maxVal / targetWidth) * targetWidth;
+  let width = targetWidth;
+
+  // Clamp bucket count: at least 5, at most 60
+  let n = (end - start) / width;
+  while (n < 5)  { width = Math.max(1, Math.floor(width / 2)); start = Math.floor(minVal / width) * width; end = Math.ceil(maxVal / width) * width; n = (end - start) / width; }
+  while (n > 60) { width = width * 2;                       start = Math.floor(minVal / width) * width; end = Math.ceil(maxVal / width) * width; n = (end - start) / width; }
+  const numBuckets = n;
 
   const buckets = [];
   for (let i = 0; i < numBuckets; i++) {
-    const low = minVal + i * actualWidth;
-    const high = low + actualWidth;
-    buckets.push({ low: Math.round(low), high: Math.round(high), count: 0, aboveCount: 0 });
+    const low = start + i * width;
+    buckets.push({ low, high: low + width, count: 0, aboveCount: 0 });
   }
 
-  // Assign each damage value to its bucket via floating-point comparison
+  // Assign each damage value to its bucket
   for (const dmg of damages) {
-    const idx = Math.min(numBuckets - 1, Math.floor((dmg - minVal) / actualWidth));
+    const idx = Math.min(numBuckets - 1, Math.floor((dmg - start) / width));
     buckets[idx].count++;
     if (hpThreshold > 0 && dmg >= hpThreshold) {
       buckets[idx].aboveCount++;
