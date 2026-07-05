@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine,
-  ResponsiveContainer, Area,
+  ResponsiveContainer,
 } from 'recharts';
 import { calcClearRate } from '@/utils/damageDistribution';
 
@@ -27,7 +27,7 @@ function CustomTooltip({ active, payload, hpThreshold }) {
       boxShadow: 'var(--shadow-md)',
     }}>
       <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-xs)', marginBottom: 2 }}>
-        第 {d.rank} 手牌 · 百分位 {fmtPct(d.pct)}
+        第 {d.rank} 种出牌 · 百分位 {fmtPct(d.pct)}
       </div>
       <div style={{ fontWeight: 700, color: 'var(--text)' }}>
         {d.damage.toLocaleString()}
@@ -41,26 +41,27 @@ function CustomTooltip({ active, payload, hpThreshold }) {
   );
 }
 
-export default function DamageHistogram({ results, hpThreshold }) {
-  // Build exact sorted data — no buckets, no approximations
-  const { data, clearRate, passCount } = useMemo(() => {
-    if (!results || results.length === 0) return { data: null, clearRate: 0, passCount: 0 };
-    const damages = results.map(r => r.maxDamage);
-    damages.sort((a, b) => a - b);
-
-    const rate = calcClearRate(results, hpThreshold);
-    const pass = hpThreshold > 0
-      ? damages.filter(d => d >= hpThreshold).length
-      : 0;
-
-    const points = damages.map((d, i) => ({
+export default function DamageHistogram({ damages, hpThreshold }) {
+  // Build exact sorted CDF — every P(15,3) play is an individual data point
+  const data = useMemo(() => {
+    if (!damages || damages.length === 0) return null;
+    const sorted = [...damages].sort((a, b) => a - b);
+    return sorted.map((d, i) => ({
       rank: i + 1,
       damage: d,
-      pct: ((i + 1) / damages.length) * 100,
+      pct: ((i + 1) / sorted.length) * 100,
     }));
+  }, [damages]);
 
-    return { data: points, clearRate: rate, passCount: pass };
-  }, [results, hpThreshold]);
+  const passCount = useMemo(() => {
+    if (!damages || hpThreshold <= 0) return 0;
+    return damages.filter(d => d >= hpThreshold).length;
+  }, [damages, hpThreshold]);
+
+  const clearRate = useMemo(() => {
+    if (!damages || damages.length === 0) return 0;
+    return passCount / damages.length;
+  }, [damages, passCount]);
 
   if (!data) return null;
 
@@ -97,7 +98,6 @@ export default function DamageHistogram({ results, hpThreshold }) {
               domain={['dataMin', 'dataMax']}
             />
             <Tooltip content={<CustomTooltip hpThreshold={hpThreshold} />} />
-            {/* Threshold line */}
             {hpThreshold > 0 && (
               <ReferenceLine
                 y={hpThreshold}
@@ -129,7 +129,7 @@ export default function DamageHistogram({ results, hpThreshold }) {
           justifyContent: 'center', marginTop: 'var(--space-sm)',
           fontSize: 'var(--font-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
         }}>
-          <span>总手牌: <b style={{ color: 'var(--text)' }}>{data.length.toLocaleString()}</b></span>
+          <span>总出牌: <b style={{ color: 'var(--text)' }}>{(damages || []).length.toLocaleString()}</b></span>
           {hpThreshold > 0 && (
             <>
               <span>超过 {fmtDmg(hpThreshold)}: <b style={{ color: 'var(--green)' }}>{passCount.toLocaleString()}</b></span>

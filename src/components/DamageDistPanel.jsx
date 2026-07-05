@@ -6,6 +6,7 @@ import { aggregateBuffs } from '@/utils/calculations';
 import {
   calcDamageDistribution,
   calcClearRate,
+  calcAllPlayDamages,
 } from '@/utils/damageDistribution';
 import { CLASS_LIST } from '@/constants/gameData';
 import DamageHistogram from '@/components/DamageHistogram';
@@ -140,11 +141,18 @@ export default function DamageDistPanel() {
     return calcDamageDistribution(pool, servantStats, agg, enemy, options);
   }, [pool, servantStats, agg, enemy, options]);
 
-  // Clear rate
+  // All possible 3-card plays (P(n,3) = n×(n-1)×(n-2)), each an exact damage value
+  const allDamages = useMemo(() => {
+    if (!pool) return null;
+    return calcAllPlayDamages(pool, servantStats, agg, enemy, options);
+  }, [pool, servantStats, agg, enemy, options]);
+
+  // Clear rate — exact, computed from all play damages
   const clearRate = useMemo(() => {
-    if (!distResult) return null;
-    return calcClearRate(distResult, hpThreshold);
-  }, [distResult, hpThreshold]);
+    if (!allDamages || allDamages.length === 0) return null;
+    const pass = hpThreshold > 0 ? allDamages.filter(d => d >= hpThreshold).length : 0;
+    return pass / allDamages.length;
+  }, [allDamages, hpThreshold]);
 
   // Find overall max/min
   const extremes = useMemo(() => {
@@ -305,7 +313,7 @@ export default function DamageDistPanel() {
               color: clearRate >= 0.8 ? 'var(--green)' : clearRate >= 0.5 ? 'var(--gold)' : 'var(--red)'
             }}>{pct(clearRate)}</div>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-              {distResult.filter(r => r.maxDamage >= hpThreshold).length} / {distResult.length} 种
+              {allDamages ? allDamages.filter(d => d >= hpThreshold).length : 0} / {allDamages ? allDamages.length : 0} 种
             </div>
           </div>
         )}
@@ -380,8 +388,8 @@ export default function DamageDistPanel() {
       )}
 
       {/* Damage histogram */}
-      {distResult && (
-        <DamageHistogram results={distResult} hpThreshold={hpThreshold} />
+      {allDamages && (
+        <DamageHistogram damages={allDamages} hpThreshold={hpThreshold} />
       )}
 
       {!allValid && (

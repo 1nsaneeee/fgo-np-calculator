@@ -177,6 +177,56 @@ export function calcDamageDistribution(pool, servantStats, buffs, enemy, options
 }
 
 /**
+ * Enumerate ALL 3-card plays (with ordering) from the full card pool.
+ * P(n,3) = n×(n-1)×(n-2) plays — ~2730 for a 15-card pool.
+ * Each play is an exact damage value; returns them sorted ascending.
+ * No "best of hand" indirection — every possible 3-card sequence is a data point.
+ */
+export function calcAllPlayDamages(pool, servantStats, buffs, enemy, options) {
+  const n = pool.length;
+  const damages = [];
+
+  for (let a = 0; a < n; a++) {
+    for (let b = 0; b < n; b++) {
+      if (b === a) continue;
+      for (let c = 0; c < n; c++) {
+        if (c === a || c === b) continue;
+
+        const cards = [pool[a], pool[b], pool[c]];
+        const firstCard = cards[0];
+        const firstType = firstCard.type === 'NP'
+          ? (firstCard.npColor || 'Buster')
+          : firstCard.type;
+        let totalDmg = 0;
+
+        for (let pos = 0; pos < 3; pos++) {
+          const card = cards[pos];
+          const st = servantStats[card.servant];
+
+          if (card.type === 'NP') {
+            totalDmg += calcNPDmgRaw({
+              totalAtk: st.totalAtk, npMult: st.npMult || 450,
+              npColor: card.npColor || st.npColor || 'Buster',
+              svClass: st.svClass, svAttr: st.svAttr, buffs, enemy,
+            });
+          } else {
+            totalDmg += calcCardDmgRaw({
+              totalAtk: st.totalAtk, cardType: card.type, position: pos,
+              firstCardType: firstType, svClass: st.svClass, svAttr: st.svAttr,
+              buffs, enemy, options,
+            });
+          }
+        }
+        damages.push(totalDmg);
+      }
+    }
+  }
+
+  damages.sort((a, b) => a - b);
+  return damages;
+}
+
+/**
  * Build histogram buckets from distribution results.
  * Uses maxDamage for each hand.
  * Bucket boundaries align to multiples of targetWidth (default 1000) so labels
