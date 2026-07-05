@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { label: '伤害计算', path: '/calculator', icon: '✧' },
   { label: '出卡概率', path: '/cards', icon: '◇' },
   { label: '组队规划', path: '/team', icon: '◆' },
-  { label: '回合模拟', path: '/turnsim', icon: '⟳' },
+  { label: '回合模拟', path: '/turnsim', icon: '⟳', wip: true },
 ];
 
 export default function Layout() {
@@ -76,7 +76,7 @@ export default function Layout() {
               onClick={() => navigate(item.path)}
             >
               <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
+              <span className="nav-label">{item.label}{item.wip ? ' (WIP)' : ''}</span>
             </button>
           ))}
         </nav>
