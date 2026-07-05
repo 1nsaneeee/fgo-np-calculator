@@ -37,7 +37,28 @@ export default function DamageHistogram({ results, hpThreshold }) {
   const data = useMemo(() => {
     if (!results || results.length === 0) return null;
     const { buckets, total } = buildHistogram(results, 1000, hpThreshold);
-    return buckets.map(b => ({ ...b, total }));
+
+    if (hpThreshold <= 0) return buckets.map(b => ({ ...b, total }));
+
+    // Split the bucket that crosses hpThreshold so the green area
+    // starts exactly at the threshold instead of at the bucket's low edge.
+    const split = [];
+    for (const b of buckets) {
+      if (b.low < hpThreshold && b.high > hpThreshold && b.aboveCount > 0) {
+        // Bucket crosses threshold — split into [low, threshold) and [threshold, high]
+        split.push({
+          low: b.low, high: hpThreshold,
+          count: b.count, aboveCount: 0, total,
+        });
+        split.push({
+          low: hpThreshold, high: b.high,
+          count: b.count, aboveCount: b.aboveCount, total,
+        });
+      } else {
+        split.push({ ...b, total });
+      }
+    }
+    return split;
   }, [results, hpThreshold]);
 
   if (!data) return null;
