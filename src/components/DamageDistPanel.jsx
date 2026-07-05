@@ -19,12 +19,6 @@ function validateDeck(raw) {
   return raw.toUpperCase().replace(/[^BAQ]/g, '').slice(0, 5);
 }
 
-function fmtDmg(n) {
-  if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
-  if (n >= 10000) return (n / 1000).toFixed(0) + 'k';
-  return n.toLocaleString();
-}
-
 function pct(v) {
   return (v * 100).toFixed(2) + '%';
 }
@@ -325,7 +319,7 @@ export default function DamageDistPanel() {
             padding: 'var(--space-xs) var(--space-md)', minWidth: 80
           }}>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>中位数 Median</div>
-            <div style={{ fontSize: 'var(--font-md)', fontWeight: 700, color: 'var(--accent)' }}>{fmtDmg(stats.median)}</div>
+            <div style={{ fontSize: 'var(--font-md)', fontWeight: 700, color: 'var(--accent)' }}>{stats.median.toLocaleString()}</div>
           </div>
         )}
 
@@ -336,7 +330,7 @@ export default function DamageDistPanel() {
             padding: 'var(--space-xs) var(--space-md)', minWidth: 80
           }}>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>均值 Avg</div>
-            <div style={{ fontSize: 'var(--font-md)', fontWeight: 700, color: 'var(--text-secondary)' }}>{fmtDmg(stats.mean)}</div>
+            <div style={{ fontSize: 'var(--font-md)', fontWeight: 700, color: 'var(--text-secondary)' }}>{stats.mean.toLocaleString()}</div>
           </div>
         )}
 
@@ -345,7 +339,7 @@ export default function DamageDistPanel() {
           <div className="dist-stat-card" style={{ minWidth: 80 }}>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>P25 – P75</div>
             <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              {fmtDmg(stats.p25)} – {fmtDmg(stats.p75)}
+              {stats.p25.toLocaleString()} – {stats.p75.toLocaleString()}
             </div>
           </div>
         )}
@@ -359,7 +353,7 @@ export default function DamageDistPanel() {
               最高伤害 Best Play
             </div>
             <div className="dist-play-damage">
-              {fmtDmg(extremes.best.maxDamage)}
+              {extremes.best.maxDamage.toLocaleString()}
             </div>
             <div className="draw-pool">
               {extremes.best.bestPlay && extremes.best.bestPlay.map((card, i) => (
@@ -374,7 +368,7 @@ export default function DamageDistPanel() {
               最低伤害 Worst Play
             </div>
             <div className="dist-play-damage">
-              {fmtDmg(extremes.worst.minDamage)}
+              {extremes.worst.minDamage.toLocaleString()}
             </div>
             <div className="draw-pool">
               {extremes.worst.worstPlay && extremes.worst.worstPlay.map((card, i) => (
