@@ -99,15 +99,16 @@ export default function DamageHistogram({ results, hpThreshold }) {
               />
             )}
             <Bar dataKey="count" radius={[2, 2, 0, 0]} maxBarSize={32}>
-              {data.map((entry, i) => (
-                <Cell
-                  key={i}
-                  fill={hpThreshold > 0 && entry.low >= hpThreshold
-                    ? 'var(--green)'
-                    : 'var(--accent)'}
-                  fillOpacity={hpThreshold > 0 && entry.low >= hpThreshold ? 0.7 : 0.6}
-                />
-              ))}
+              {data.map((entry, i) => {
+                // Three-color scheme: blue = fully below, gold = crossing, green = fully above
+                const fullyAbove = hpThreshold > 0 && entry.low >= hpThreshold;
+                const crossing = hpThreshold > 0 && entry.low < hpThreshold && entry.high > hpThreshold;
+                const fill = fullyAbove ? 'var(--green)'
+                  : crossing ? 'var(--gold)'
+                  : 'var(--accent)';
+                const opacity = fullyAbove ? 0.7 : crossing ? 0.6 : 0.5;
+                return <Cell key={i} fill={fill} fillOpacity={opacity} />;
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
@@ -123,21 +124,15 @@ export default function DamageHistogram({ results, hpThreshold }) {
           <div style={{
             display: 'flex', alignItems: 'center', gap: 'var(--space-sm)',
             justifyContent: 'center', marginTop: 'var(--space-sm)',
-            fontSize: 'var(--font-xs)', color: 'var(--text-muted)',
+            fontSize: 'var(--font-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
           }}>
-            <span style={{
-              display: 'inline-block', width: 10, height: 10,
-              background: 'var(--green)', borderRadius: 2, opacity: 0.7,
-            }} />
-            <span>≥ 阈值（{fmtDmg(hpThreshold)}）</span>
-            <span style={{
-              display: 'inline-block', width: 10, height: 10,
-              background: 'var(--accent)', borderRadius: 2, opacity: 0.6,
-            }} />
+            <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--green)', borderRadius: 2, opacity: 0.7 }} />
+            <span>超过阈值</span>
+            <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--gold)', borderRadius: 2, opacity: 0.6 }} />
+            <span>跨越阈值（部分超过）</span>
+            <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--accent)', borderRadius: 2, opacity: 0.5 }} />
             <span>低于阈值</span>
-            <span style={{ color: 'var(--red)', fontWeight: 600, marginLeft: 'var(--space-xs)' }}>
-              — 阈值线
-            </span>
+            <span style={{ color: 'var(--red)', fontWeight: 600 }}>— 阈值线 {fmtDmg(hpThreshold)}</span>
           </div>
         )}
       </div>
