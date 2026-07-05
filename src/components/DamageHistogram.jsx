@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine,
-  ResponsiveContainer, Cell,
+  AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine,
+  ResponsiveContainer,
 } from 'recharts';
 import { buildHistogram } from '@/utils/damageDistribution';
 
@@ -29,11 +29,6 @@ function CustomTooltip({ active, payload, hpThreshold }) {
       <div style={{ fontWeight: 700, color: 'var(--text)' }}>
         {d.count} 种 ({((d.count / d.total) * 100).toFixed(1)}%)
       </div>
-      {hpThreshold > 0 && d.low >= hpThreshold && (
-        <div style={{ color: 'var(--green)', fontSize: 'var(--font-xs)', fontWeight: 600 }}>
-          超过阈值
-        </div>
-      )}
     </div>
   );
 }
@@ -45,9 +40,16 @@ export default function DamageHistogram({ results, hpThreshold }) {
     return buckets.map(b => ({ ...b, total }));
   }, [results]);
 
-  if (!data) return null;
+  // Above-threshold overlay: only counts where low >= threshold
+  const aboveData = useMemo(() => {
+    if (!data || hpThreshold <= 0) return data;
+    return data.map(d => ({
+      ...d,
+      aboveCount: d.low >= hpThreshold ? d.count : 0,
+    }));
+  }, [data, hpThreshold]);
 
-  const maxDamage = data[data.length - 1].high;
+  if (!data) return null;
 
   return (
     <div className="section" style={{ marginTop: 'var(--space-md)' }}>
@@ -58,8 +60,18 @@ export default function DamageHistogram({ results, hpThreshold }) {
         borderRadius: 'var(--radius)',
         padding: 'var(--space-md)',
       }}>
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
+        <ResponsiveContainer width="100%" height={240}>
+          <AreaChart data={data} margin={{ top: 12, right: 8, bottom: 4, left: 0 }}>
+            <defs>
+              <linearGradient id="fillBelow" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.04} />
+              </linearGradient>
+              <linearGradient id="fillAbove" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--green)" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="var(--green)" stopOpacity={0.06} />
+              </linearGradient>
+            </defs>
             <XAxis
               dataKey="low"
               type="number"
@@ -80,7 +92,6 @@ export default function DamageHistogram({ results, hpThreshold }) {
             />
             <Tooltip
               content={<CustomTooltip hpThreshold={hpThreshold} />}
-              cursor={{ fill: 'rgba(0,0,0,0.04)' }}
             />
             {hpThreshold > 0 && (
               <ReferenceLine
@@ -98,39 +109,37 @@ export default function DamageHistogram({ results, hpThreshold }) {
                 }}
               />
             )}
-            <Bar dataKey="count" radius={[2, 2, 0, 0]} maxBarSize={32}>
-              {data.map((entry, i) => {
-                // Three-color scheme: blue = fully below, gold = crossing, green = fully above
-                const fullyAbove = hpThreshold > 0 && entry.low >= hpThreshold;
-                const crossing = hpThreshold > 0 && entry.low < hpThreshold && entry.high > hpThreshold;
-                const fill = fullyAbove ? 'var(--green)'
-                  : crossing ? 'var(--gold)'
-                  : 'var(--accent)';
-                const opacity = fullyAbove ? 0.7 : crossing ? 0.6 : 0.5;
-                return <Cell key={i} fill={fill} fillOpacity={opacity} />;
-              })}
-            </Bar>
-          </BarChart>
+            {/* Full distribution — accent/blue */}
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke="var(--accent)"
+              strokeWidth={1.5}
+              fill="url(#fillBelow)"
+              isAnimationActive={false}
+            />
+            {/* Above-threshold overlay — green, only where low >= threshold */}
+            {hpThreshold > 0 && (
+              <Area
+                type="monotone"
+                dataKey="aboveCount"
+                data={aboveData}
+                stroke="none"
+                fill="url(#fillAbove)"
+                isAnimationActive={false}
+              />
+            )}
+          </AreaChart>
         </ResponsiveContainer>
-        <div style={{
-          display: 'flex', justifyContent: 'center', gap: 'var(--space-lg)',
-          marginTop: 'var(--space-xs)', fontSize: 'var(--font-xs)', color: 'var(--text-muted)',
-        }}>
-          <span>0</span>
-          <span style={{ flex: 1, textAlign: 'center' }}>伤害区间</span>
-          <span>{fmtDmg(maxDamage)}</span>
-        </div>
         {hpThreshold > 0 && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: 'var(--space-sm)',
             justifyContent: 'center', marginTop: 'var(--space-sm)',
             fontSize: 'var(--font-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
           }}>
-            <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--green)', borderRadius: 2, opacity: 0.7 }} />
+            <span style={{ display: 'inline-block', width: 12, height: 12, background: 'var(--green)', borderRadius: 2, opacity: 0.4 }} />
             <span>超过阈值</span>
-            <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--gold)', borderRadius: 2, opacity: 0.6 }} />
-            <span>跨越阈值（部分超过）</span>
-            <span style={{ display: 'inline-block', width: 10, height: 10, background: 'var(--accent)', borderRadius: 2, opacity: 0.5 }} />
+            <span style={{ display: 'inline-block', width: 12, height: 12, background: 'var(--accent)', borderRadius: 2, opacity: 0.25 }} />
             <span>低于阈值</span>
             <span style={{ color: 'var(--red)', fontWeight: 600 }}>— 阈值线 {fmtDmg(hpThreshold)}</span>
           </div>
