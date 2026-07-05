@@ -62,6 +62,8 @@ export default function DamageHistogram({ results, hpThreshold }) {
           <BarChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 0 }}>
             <XAxis
               dataKey="low"
+              type="number"
+              domain={['dataMin', 'dataMax']}
               tickFormatter={(v) => fmtDmg(v)}
               tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
               axisLine={{ stroke: 'var(--border)' }}
@@ -86,6 +88,7 @@ export default function DamageHistogram({ results, hpThreshold }) {
                 stroke="var(--red)"
                 strokeDasharray="6 4"
                 strokeWidth={1.5}
+                ifOverflow="extendDomain"
                 label={{
                   value: fmtDmg(hpThreshold),
                   position: 'top',
