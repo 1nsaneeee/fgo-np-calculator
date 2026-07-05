@@ -36,12 +36,8 @@ function CustomTooltip({ active, payload, hpThreshold }) {
 export default function DamageHistogram({ results, hpThreshold }) {
   const data = useMemo(() => {
     if (!results || results.length === 0) return null;
-    const { buckets, total } = buildHistogram(results, 1000);
-    return buckets.map(b => ({
-      ...b,
-      total,
-      aboveCount: hpThreshold > 0 && b.low >= hpThreshold ? b.count : 0,
-    }));
+    const { buckets, total } = buildHistogram(results, 1000, hpThreshold);
+    return buckets.map(b => ({ ...b, total }));
   }, [results, hpThreshold]);
 
   if (!data) return null;

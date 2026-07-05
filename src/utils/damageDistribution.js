@@ -180,8 +180,9 @@ export function calcDamageDistribution(pool, servantStats, buffs, enemy, options
  * Build histogram buckets from distribution results.
  * Uses maxDamage for each hand.
  * Buckets are ~1000 damage wide — appropriate for FGO's damage granularity.
+ * @param {number} hpThreshold — if > 0, each bucket gets an aboveCount of hands exceeding the threshold
  */
-export function buildHistogram(results, bucketWidth = 1000) {
+export function buildHistogram(results, bucketWidth = 1000, hpThreshold = 0) {
   const damages = results.map(r => r.maxDamage);
   const maxVal = Math.max(...damages);
   const minVal = Math.min(...damages);
@@ -196,13 +197,16 @@ export function buildHistogram(results, bucketWidth = 1000) {
   for (let i = 0; i < numBuckets; i++) {
     const low = minVal + i * actualWidth;
     const high = low + actualWidth;
-    buckets.push({ low: Math.round(low), high: Math.round(high), count: 0 });
+    buckets.push({ low: Math.round(low), high: Math.round(high), count: 0, aboveCount: 0 });
   }
 
   // Assign each damage value to its bucket via floating-point comparison
   for (const dmg of damages) {
     const idx = Math.min(numBuckets - 1, Math.floor((dmg - minVal) / actualWidth));
     buckets[idx].count++;
+    if (hpThreshold > 0 && dmg >= hpThreshold) {
+      buckets[idx].aboveCount++;
+    }
   }
 
   return { buckets, total: results.length, minVal, maxVal, numBuckets };
