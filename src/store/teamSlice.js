@@ -42,7 +42,7 @@ const defaultTeam = {
 };
 
 export const createTeamSlice = (set) => ({
-  team: cloneDeep(defaultTeam),
+  team: structuredClone(defaultTeam),
 
   // ── Servant selection ──
   setTeamServant: (slotIndex, servantId) => set((state) => {
@@ -196,14 +196,14 @@ export const createTeamSlice = (set) => ({
     return { team: { ...state.team, servants } };
   }),
 
-  resetTeam: () => set({ team: cloneDeep(defaultTeam) }),
+  resetTeam: () => set({ team: structuredClone(defaultTeam) }),
 
   // Copy buffs from one slot to another (convenience)
   copyTeamBuffs: (fromSlot, toSlot) => set((state) => {
     const servants = [...state.team.servants];
     servants[toSlot] = {
       ...servants[toSlot],
-      buffs: cloneDeep(servants[fromSlot].buffs),
+      buffs: structuredClone(servants[fromSlot].buffs),
     };
     return { team: { ...state.team, servants } };
   }),

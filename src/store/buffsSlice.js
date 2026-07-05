@@ -2,7 +2,7 @@ import { createEmptyBuffs, DEFAULT_SOURCES, DEFAULT_NEXT_ID } from '@/constants/
 
 export const createBuffsSlice = (set) => ({
   buffs: {
-    sources: cloneDeep(DEFAULT_SOURCES),
+    sources: structuredClone(DEFAULT_SOURCES),
     _nextId: DEFAULT_NEXT_ID,
   },
 
