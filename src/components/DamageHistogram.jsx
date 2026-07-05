@@ -30,7 +30,7 @@ function CustomTooltip({ active, payload, hpThreshold }) {
         第 {d.rank} 手牌 · 百分位 {fmtPct(d.pct)}
       </div>
       <div style={{ fontWeight: 700, color: 'var(--text)' }}>
-        伤害 {fmtDmg(d.damage)}
+        {d.damage.toLocaleString()}
       </div>
       {above && (
         <div style={{ color: 'var(--green)', fontSize: 'var(--font-xs)', fontWeight: 600 }}>
