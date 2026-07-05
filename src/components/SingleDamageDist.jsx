@@ -5,13 +5,14 @@ import useStore from '@/store/index';
 import { useServant } from '@/hooks/useServant';
 import { getSv } from '@/utils/helpers';
 import { aggregateBuffs } from '@/utils/calculations';
-import { calcAllPlayDamagesDetailed } from '@/utils/damageDistribution';
+import { calcAllPlayDamagesDetailed, calcWeightedPassRate } from '@/utils/damageDistribution';
 import DamageHistogram from '@/components/DamageHistogram';
 
 const CARDS = ['B', 'A', 'Q'];
 const CARD_COLORS = { B: 'var(--buster)', A: 'var(--arts)', Q: 'var(--quick)' };
 
 function fmtNum(v) { return Math.round(v).toLocaleString(); }
+function pct(v) { return (v * 100).toFixed(1) + '%'; }
 
 function CardBadge({ type }) {
   return (
@@ -60,23 +61,31 @@ export default function SingleDamageDist() {
     const pool = buildSinglePool(svData.deck, 1);
     const servantStats = { 1: { totalAtk: svData.totalAtk, svClass: svData.svClass, svAttr: svData.svAttr, npMult: 450, npColor: 'Buster' } };
     const aggs = { 1: agg };
-    return calcAllPlayDamagesDetailed(pool, servantStats, aggs, enemy, options);
+    const n = pool.length;
+    const totalPerms = n * (n - 1) * (n - 2);
+    const detailed = calcAllPlayDamagesDetailed(pool, servantStats, aggs, enemy, options);
+    return { detailed, totalPerms };
   }, [svData, agg, enemy, options]);
 
   // Stats
   const stats = useMemo(() => {
-    if (!allPlays || allPlays.length === 0) return null;
-    const damages = allPlays.map(p => p.damage);
+    if (!allPlays?.detailed || allPlays.detailed.length === 0) return null;
+    const damages = allPlays.detailed.map(p => p.damage);
     const sum = damages.reduce((s, d) => s + d, 0);
     return {
-      max: allPlays[0],
-      min: allPlays[allPlays.length - 1],
+      max: allPlays.detailed[0],
+      min: allPlays.detailed[allPlays.detailed.length - 1],
       median: damages[Math.floor(damages.length / 2)],
       mean: Math.floor(sum / damages.length),
-      count: allPlays.length,
-      kills: allPlays.filter(p => p.damage >= hpThreshold).length,
-      handKill: allPlays.length > 0 && allPlays[0].damage >= hpThreshold,  // best play can kill?
+      count: allPlays.detailed.length,
+      kills: allPlays.detailed.filter(p => p.damage >= hpThreshold).length,
+      handKill: allPlays.detailed.length > 0 && allPlays.detailed[0].damage >= hpThreshold,
     };
+  }, [allPlays, hpThreshold]);
+
+  const fitPassRate = useMemo(() => {
+    if (!allPlays?.detailed || hpThreshold <= 0) return null;
+    return calcWeightedPassRate(allPlays.detailed, allPlays.totalPerms, hpThreshold);
   }, [allPlays, hpThreshold]);
 
   if (!servant) {
@@ -90,7 +99,7 @@ export default function SingleDamageDist() {
     );
   }
 
-  if (!allPlays) {
+  if (!allPlays?.detailed) {
     return (
       <div className="section-card">
         <h2 className="panel-title">伤害分布 Damage Distribution</h2>
@@ -137,18 +146,20 @@ export default function SingleDamageDist() {
                 {stats.kills} / {stats.count} 种出牌
               </div>
             </div>
-            <div className="dist-stat-card" style={{ minWidth: 80 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(实际)</div>
-              <div style={{
-                fontSize: 'var(--font-lg)', fontWeight: 800,
-                color: stats.handKill ? 'var(--green)' : 'var(--red)',
-              }}>
-                {stats.handKill ? '✓ 可击杀' : '✗ 无法击杀'}
+            {fitPassRate && (
+              <div className="dist-stat-card" style={{ minWidth: 100 }}>
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(拟合)</div>
+                <div style={{
+                  fontSize: 'var(--font-lg)', fontWeight: 800,
+                  color: fitPassRate.weighted >= 0.5 ? 'var(--green)' : 'var(--red)',
+                }}>
+                  {pct(fitPassRate.weighted)}
+                </div>
+                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                  概率 × 击破率
+                </div>
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                最优出牌判定
-              </div>
-            </div>
+            )}
 
             <div className="dist-stat-card" style={{ minWidth: 70 }}>
               <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>最高 Max</div>
@@ -207,7 +218,7 @@ export default function SingleDamageDist() {
         伤害排名 Top 5
       </h3>
       <div style={{ marginBottom: 'var(--space-md)' }}>
-        {allPlays.slice(0, 5).map((play, i) => (
+        {allPlays.detailed.slice(0, 5).map((play, i) => (
           <div key={i} style={{
             display: 'flex', alignItems: 'center', gap: 'var(--space-sm)',
             padding: '2px 0', borderBottom: '1px solid var(--border-light)',
@@ -227,7 +238,7 @@ export default function SingleDamageDist() {
       </div>
 
       {/* Histogram */}
-      <DamageHistogram damages={allPlays.map(p => p.damage)} hpThreshold={hpThreshold} />
+      <DamageHistogram damages={allPlays.detailed.map(p => p.damage)} hpThreshold={hpThreshold} />
     </div>
   );
 }

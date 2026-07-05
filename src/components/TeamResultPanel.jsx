@@ -6,7 +6,9 @@ import { aggregateBuffs } from '@/utils/calculations';
 import {
   calcDamageDistribution,
   calcAllPlayDamages,
+  calcAllPlayDamagesDetailed,
   calcClearRate,
+  calcWeightedPassRate,
   formatCard,
 } from '@/utils/damageDistribution';
 import DamageHistogram from '@/components/DamageHistogram';
@@ -217,7 +219,23 @@ export default function TeamResultPanel() {
     return pass / allDamages.length;
   }, [allDamages, hpThreshold]);
 
-  // ── Hand-based clear rate (per-hand best play, more realistic) ──
+  // ── Detailed plays (with multiplicity) + weighted pass rate ──
+  const detailedPlays = useMemo(() => {
+    if (!pool || !servantStats) return null;
+    return calcAllPlayDamagesDetailed(pool, servantStats, aggs, enemy, options);
+  }, [pool, servantStats, aggs, enemy, options]);
+
+  const totalPerms = useMemo(() => {
+    const n = pool?.length || 0;
+    return n * (n - 1) * (n - 2); // P(n,3)
+  }, [pool]);
+
+  const fitPassRate = useMemo(() => {
+    if (!detailedPlays || hpThreshold <= 0) return null;
+    return calcWeightedPassRate(detailedPlays, totalPerms, hpThreshold);
+  }, [detailedPlays, totalPerms, hpThreshold]);
+
+  // ── Hand-based clear rate (per-hand best play) ──
   const handClearRate = useMemo(() => {
     if (!distResult || distResult.length === 0 || hpThreshold <= 0) return null;
     return calcClearRate(distResult, hpThreshold);
@@ -359,15 +377,15 @@ export default function TeamResultPanel() {
               </div>
             </div>
           )}
-          {handClearRate !== null && (
-            <div className="dist-stat-card" style={{ minWidth: 120 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>通关率(实际)</div>
+          {handClearRate !== null && fitPassRate !== null && (
+            <div className="dist-stat-card" style={{ minWidth: 140 }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>通关率(拟合)</div>
               <div style={{
                 fontSize: 'var(--font-xl)', fontWeight: 800,
-                color: handClearRate >= 0.8 ? 'var(--green)' : handClearRate >= 0.5 ? 'var(--gold)' : 'var(--red)'
-              }}>{pct(handClearRate)}</div>
+                color: fitPassRate.weighted >= 0.8 ? 'var(--green)' : fitPassRate.weighted >= 0.5 ? 'var(--gold)' : 'var(--red)'
+              }}>{pct(fitPassRate.weighted)}</div>
               <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                {distResult ? distResult.filter(r => r.maxDamage >= hpThreshold).length : 0} / {distResult ? distResult.length : 0} 手
+                出牌概率 × 击破率
               </div>
             </div>
           )}

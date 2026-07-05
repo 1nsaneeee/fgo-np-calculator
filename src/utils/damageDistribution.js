@@ -305,16 +305,22 @@ export function calcAllPlayDamagesDetailed(pool, servantStats, aggs, enemy, opti
 
   results.sort((a, b) => b.damage - a.damage);
 
-  // Deduplicate by card sequence (type+servant key).
-  // pools may have duplicate card types from the same servant (e.g. BBAAQ has two B),
-  // causing P(n,3) to treat B₀ and B₁ as distinct permutations with identical damage.
-  const seen = new Set();
-  return results.filter(p => {
+  // Collapse duplicate card sequences (e.g. two B cards from same servant → same type+servant key)
+  // and track multiplicity for weighted probability calculations.
+  const seen = new Map();
+  const collapsed = [];
+  for (const p of results) {
     const key = p.cards.map(c => c.type + c.servant).join('');
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+    const existing = seen.get(key);
+    if (existing) {
+      existing.multiplicity++;
+    } else {
+      const entry = { ...p, multiplicity: 1 };
+      seen.set(key, entry);
+      collapsed.push(entry);
+    }
+  }
+  return collapsed;
 }
 
 /**
@@ -365,6 +371,40 @@ export function calcClearRate(results, hpThreshold) {
   if (!results || results.length === 0) return 0;
   const pass = results.filter(r => r.maxDamage >= hpThreshold).length;
   return pass / results.length;
+}
+
+/**
+ * Calculate weighted pass rate: for each unique card sequence, weight its kill probability
+ * by how many pool-level permutations it represents, then divide by total permutations.
+ * Accounts for both card draw probability AND per-sequence damage variance.
+ *
+ * @param {Array} detailed - results from calcAllPlayDamagesDetailed (with multiplicity)
+ * @param {number} totalPermutations - P(n,3) = n×(n-1)×(n-2), total pool permutations
+ * @param {number} hpThreshold - enemy HP
+ * @returns {{ weighted: number, unweighted: number }} pass rates
+ */
+export function calcWeightedPassRate(detailed, totalPermutations, hpThreshold) {
+  if (!detailed || detailed.length === 0 || hpThreshold <= 0 || !totalPermutations) {
+    return { weighted: 0, unweighted: 0 };
+  }
+  let weightedPass = 0;
+  let unweightedPass = 0;
+  for (const seq of detailed) {
+    // Per-sequence kill rate: fraction of random damage range above HP
+    const range = seq.max - seq.min;
+    let killRate = 0;
+    if (range > 0) {
+      killRate = Math.max(0, Math.min(1, (seq.max - hpThreshold) / range));
+    } else {
+      killRate = seq.damage >= hpThreshold ? 1 : 0;
+    }
+    weightedPass += seq.multiplicity * killRate;
+    unweightedPass += killRate;
+  }
+  return {
+    weighted: weightedPass / totalPermutations,
+    unweighted: unweightedPass / detailed.length,
+  };
 }
 
 /**
