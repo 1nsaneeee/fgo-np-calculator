@@ -75,6 +75,7 @@ export default function SingleDamageDist() {
       mean: Math.floor(sum / damages.length),
       count: allPlays.length,
       kills: allPlays.filter(p => p.damage >= hpThreshold).length,
+      handKill: allPlays.length > 0 && allPlays[0].damage >= hpThreshold,  // best play can kill?
     };
   }, [allPlays, hpThreshold]);
 
@@ -125,7 +126,7 @@ export default function SingleDamageDist() {
         {stats && (
           <>
             <div className="dist-stat-card" style={{ minWidth: 100 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>致命率 Kill%</div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(全局)</div>
               <div style={{
                 fontSize: 'var(--font-lg)', fontWeight: 800,
                 color: (stats.kills / stats.count) >= 0.5 ? 'var(--green)' : 'var(--red)',
@@ -134,6 +135,18 @@ export default function SingleDamageDist() {
               </div>
               <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
                 {stats.kills} / {stats.count} 种出牌
+              </div>
+            </div>
+            <div className="dist-stat-card" style={{ minWidth: 80 }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(实际)</div>
+              <div style={{
+                fontSize: 'var(--font-lg)', fontWeight: 800,
+                color: stats.handKill ? 'var(--green)' : 'var(--red)',
+              }}>
+                {stats.handKill ? '✓ 可击杀' : '✗ 无法击杀'}
+              </div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                最优出牌判定
               </div>
             </div>
 
