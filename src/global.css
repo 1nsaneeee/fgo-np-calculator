@@ -6,16 +6,16 @@
   --border-light: #edf0f4;
   --text: #1a1d23;
   --text-secondary: #4a5568;
-  --text-muted: #6b7280;
-  --accent: #3b6ef0;
-  --accent-light: #e8effe;
-  --accent-hover: #2958d4;
+  --text-muted: #5a6475;
+  --accent: #6366f1;
+  --accent-light: #eef2ff;
+  --accent-hover: #4f46e5;
   --red: #dc3545;
   --red-bg: #fde8ea;
   --green: #1a8a4a;
   --green-bg: #e6f4ec;
   --blue: #2563eb;
-  --blue-bg: #e8effe;
+  --blue-bg: #eef2ff;
   --gold: #b8860b;
   --gold-bg: #fef3cd;
   --buster: #d63031;
@@ -31,15 +31,15 @@
   --ex-border: #e6d08c;
   --indigo: #6366f1;
   --indigo-bg: #eef2ff;
-  --radius: 10px;
+  --radius: 8px;
   --radius-sm: 6px;
-  --font-xs: 11px;
-  --font-sm: 13px;
-  --font-base: 14px;
-  --font-md: 17px;
-  --font-lg: 20px;
-  --font-xl: 26px;
-  --font-hero: 34px;
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-base: 15px;
+  --font-md: 18px;
+  --font-lg: 22px;
+  --font-xl: 28px;
+  --font-hero: 36px;
   --space-2xs: 2px;
   --space-xs: 4px;
   --space-sm: 8px;
@@ -47,6 +47,8 @@
   --space-lg: 24px;
   --space-xl: 32px;
   --space-2xl: 48px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
 }
 
 * {
@@ -90,8 +92,9 @@
 .app-footer {
   text-align: center;
   margin-top: var(--space-2xl);
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   color: var(--text-muted);
+  opacity: 0.7;
 }
 
 .main-col {
@@ -130,6 +133,7 @@
   background: var(--surface-alt);
   border-radius: var(--radius);
   border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
 }
 
 .section-prominent {
@@ -203,6 +207,7 @@
   background: var(--surface);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
   text-align: center;
 }
 
@@ -241,7 +246,7 @@
   font-weight: 800;
   cursor: pointer;
   border: 2px solid var(--border);
-  transition: transform 0.12s, border-color 0.15s, background 0.15s;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
   user-select: none;
   position: relative;
   background: var(--surface);
@@ -256,8 +261,8 @@
 .card-slot.is-np { border-style: double; border-width: 4px; font-size: var(--font-sm); letter-spacing: 1px; }
 
 .break-bar {
-  margin-top: var(--space-sm);
-  padding: var(--space-sm);
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   background: var(--surface-alt);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-light);
@@ -330,7 +335,7 @@
   display: flex;
   gap: var(--space-sm);
   flex-wrap: wrap;
-  font-size: var(--font-sm);
+  font-size: var(--font-xs);
   margin-bottom: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   background: var(--surface-alt);
@@ -371,10 +376,12 @@
 
 .loop-card {
   flex: 1;
-  padding: var(--space-sm);
-  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius);
   border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
   text-align: center;
+  transition: box-shadow 0.2s ease;
 }
 
 .loop-card .loop-turn { font-size: var(--font-xs); color: var(--text-muted); font-weight: 600; }
@@ -445,7 +452,7 @@
 .buff-label.buff-c-special { border-left-color: var(--red); }
 
 .buff-note {
-  font-size: 9px;
+  font-size: 11px;
   color: var(--text-muted);
   margin-left: 4px;
   font-weight: 400;
@@ -455,7 +462,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 11px;
   padding: 0 4px 0 0;
   color: var(--text-muted);
   line-height: 1;
@@ -463,7 +470,7 @@
 .crit-toggle:hover { color: var(--gold); }
 
 .crit-summary {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
   margin-top: 2px;
   white-space: nowrap;
@@ -572,7 +579,7 @@
 
 .cap-badge {
   display: inline-block;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   padding: 1px 4px;
   border-radius: 3px;
@@ -712,7 +719,7 @@
 }
 
 .draw-badge sub {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   margin-left: 1px;
 }
@@ -742,9 +749,9 @@
   font-size: var(--font-sm);
   align-items: center;
   margin-top: var(--space-md);
-  padding: var(--space-sm);
+  padding: var(--space-md);
   background: var(--surface-alt);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   border: 1px solid var(--border-light);
 }
 
@@ -783,14 +790,30 @@
   white-space: nowrap;
 }
 
+/* ── Chain Action Buttons ── */
+.chain-crit-btn,
+.chain-ok-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 3px;
+  border: 1px solid;
+  cursor: pointer;
+  min-height: 28px;
+  min-width: 36px;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  font-family: inherit;
+}
+
 /* ── Accessibility ── */
-/* Focus-visible for all custom buttons */
+/* Focus-visible for all custom interactive elements */
 .card-slots button:focus-visible,
 .source-remove-btn:focus-visible,
 .add-source-btn:focus-visible,
 .add-source-confirm:focus-visible,
 .add-source-cancel:focus-visible,
-.toggle-btn:focus-visible {
+.toggle-btn:focus-visible,
+button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

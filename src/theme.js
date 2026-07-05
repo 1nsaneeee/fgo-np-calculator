@@ -12,9 +12,9 @@ const theme = createTheme({
       secondary: '#4a5568',
     },
     primary: {
-      main: '#3b6ef0',
-      light: '#e8effe',
-      dark: '#2958d4',
+      main: '#6366f1',
+      light: '#eef2ff',
+      dark: '#4f46e5',
     },
     error: {
       main: '#dc3545',
@@ -32,7 +32,7 @@ const theme = createTheme({
     fontWeightBold: 700,
   },
   shape: {
-    borderRadius: 10,
+    borderRadius: 8,
   },
   components: {
     MuiCssBaseline: {

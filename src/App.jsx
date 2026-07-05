@@ -23,7 +23,7 @@ export default function App() {
         </Routes>
 
         <footer className="app-footer">
-          FGO Damage Calculator v4.0 · Data from Atlas Academy API · React 18 + Vite + MUI + Zustand
+          FGO Damage Calculator v4.0 · Data from Atlas Academy API
         </footer>
       </div>
     </HashRouter>

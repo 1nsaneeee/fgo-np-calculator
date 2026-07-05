@@ -16,7 +16,7 @@ export default function ServantCard({ basic, onClick }) {
   const npChar = NPC_LABEL[npColor] || 'B';
   const nameJp = basic.originalName || basic.name || '';
   const nameCn = servantNamesById[basic.id] || servantNames[nameJp] || nameJp;
-  const npColorHex = npColor === 'Buster' ? '#c0392b' : npColor === 'Arts' ? '#2980b9' : '#27ae60';
+  const npColorHex = npColor === 'Buster' ? 'var(--buster)' : npColor === 'Arts' ? 'var(--arts)' : 'var(--quick)';
 
   return (
     <Card sx={{ cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s', '&:hover': { transform: 'translateY(-2px)', boxShadow: 4 } }}>

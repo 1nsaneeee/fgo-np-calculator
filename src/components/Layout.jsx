@@ -26,11 +26,14 @@ export default function Layout() {
 
   return (
     <Box>
-      <AppBar position="sticky" color="default" elevation={1}>
+      <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
         <Toolbar variant="dense" sx={{ gap: 2 }}>
           <Box
             component="span"
-            sx={{ fontWeight: 900, fontSize: '0.95rem', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            sx={{
+              fontWeight: 900, fontSize: '1rem', cursor: 'pointer', whiteSpace: 'nowrap',
+              color: 'var(--accent)', letterSpacing: '-0.02em',
+            }}
             onClick={() => navigate('/servants')}
           >
             FGO Calc
@@ -39,7 +42,11 @@ export default function Layout() {
             value={currentTab}
             onChange={(_, v) => navigate(v)}
             textColor="inherit"
-            sx={{ minHeight: 40, '& .MuiTab-root': { minHeight: 40, fontSize: '0.85rem', textTransform: 'none' } }}
+            sx={{
+              minHeight: 40,
+              '& .MuiTab-root': { minHeight: 40, fontSize: '0.85rem', textTransform: 'none', fontWeight: 600 },
+              '& .MuiTabs-indicator': { backgroundColor: 'var(--accent)' },
+            }}
           >
             {TABS.map(t => <Tab key={t.path} label={t.label} value={t.path} />)}
           </Tabs>

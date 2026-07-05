@@ -90,8 +90,8 @@ export default function ServantFilterPanel({
               checked={npColorFilter.includes(color)}
               onChange={() => toggleNpColor(color)}
               sx={{
-                color: color === 'Buster' ? '#c0392b' : color === 'Arts' ? '#2980b9' : '#27ae60',
-                '&.Mui-checked': { color: color === 'Buster' ? '#c0392b' : color === 'Arts' ? '#2980b9' : '#27ae60' },
+                color: color === 'Buster' ? 'var(--buster)' : color === 'Arts' ? 'var(--arts)' : 'var(--quick)',
+                '&.Mui-checked': { color: color === 'Buster' ? 'var(--buster)' : color === 'Arts' ? 'var(--arts)' : 'var(--quick)' },
                 p: 0.5,
               }}
             />

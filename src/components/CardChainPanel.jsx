@@ -122,12 +122,11 @@ export default function CardChainPanel() {
                   onClick={() => toggleCardCrit(i)}
                   aria-pressed={cardOptions[i]?.isCrit || false}
                   aria-label={`卡牌${i + 1}暴击`}
+                  className="chain-crit-btn"
                   style={{
-                    fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
                     background: cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--surface)',
                     color: cardOptions[i]?.isCrit ? '#fff' : 'var(--text-muted)',
-                    border: `1px solid ${cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--border)'}`,
-                    cursor: 'pointer', minHeight: 28, minWidth: 36,
+                    borderColor: cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--border)',
                   }}
                 >
                   CRIT
@@ -137,12 +136,11 @@ export default function CardChainPanel() {
                 onClick={() => toggleCardOverkill(i)}
                 aria-pressed={cardOptions[i]?.overkill || false}
                 aria-label={`卡牌${i + 1}overkill`}
+                className="chain-ok-btn"
                 style={{
-                  fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
                   background: cardOptions[i]?.overkill ? 'var(--red)' : 'var(--surface)',
                   color: cardOptions[i]?.overkill ? '#fff' : 'var(--text-muted)',
-                  border: `1px solid ${cardOptions[i]?.overkill ? 'var(--red)' : 'var(--border)'}`,
-                  cursor: 'pointer', minHeight: 28, minWidth: 36,
+                  borderColor: cardOptions[i]?.overkill ? 'var(--red)' : 'var(--border)',
                 }}
               >
                 OK
@@ -169,12 +167,11 @@ export default function CardChainPanel() {
               onClick={() => toggleCardOverkill(3)}
               aria-pressed={cardOptions[3]?.overkill || false}
               aria-label="Extra卡overkill"
+              className="chain-ok-btn"
               style={{
-                fontSize: 10, fontWeight: 700, padding: '6px 10px', borderRadius: 3,
                 background: cardOptions[3]?.overkill ? 'var(--red)' : 'var(--surface)',
                 color: cardOptions[3]?.overkill ? '#fff' : 'var(--text-muted)',
-                border: `1px solid ${cardOptions[3]?.overkill ? 'var(--red)' : 'var(--border)'}`,
-                cursor: 'pointer', minHeight: 28, minWidth: 36,
+                borderColor: cardOptions[3]?.overkill ? 'var(--red)' : 'var(--border)',
               }}
             >
               OK
