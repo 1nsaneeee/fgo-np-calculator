@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ReferenceLine,
+  AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer,
 } from 'recharts';
 import { buildHistogram } from '@/utils/damageDistribution';
@@ -88,22 +88,6 @@ export default function DamageHistogram({ results, hpThreshold }) {
             <Tooltip
               content={<CustomTooltip hpThreshold={hpThreshold} />}
             />
-            {hpThreshold > 0 && (
-              <ReferenceLine
-                x={hpThreshold}
-                stroke="var(--red)"
-                strokeDasharray="6 4"
-                strokeWidth={1.5}
-                ifOverflow="extendDomain"
-                label={{
-                  value: fmtDmg(hpThreshold),
-                  position: 'top',
-                  fill: 'var(--red)',
-                  fontSize: 11,
-                  fontWeight: 600,
-                }}
-              />
-            )}
             {/* Full distribution — accent/blue */}
             <Area
               type="monotone"
@@ -113,7 +97,7 @@ export default function DamageHistogram({ results, hpThreshold }) {
               fill="url(#fillBelow)"
               isAnimationActive={false}
             />
-            {/* Above-threshold overlay — green, only where low >= threshold */}
+            {/* Above-threshold overlay — green */}
             {hpThreshold > 0 && (
               <Area
                 type="monotone"
@@ -132,10 +116,9 @@ export default function DamageHistogram({ results, hpThreshold }) {
             fontSize: 'var(--font-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
           }}>
             <span style={{ display: 'inline-block', width: 12, height: 12, background: 'var(--green)', borderRadius: 2, opacity: 0.4 }} />
-            <span>超过阈值</span>
+            <span>超过 {fmtDmg(hpThreshold)}</span>
             <span style={{ display: 'inline-block', width: 12, height: 12, background: 'var(--accent)', borderRadius: 2, opacity: 0.25 }} />
-            <span>低于阈值</span>
-            <span style={{ color: 'var(--red)', fontWeight: 600 }}>— 阈值线 {fmtDmg(hpThreshold)}</span>
+            <span>低于 {fmtDmg(hpThreshold)}</span>
           </div>
         )}
       </div>
