@@ -619,7 +619,7 @@ export default function TurnSimulator() {
       {/* ── Turn Result ── */}
       {turnResults && turnResults[activeTurn - 1] && allValid && (
         <div style={{
-          background: 'var(--surface-hero, #eeece5)',
+          background: 'var(--surface-raised)',
           border: '1px solid var(--border-strong)',
           borderRadius: 'var(--radius-sm)',
           padding: 'var(--space-md)',

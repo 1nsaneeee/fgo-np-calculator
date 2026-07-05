@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+﻿import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
@@ -22,5 +22,13 @@ export default defineConfig(({ command }) => ({
   },
   build: {
     outDir: 'docs',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-mui': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          'vendor-recharts': ['recharts'],
+        },
+      },
+    },
   },
 }));

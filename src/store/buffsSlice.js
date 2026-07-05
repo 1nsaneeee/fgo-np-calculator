@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import { createEmptyBuffs, DEFAULT_SOURCES, DEFAULT_NEXT_ID } from '@/constants/buffDefs';
 
 export const createBuffsSlice = (set) => ({
@@ -43,7 +42,7 @@ export const createBuffsSlice = (set) => ({
 
   resetBuffs: () => set({
     buffs: {
-      sources: cloneDeep(DEFAULT_SOURCES),
+    sources: structuredClone(DEFAULT_SOURCES),
       _nextId: DEFAULT_NEXT_ID,
     }
   }),

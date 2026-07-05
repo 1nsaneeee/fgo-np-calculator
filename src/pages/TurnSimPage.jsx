@@ -20,7 +20,7 @@ export default function TurnSimPage() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Alert severity="warning" sx={{ fontSize: '0.85rem' }}>
-        ⚠️ WIP — 回合模拟功能仍在开发中，技能数据可能不完整，计算结果仅供参考。
+        WIP — 回合模拟功能仍在开发中，技能数据可能不完整，计算结果仅供参考。
       </Alert>
       <TurnSimulator />
     </Box>

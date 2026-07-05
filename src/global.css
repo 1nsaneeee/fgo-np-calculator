@@ -61,7 +61,6 @@
   --font-md: 17px;
   --font-lg: 20px;
   --font-xl: 26px;
-  --font-hero: 34px;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
 
   /* ── Spacing ── */
@@ -453,8 +452,8 @@ body {
   border-radius: var(--radius-xs);
   border: 1px solid;
   cursor: pointer;
-  min-height: 28px;
-  min-width: 36px;
+  min-height: 32px;
+  min-width: 40px;
   transition: all 0.2s ease;
   font-family: inherit;
   letter-spacing: 0.05em;
@@ -805,8 +804,8 @@ body {
 }
 
 .source-remove-btn {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border: none;
   background: transparent;
   color: var(--text-muted);

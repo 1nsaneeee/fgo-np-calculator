@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import { createEmptyBuffs, DEFAULT_SOURCES, DEFAULT_NEXT_ID } from '@/constants/buffDefs';
 
 const createDefaultServantSlot = (id) => ({
@@ -16,7 +15,7 @@ const createDefaultServantSlot = (id) => ({
     extraAtk: 0,
   },
   buffs: {
-    sources: cloneDeep(DEFAULT_SOURCES),
+    sources: structuredClone(DEFAULT_SOURCES),
     _nextId: DEFAULT_NEXT_ID,
   },
   // Per-servant skill selection and activation tracking

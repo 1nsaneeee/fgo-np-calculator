@@ -34,10 +34,14 @@ export default function Layout() {
         <Box
           component="span"
           onClick={() => navigate('/servants')}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/servants')}
+          role="button"
+          tabIndex={0}
+          aria-label="返回从者列表"
           sx={{ cursor: 'pointer', fontWeight: 900, letterSpacing: '-0.02em' }}
         >
           <span className="app-title">
-            <span>FGO</span> Calc
+            <h1 style={{ fontSize: 'inherit', fontWeight: 'inherit', margin: 0, display: 'inline' }}>FGO Calc</h1>
           </span>
         </Box>
 
@@ -45,7 +49,7 @@ export default function Layout() {
         {(selectedId || isCustom) && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
             {servantData && (
-              <Avatar src={servantData._face} sx={{ width: 28, height: 28 }} />
+              <Avatar src={servantData._face} alt={servantData?.name || '从者头像'} sx={{ width: 28, height: 28 }} />
             )}
             <Box component="span" sx={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text)' }}>
               {isCustom ? '自定义从者' : (servantData?.name || '')}

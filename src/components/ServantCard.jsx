@@ -17,7 +17,14 @@ export default function ServantCard({ basic, onClick }) {
   const npColorVar = npColor === 'Buster' ? 'var(--buster)' : npColor === 'Arts' ? 'var(--arts)' : 'var(--quick)';
 
   return (
-    <div className="sv-card" onClick={onClick}>
+    <div
+      className="sv-card"
+      onClick={onClick}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
+      role="button"
+      tabIndex={0}
+      aria-label={`选择 ${nameCn}`}
+    >
       <div style={{ position: 'relative' }}>
         <img
           className="sv-card-img"

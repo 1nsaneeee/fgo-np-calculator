@@ -27,7 +27,7 @@ export default function CardChainPanel() {
 
   if (!servant) return null;
 
-  const npColor = getSv(servant, 'npColor') || 'Buster';
+  const npColor = useMemo(() => getSv(servant, 'npColor') || 'Buster', [servant]);
 
   const cycleCard = (idx) => {
     setSlots((prev) => {
@@ -62,7 +62,7 @@ export default function CardChainPanel() {
   const cards = showExtra ? [...slots, 'Extra'] : slots;
   const firstCard = resolvedSlots[0];
 
-  const results = cards.map((cardType, i) => {
+  const results = useMemo(() => cards.map((cardType, i) => {
     const position = i === 0 ? 'first' : i === 1 ? 'second' : i === 2 ? 'third' : 'extra';
     const cardOpt = cardOptions[i] || { isCrit: false, overkill: false };
 
@@ -84,19 +84,23 @@ export default function CardChainPanel() {
       cardType, position, dmg, npGain, stars, cardOpt, isNP: false,
       breakInfo: { baseDmg: dmg.baseDmg, flatDmg: 0 },
     };
-  });
+  }), [cards, servant, config, buffs, enemy, cardOptions, firstCard, npColor]);
 
-  const totalMin = results.reduce((s, r) => s + r.dmg.min, 0);
-  const totalAvg = results.reduce((s, r) => s + r.dmg.avg, 0);
-  const totalMax = results.reduce((s, r) => s + r.dmg.max, 0);
-  const totalNp = results.reduce((s, r) => s + r.npGain, 0);
-  const totalStars = results.reduce((s, r) => s + r.stars.expected, 0);
+  const totals = useMemo(() => ({
+    min: results.reduce((s, r) => s + r.dmg.min, 0),
+    avg: results.reduce((s, r) => s + r.dmg.avg, 0),
+    max: results.reduce((s, r) => s + r.dmg.max, 0),
+    np: results.reduce((s, r) => s + r.npGain, 0),
+    stars: results.reduce((s, r) => s + r.stars.expected, 0),
+  }), [results]);
 
   const sameChain = resolvedSlots[0] === resolvedSlots[1] && resolvedSlots[1] === resolvedSlots[2];
   const triColor = new Set(resolvedSlots).size === 3;
 
   const hp = parseInt(breakHP) || 0;
-  const breakProb = hp > 0 ? calcBreakProb(results.map(r => r.breakInfo), hp) : null;
+  const breakProb = useMemo(() =>
+    hp > 0 ? calcBreakProb(results.map(r => r.breakInfo), hp) : null
+  , [results, hp]);
 
   const getSlotColor = (ct) => ct === 'NP' ? cardColors[npColor] : cardColors[ct];
 
@@ -230,13 +234,13 @@ export default function CardChainPanel() {
         ))}
         <div className="chain-total">TOTAL</div>
         <div className="chain-total">
-          {totalAvg.toLocaleString()}
+          {totals.avg.toLocaleString()}
           <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>
-            {' '}({totalMin.toLocaleString()}~{totalMax.toLocaleString()})
+            {' '}({totals.min.toLocaleString()}~{totals.max.toLocaleString()})
           </span>
         </div>
-        <div className="chain-total">{totalNp.toFixed(1)}</div>
-        <div className="chain-total">{totalStars.toFixed(1)}</div>
+        <div className="chain-total">{totals.np.toFixed(1)}</div>
+        <div className="chain-total">{totals.stars.toFixed(1)}</div>
       </div>
 
       <div className="break-bar">
