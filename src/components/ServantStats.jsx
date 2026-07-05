@@ -36,9 +36,9 @@ export default function ServantStats({ servant }) {
   const np = COLOR_MAP[npColor] || COLOR_MAP.Arts;
 
   return (
-    <>
+    <div className="section-card">
       <div className="servant-card">
-        <span className="servant-class" style={{ background: CLASS_COLORS[svClass] || '#333', color: '#fff' }}>
+        <span className="servant-class" style={{ background: CLASS_COLORS[svClass] || '#555', color: '#fff' }}>
           {svClass}
         </span>
         <Box>
@@ -48,7 +48,7 @@ export default function ServantStats({ servant }) {
           </div>
         </Box>
         <Box sx={{ ml: 'auto', display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-          <Chip label="ATK" value={getSv(sv, 'atk90')} color="var(--blue)" bg="var(--accent-light)" />
+          <Chip label="ATK" value={getSv(sv, 'atk90')} color="var(--blue)" bg="var(--blue-bg)" />
           <Chip label="NP" value={npColor} color={np.color} bg={np.bg} />
           <Chip label="NP率" value={getSv(sv, 'npRate')} />
           <Chip label="配卡" value={getSv(sv, 'deck')} />
@@ -58,25 +58,25 @@ export default function ServantStats({ servant }) {
       <Button
         onClick={() => setShowDetails(!showDetails)}
         sx={{
-          display: 'block', mx: 'auto', mt: 1, fontSize: 'var(--font-xs)', py: 0.5, px: 2,
+          display: 'block', mx: 'auto', mt: 1, fontSize: '0.75rem', py: 0.5, px: 2,
           color: 'var(--text-muted)', border: '1px dashed var(--border)', borderRadius: 1,
           textTransform: 'none', minWidth: 0,
         }}
       >
-        {showDetails ? '\u25B2 收起详情' : '\u25BC 查看完整数据'}
+        {showDetails ? '▲ 收起详情' : '▼ 查看完整数据'}
       </Button>
 
       {showDetails && (
         <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
-          {getSv(sv, 'atk100') ? <Chip label="ATK100" value={getSv(sv, 'atk100')} color="var(--blue)" bg="var(--accent-light)" /> : null}
-          {getSv(sv, 'atk120') ? <Chip label="ATK120" value={getSv(sv, 'atk120')} color="var(--indigo)" bg="var(--indigo-bg)" /> : null}
+          {getSv(sv, 'atk100') ? <Chip label="ATK100" value={getSv(sv, 'atk100')} color="var(--blue)" bg="var(--blue-bg)" /> : null}
+          {getSv(sv, 'atk120') ? <Chip label="ATK120" value={getSv(sv, 'atk120')} color="var(--accent)" bg="var(--accent-light)" /> : null}
           <Chip label="NP Hit" value={getSv(sv, 'npHits')} />
           <Chip label="属性" value={getSv(sv, 'attr') || '-'} />
           <Chip label="B Hit" value={getSv(sv, 'bHits')} color="var(--buster)" bg="var(--buster-bg)" />
           <Chip label="A Hit" value={getSv(sv, 'aHits')} color="var(--arts)" bg="var(--arts-bg)" />
           <Chip label="Q Hit" value={getSv(sv, 'qHits')} color="var(--quick)" bg="var(--quick-bg)" />
           <Chip label="EX Hit" value={getSv(sv, 'eHits')} color="var(--gold)" bg="var(--ex-bg)" />
-          <Chip label="星率" value={`${getSv(sv, 'starRate')}%`} color="var(--gold)" bg="var(--ex-bg)" />
+          <Chip label="星率" value={`${getSv(sv, 'starRate')}%`} />
           <Chip label="NP1" value={`${getSv(sv, 'np1')}%`} />
           <Chip label="NP2" value={`${getSv(sv, 'np2')}%`} />
           <Chip label="NP3" value={`${getSv(sv, 'np3')}%`} />
@@ -85,11 +85,11 @@ export default function ServantStats({ servant }) {
           {getSv(sv, 'passiveBuster') > 0 && <Chip label="红放" value={`+${getSv(sv, 'passiveBuster')}%`} color="var(--buster)" bg="var(--buster-bg)" />}
           {getSv(sv, 'passiveArts') > 0 && <Chip label="蓝放" value={`+${getSv(sv, 'passiveArts')}%`} color="var(--arts)" bg="var(--arts-bg)" />}
           {getSv(sv, 'passiveQuick') > 0 && <Chip label="绿放" value={`+${getSv(sv, 'passiveQuick')}%`} color="var(--quick)" bg="var(--quick-bg)" />}
-          {getSv(sv, 'passiveCrit') > 0 && <Chip label="爆伤" value={`+${getSv(sv, 'passiveCrit')}%`} color="var(--gold)" bg="var(--ex-bg)" />}
+          {getSv(sv, 'passiveCrit') > 0 && <Chip label="爆伤" value={`+${getSv(sv, 'passiveCrit')}%`} color="var(--gold)" bg="var(--gold-bg)" />}
           {getSv(sv, 'passiveNpGen') > 0 && <Chip label="NP率" value={`+${getSv(sv, 'passiveNpGen')}%`} color="var(--arts)" bg="var(--arts-bg)" />}
-          {getSv(sv, 'passiveNpStrength') > 0 && <Chip label="宝威" value={`+${getSv(sv, 'passiveNpStrength')}%`} color="var(--indigo)" bg="var(--indigo-bg)" />}
+          {getSv(sv, 'passiveNpStrength') > 0 && <Chip label="宝威" value={`+${getSv(sv, 'passiveNpStrength')}%`} color="var(--accent)" bg="var(--accent-light)" />}
         </div>
       )}
-    </>
+    </div>
   );
 }

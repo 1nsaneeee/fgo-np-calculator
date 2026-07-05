@@ -1,19 +1,13 @@
 // src/components/Layout.jsx
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { AppBar, Toolbar, Tabs, Tab, Box, Avatar, Button } from '@mui/material';
+import { Box, Avatar, Button } from '@mui/material';
 import useStore from '@/store/index';
 
-const TABS = [
-  { label: '从者列表', path: '/servants' },
-  { label: '计算器', path: '/calculator' },
-  { label: '出卡概率', path: '/cards' },
+const NAV_ITEMS = [
+  { label: '从者列表', path: '/servants', icon: '☰' },
+  { label: '伤害计算', path: '/calculator', icon: '✧' },
+  { label: '出卡概率', path: '/cards', icon: '◇' },
 ];
-
-function tabValue(pathname) {
-  if (pathname.startsWith('/calculator')) return '/calculator';
-  if (pathname.startsWith('/cards')) return '/cards';
-  return '/servants';
-}
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -22,65 +16,75 @@ export default function Layout() {
   const servantData = useStore((s) => s.servantData);
   const isCustom = useStore((s) => s.isCustom);
 
-  const currentTab = tabValue(location.pathname);
+  const isActive = (path) => {
+    if (path === '/servants') return location.pathname.startsWith('/servants');
+    if (path === '/calculator') return location.pathname.startsWith('/calculator');
+    if (path === '/cards') return location.pathname.startsWith('/cards');
+    return false;
+  };
 
   return (
-    <Box>
-      <AppBar position="sticky" color="default" elevation={0} sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Toolbar variant="dense" sx={{ gap: 2 }}>
-          <Box
-            component="span"
-            sx={{
-              fontWeight: 900, fontSize: '1rem', cursor: 'pointer', whiteSpace: 'nowrap',
-              color: 'var(--accent)', letterSpacing: '-0.02em',
-            }}
-            onClick={() => navigate('/servants')}
-          >
-            FGO Calc
-          </Box>
-          <Tabs
-            value={currentTab}
-            onChange={(_, v) => navigate(v)}
-            textColor="inherit"
-            sx={{
-              minHeight: 40,
-              '& .MuiTab-root': { minHeight: 40, fontSize: '0.85rem', textTransform: 'none', fontWeight: 600 },
-              '& .MuiTabs-indicator': { backgroundColor: 'var(--accent)' },
-            }}
-          >
-            {TABS.map(t => <Tab key={t.path} label={t.label} value={t.path} />)}
-          </Tabs>
-        </Toolbar>
-      </AppBar>
-
-      {(selectedId || isCustom) && (
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
+      {/* Top bar */}
+      <header className="app-header">
         <Box
-          sx={{
-            display: 'flex', alignItems: 'center', gap: 1.5,
-            px: 2, py: 1, bgcolor: 'action.hover', borderBottom: '1px solid',
-            borderColor: 'divider',
-          }}
+          component="span"
+          onClick={() => navigate('/servants')}
+          sx={{ cursor: 'pointer', fontWeight: 900, letterSpacing: '-0.02em' }}
         >
-          {servantData && (
-            <Avatar src={servantData._face} sx={{ width: 32, height: 32 }} />
-          )}
-          <Box sx={{ flex: 1 }}>
-            <Box component="span" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
-              {isCustom ? '自定义从者' : (servantData?.name || '加载中...')}
+          <span className="app-title">
+            <span>FGO</span> Calc
+          </span>
+        </Box>
+
+        {/* Servant info */}
+        {(selectedId || isCustom) && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
+            {servantData && (
+              <Avatar src={servantData._face} sx={{ width: 28, height: 28 }} />
+            )}
+            <Box component="span" sx={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text)' }}>
+              {isCustom ? '自定义从者' : (servantData?.name || '')}
             </Box>
             {servantData && (
-              <Box component="span" sx={{ ml: 1, fontSize: '0.8rem', color: 'text.secondary' }}>
+              <Box component="span" sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 {servantData.class} ★{servantData._rarity}
               </Box>
             )}
+            <Button
+              size="small"
+              onClick={() => navigate('/servants')}
+              sx={{ fontSize: '0.75rem', py: 0.3, px: 1.5, minWidth: 0 }}
+            >
+              切换
+            </Button>
           </Box>
-          <Button size="small" onClick={() => navigate('/servants')}>切换从者</Button>
-        </Box>
-      )}
+        )}
+      </header>
 
-      <Box component="main" className="main-col">
-        <Outlet />
-      </Box>
+      {/* Body: sidebar + main */}
+      <div className="layout-shell">
+        <nav className="layout-sidebar">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.path}
+              className={'nav-item' + (isActive(item.path) ? ' active' : '')}
+              onClick={() => navigate(item.path)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <main className="layout-main">
+          <Outlet />
+        </main>
+      </div>
+
+      <footer className="app-footer">
+        FGO Damage Calculator v4.0 · Data from Atlas Academy API
+      </footer>
     </Box>
   );
 }

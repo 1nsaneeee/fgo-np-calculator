@@ -5,7 +5,7 @@
  */
 import { enumerateHands } from './cardDraw';
 import { clamp, getAttributeAdvantage } from './helpers';
-import { CLASS_ADVANTAGE, CLASS_CORRECTION } from '@/constants/gameData';
+import { CLASS_ADVANTAGE, CLASS_CORRECTION, NP_COLOR_CARD_MULT } from '@/constants/gameData';
 
 const CARD_DMG_COEF = { Arts: 1, Quick: 0.8, Buster: 1.5 };
 
@@ -53,7 +53,41 @@ function calcCardDmgRaw({
 }
 
 /**
+ * Simplified NP damage calculation using raw parameters.
+ * Mirrors calcNPDamage() in calculations.js.
+ */
+function calcNPDmgRaw({ totalAtk, npMult, npColor, svClass, svAttr, buffs, enemy }) {
+  const npCardMult = NP_COLOR_CARD_MULT[npColor] || 1;
+
+  let colorBuff = 0;
+  if (npColor === 'Buster') colorBuff = buffs.busterUp || 0;
+  else if (npColor === 'Arts') colorBuff = buffs.artsUp || 0;
+  else if (npColor === 'Quick') colorBuff = buffs.quickUp || 0;
+
+  const classAdv = (CLASS_ADVANTAGE[svClass] && CLASS_ADVANTAGE[svClass][enemy.class]) || 1;
+  const classCorr = CLASS_CORRECTION[svClass] || 1;
+  const attrAdv = getAttributeAdvantage(svAttr, enemy.attr || 'Human');
+  const defMultiplier = 1 - clamp((enemy.def || 0) - (buffs.defDown || 0), 100) / 100;
+
+  const atkUp = (buffs.atkUp || 0) / 100;
+  const npStrength = (buffs.npStrength || 0) / 100;
+  const powerMod = (buffs.powerMod || 0) / 100;
+
+  const baseDmg = 0.23 * totalAtk * (npMult / 100) * npCardMult
+    * (1 + colorBuff / 100)
+    * (1 + atkUp)
+    * classAdv * attrAdv * classCorr
+    * defMultiplier
+    * (1 + npStrength + powerMod)
+    * (1 + (buffs.independentMod || 0) / 100);
+
+  return Math.floor(baseDmg) + (buffs.flatDmg || 0);
+}
+
+/**
  * For a 5-card hand, try all P(5,3) = 60 possible 3-card orderings.
+ * NP cards use calcNPDmgRaw (no position / first-card bonus).
+ * The first card's color (or NP color) determines the chain bonus.
  * Returns { max: {damage, cards}, min: {damage, cards} }.
  */
 export function findBestAndWorstPlays(hand, servantStats, buffs, enemy, options) {
@@ -69,23 +103,40 @@ export function findBestAndWorstPlays(hand, servantStats, buffs, enemy, options)
         if (c === a || c === b) continue;
 
         const cards = [hand[a], hand[b], hand[c]];
-        const firstType = cards[0].type;
+        // First card's effective color: NP cards use their npColor as chain bonus source
+        const firstCard = cards[0];
+        const firstType = firstCard.type === 'NP'
+          ? (firstCard.npColor || 'Buster')
+          : firstCard.type;
         let totalDmg = 0;
 
         for (let i = 0; i < 3; i++) {
           const card = cards[i];
           const st = servantStats[card.servant];
-          totalDmg += calcCardDmgRaw({
-            totalAtk: st.totalAtk,
-            cardType: card.type,
-            position: i,
-            firstCardType: firstType,
-            svClass: st.svClass,
-            svAttr: st.svAttr,
-            buffs,
-            enemy,
-            options
-          });
+
+          if (card.type === 'NP') {
+            totalDmg += calcNPDmgRaw({
+              totalAtk: st.totalAtk,
+              npMult: st.npMult || 450,
+              npColor: card.npColor || st.npColor || 'Buster',
+              svClass: st.svClass,
+              svAttr: st.svAttr,
+              buffs,
+              enemy,
+            });
+          } else {
+            totalDmg += calcCardDmgRaw({
+              totalAtk: st.totalAtk,
+              cardType: card.type,
+              position: i,
+              firstCardType: firstType,
+              svClass: st.svClass,
+              svAttr: st.svAttr,
+              buffs,
+              enemy,
+              options
+            });
+          }
         }
 
         if (totalDmg > maxR.damage) maxR = { damage: totalDmg, cards };

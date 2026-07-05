@@ -1,5 +1,5 @@
 // src/components/ServantFilterPanel.jsx
-import { Box, FormControlLabel, Checkbox, Typography, Divider, Button } from '@mui/material';
+import { Box, FormControlLabel, Checkbox, Divider, Button } from '@mui/material';
 import { MAIN_CLASSES, EXTRA_CLASSES, CLASS_COLORS } from '@/constants/gameData';
 
 const RARITY_OPTIONS = [
@@ -37,8 +37,8 @@ export default function ServantFilterPanel({
   };
 
   return (
-    <Box sx={{ width: 160, flexShrink: 0 }}>
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>职阶 Class</Typography>
+    <div className="filter-panel">
+      <div className="filter-section-title">职阶 Class</div>
       {allClasses.map(cls => (
         <FormControlLabel
           key={cls}
@@ -48,20 +48,20 @@ export default function ServantFilterPanel({
               checked={classFilter.includes(cls)}
               onChange={() => toggleClass(cls)}
               sx={{
-                color: CLASS_COLORS[cls],
-                '&.Mui-checked': { color: CLASS_COLORS[cls] },
+                color: CLASS_COLORS[cls] || 'var(--text-muted)',
+                '&.Mui-checked': { color: CLASS_COLORS[cls] || 'var(--accent)' },
                 p: 0.5,
               }}
             />
           }
-          label={<Box component="span" sx={{ fontSize: '0.8rem' }}>{cls}</Box>}
+          label={<Box component="span" sx={{ fontSize: '0.78rem' }}>{cls}</Box>}
           sx={{ display: 'flex', ml: 0, mb: -0.5, '& .MuiFormControlLabel-label': { ml: 0.5 } }}
         />
       ))}
 
       <Divider sx={{ my: 1.5 }} />
 
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>稀有度 Rarity</Typography>
+      <div className="filter-section-title">稀有度 Rarity</div>
       {RARITY_OPTIONS.map(opt => (
         <FormControlLabel
           key={opt.label}
@@ -73,14 +73,14 @@ export default function ServantFilterPanel({
               sx={{ p: 0.5 }}
             />
           }
-          label={<Box component="span" sx={{ fontSize: '0.8rem' }}>{opt.label}</Box>}
+          label={<Box component="span" sx={{ fontSize: '0.78rem' }}>{opt.label}</Box>}
           sx={{ display: 'flex', ml: 0, mb: -0.5 }}
         />
       ))}
 
       <Divider sx={{ my: 1.5 }} />
 
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>宝具色卡 NP Color</Typography>
+      <div className="filter-section-title">宝具色卡</div>
       {NP_COLORS.map(color => (
         <FormControlLabel
           key={color}
@@ -96,16 +96,16 @@ export default function ServantFilterPanel({
               }}
             />
           }
-          label={<Box component="span" sx={{ fontSize: '0.8rem' }}>{color}</Box>}
+          label={<Box component="span" sx={{ fontSize: '0.78rem' }}>{color}</Box>}
           sx={{ display: 'flex', ml: 0, mb: -0.5 }}
         />
       ))}
 
       <Divider sx={{ my: 1.5 }} />
 
-      <Button size="small" variant="outlined" fullWidth onClick={onReset}>
+      <Button size="small" variant="outlined" fullWidth onClick={onReset} sx={{ fontSize: '0.78rem' }}>
         重置 Reset
       </Button>
-    </Box>
+    </div>
   );
 }

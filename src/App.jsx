@@ -9,10 +9,6 @@ export default function App() {
   return (
     <HashRouter>
       <div className="app">
-        <header className="app-header">
-          <h1 className="app-title">FGO NP Damage Calculator // 宝具伤害计算器</h1>
-        </header>
-
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Navigate to="/servants" replace />} />
@@ -21,10 +17,6 @@ export default function App() {
             <Route path="/cards" element={<CardDrawPage />} />
           </Route>
         </Routes>
-
-        <footer className="app-footer">
-          FGO Damage Calculator v4.0 · Data from Atlas Academy API
-        </footer>
       </div>
     </HashRouter>
   );

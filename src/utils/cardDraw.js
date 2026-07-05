@@ -1,7 +1,8 @@
 /**
  * Card Draw Probability Engine
- * Calculates probabilities for 5-card hands drawn from a 15-card pool (3 servants × 5 cards).
- * C(15,5) = 3003 possible hands — brute-force enumeration is trivially fast.
+ * Calculates probabilities for 5-card hands drawn from a pool of command cards
+ * (3 servants × 5 cards, optionally +NP cards). Pool size ranges 15–18.
+ * C(15,5) = 3003 up to C(18,5) = 8568 hands — brute-force enumeration is trivially fast.
  */
 
 export function C(n, k) {
@@ -15,11 +16,19 @@ export function C(n, k) {
   return Math.round(result);
 }
 
-export function buildPool(deck1, deck2, deck3) {
+export function buildPool(deck1, deck2, deck3, npConfigs) {
   const pool = [];
   for (const ch of deck1) pool.push({ type: ch, servant: 1 });
   for (const ch of deck2) pool.push({ type: ch, servant: 2 });
   for (const ch of deck3) pool.push({ type: ch, servant: 3 });
+  // Add NP cards to pool when enabled
+  if (npConfigs) {
+    for (let s = 1; s <= 3; s++) {
+      if (npConfigs[s] && npConfigs[s].enabled) {
+        pool.push({ type: 'NP', servant: s, npColor: npConfigs[s].npColor || 'Buster' });
+      }
+    }
+  }
   return pool;
 }
 

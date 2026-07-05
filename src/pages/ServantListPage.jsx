@@ -120,14 +120,14 @@ export default function ServantListPage() {
 
   if (error && servantList.length === 0) {
     return (
-      <Box sx={{ p: 3 }}>
+      <Box>
         <Alert severity="error">无法加载从者列表: {error}</Alert>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
+    <Box sx={{ display: 'flex', gap: 2 }}>
       <ServantFilterPanel
         classFilter={classFilter}
         setClassFilter={setClassFilter}
@@ -158,22 +158,18 @@ export default function ServantListPage() {
           </FormControl>
         </Box>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        <Typography variant="body2" sx={{ mb: 1.5, color: 'var(--text-muted)' }}>
           共 {filtered.length} 位从者
         </Typography>
 
-        <Box sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-          gap: 1,
-        }}>
+        <div className="sv-grid">
           {pageItems.map((basic) => (
             <ServantCard key={basic.id} basic={basic} onClick={() => handleSelect(basic)} />
           ))}
-        </Box>
+        </div>
 
         {totalPages > 1 && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
             <Pagination count={totalPages} page={page} onChange={(_, p) => setPage(p)} size="small" />
           </Box>
         )}

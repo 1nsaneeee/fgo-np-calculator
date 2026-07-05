@@ -18,16 +18,16 @@ export default function ThreeTResult() {
   if (!servant) return null;
 
   return (
-    <div className="section-prominent">
-      <h2 className="panel-title">3T Loop</h2>
+    <div className="section">
+      <h2 className="panel-title">3T 连发模拟</h2>
       <div className="loop-row">
         {results.map((r, i) => (
           <div key={i} className="loop-card">
             <div className="loop-turn">T{r.turn}</div>
             <div className="loop-dmg">{r.npDmg.avg.toLocaleString()}</div>
-            <div className="loop-np">NP回 {r.npGain.toFixed(1)}%</div>
+            <div className="loop-np">NP 回收 {r.npGain.toFixed(1)}%</div>
             <div className={r.npGain >= 100 ? 'loop-ok' : 'loop-fail'}>
-              {r.npGain >= 100 ? '\u2713 可连发' : '\u2717 需补NP'}
+              {r.npGain >= 100 ? '✓ 可连发' : '✗ 需补NP'}
             </div>
           </div>
         ))}

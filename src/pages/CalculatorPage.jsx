@@ -44,8 +44,10 @@ export default function CalculatorPage() {
 
   if (!selectedId && !isCustom) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center' }}>
-        <p>请先从从者列表中选择一位从者</p>
+      <Box sx={{ textAlign: 'center', py: 6 }}>
+        <p style={{ color: 'var(--text-muted)', marginBottom: 'var(--space-md)' }}>
+          请先从从者列表中选择一位从者
+        </p>
         <Button variant="contained" onClick={() => navigate('/servants')}>
           前往从者列表
         </Button>
@@ -55,100 +57,122 @@ export default function CalculatorPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', gap: 0, px: 2, pt: 2 }}>
+      {/* DB / Custom toggle */}
+      <Box sx={{ display: 'flex', gap: 0, mb: 2 }}>
         <Button
           variant={!isCustom ? 'contained' : 'outlined'}
           onClick={() => setCustomMode(false)}
-          sx={{ flex: 1, borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)' }}
+          sx={{ flex: 1, borderRadius: '8px 0 0 8px' }}
         >
           数据库 Database
         </Button>
         <Button
           variant={isCustom ? 'contained' : 'outlined'}
           onClick={() => { setCustomMode(true); setCustomOpen(true); }}
-          sx={{ flex: 1, borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' }}
+          sx={{ flex: 1, borderRadius: '0 8px 8px 0' }}
         >
           自定义 Custom
         </Button>
       </Box>
 
       <Dialog open={customOpen && isCustom} onClose={() => setCustomOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>自定义从者</DialogTitle>
-        <DialogContent>
+        <DialogTitle sx={{ color: 'var(--text)', borderBottom: '1px solid var(--border)' }}>自定义从者</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
           <CustomServantForm />
         </DialogContent>
       </Dialog>
 
+      {/* Servant stats */}
       {servant && !isCustom && (
-        <Box sx={{ px: 2, pt: 1 }}>
+        <Box sx={{ mb: 2 }}>
           <ServantStats servant={servant} />
         </Box>
       )}
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)}
-        sx={{ px: 2, borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+      {/* Tab bar */}
+      <Tabs
+        value={tab}
+        onChange={(_, v) => setTab(v)}
+        sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+      >
         <Tab label="伤害计算" />
         <Tab label="三回合模拟" />
         <Tab label="指令卡链" />
       </Tabs>
 
+      {/* Tab 0: Damage calc */}
       {tab === 0 && (
-        <Box sx={{ px: 2 }}>
+        <Box>
           <div className="config-row">
-            <div className="section">
-              <h2 className="panel-title">Level Config</h2>
+            <div className="section-card">
+              <h3 className="panel-title">等级配置</h3>
               <LevelConfig />
             </div>
-            <div className="section">
-              <h2 className="panel-title">Enemy & Options</h2>
+            <div className="section-card">
+              <h3 className="panel-title">敌方 & 选项</h3>
               <EnemyPanel />
-              <div style={{ marginTop: 'var(--space-sm)' }}>
+              <div style={{ marginTop: 'var(--space-md)' }}>
                 <OptionsPanel />
               </div>
             </div>
           </div>
-          <PresetButtons />
-          <div className="section">
+
+          <Box sx={{ mt: 2 }}>
+            <PresetButtons />
+          </Box>
+
+          <div className="section-card" style={{ marginTop: 'var(--space-md)' }}>
             <BuffTable />
           </div>
-          <NPDamageResult result={npResult} servant={servant} />
-          <CardDrawPanel />
+
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            <NPDamageResult result={npResult} servant={servant} />
+          </div>
         </Box>
       )}
 
+      {/* Tab 1: 3T loop */}
       {tab === 1 && (
-        <Box sx={{ px: 2 }}>
+        <Box>
           <div className="config-row">
-            <div className="section">
-              <h2 className="panel-title">Level Config</h2>
+            <div className="section-card">
+              <h3 className="panel-title">等级配置</h3>
               <LevelConfig />
             </div>
-            <div className="section">
-              <h2 className="panel-title">Enemy & Options</h2>
+            <div className="section-card">
+              <h3 className="panel-title">敌方 & 选项</h3>
               <EnemyPanel />
-              <div style={{ marginTop: 'var(--space-sm)' }}>
+              <div style={{ marginTop: 'var(--space-md)' }}>
                 <OptionsPanel />
               </div>
             </div>
           </div>
-          <PresetButtons />
-          <div className="section">
+
+          <Box sx={{ mt: 2 }}>
+            <PresetButtons />
+          </Box>
+
+          <div className="section-card" style={{ marginTop: 'var(--space-md)' }}>
             <BuffTable />
           </div>
-          <ThreeTResult />
+
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            <ThreeTResult />
+          </div>
         </Box>
       )}
 
+      {/* Tab 2: Card chain */}
       {tab === 2 && (
-        <Box sx={{ px: 2 }}>
+        <div className="section-card">
           <CardChainPanel />
-        </Box>
+        </div>
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 2 }}>
-        <Button variant="outlined" color="error" onClick={handleReset}
-          sx={{ fontSize: 'var(--font-sm)' }}>
-          {'⟲'} Reset All
+      {/* Reset button */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+        <Button variant="outlined" color="error" onClick={handleReset} sx={{ fontSize: '0.8rem' }}>
+          重置全部 Reset All
         </Button>
       </Box>
     </Box>

@@ -81,6 +81,27 @@ export default function DamageDistPanel() {
   const [cls2, setCls2] = useState(svClass);
   const [cls3, setCls3] = useState(svClass);
 
+  // NP config per servant
+  const svNpColor = useMemo(() => {
+    return servant ? (getSv(servant, 'npColor') || 'Buster') : 'Buster';
+  }, [servant]);
+  const svNpMult = useMemo(() => {
+    if (!servant) return 300;
+    const npLev = Math.min(5, Math.max(1, config.npLevel || 1));
+    const npKeys = ['np1', 'np2', 'np3', 'np4', 'np5'];
+    return getSv(servant, npKeys[npLev - 1]) || 300;
+  }, [servant, config.npLevel]);
+
+  const [npEnabled1, setNpEnabled1] = useState(false);
+  const [npEnabled2, setNpEnabled2] = useState(false);
+  const [npEnabled3, setNpEnabled3] = useState(false);
+  const [npMult1, setNpMult1] = useState(300);
+  const [npMult2, setNpMult2] = useState(300);
+  const [npMult3, setNpMult3] = useState(svNpMult);
+  const [npColor1, setNpColor1] = useState('Buster');
+  const [npColor2, setNpColor2] = useState('Buster');
+  const [npColor3, setNpColor3] = useState(svNpColor);
+
   // Enemy HP threshold
   const [hpThreshold, setHpThreshold] = useState(100000);
 
@@ -92,18 +113,25 @@ export default function DamageDistPanel() {
     return aggregateBuffs(buffs, servant, options);
   }, [buffs, servant, options]);
 
+  // NP config for buildPool
+  const npConfigs = useMemo(() => ({
+    1: { enabled: npEnabled1, npColor: npColor1 },
+    2: { enabled: npEnabled2, npColor: npColor2 },
+    3: { enabled: npEnabled3, npColor: npColor3 },
+  }), [npEnabled1, npEnabled2, npEnabled3, npColor1, npColor2, npColor3]);
+
   // Build pool
   const pool = useMemo(() => {
     if (!allValid) return null;
-    return buildPool(deck1, deck2, deck3);
-  }, [deck1, deck2, deck3, allValid]);
+    return buildPool(deck1, deck2, deck3, npConfigs);
+  }, [deck1, deck2, deck3, npConfigs, allValid]);
 
   // Servant stats for distribution
   const servantStats = useMemo(() => ({
-    1: { totalAtk: atk1, svClass: cls1, svAttr: defaultAttr },
-    2: { totalAtk: atk2, svClass: cls2, svAttr: defaultAttr },
-    3: { totalAtk: atk3, svClass: cls3, svAttr: defaultAttr }
-  }), [atk1, atk2, atk3, cls1, cls2, cls3, defaultAttr]);
+    1: { totalAtk: atk1, svClass: cls1, svAttr: defaultAttr, npMult: npMult1, npColor: npColor1 },
+    2: { totalAtk: atk2, svClass: cls2, svAttr: defaultAttr, npMult: npMult2, npColor: npColor2 },
+    3: { totalAtk: atk3, svClass: cls3, svAttr: defaultAttr, npMult: npMult3, npColor: npColor3 }
+  }), [atk1, atk2, atk3, cls1, cls2, cls3, defaultAttr, npMult1, npMult2, npMult3, npColor1, npColor2, npColor3]);
 
   // Calculate distribution
   const distResult = useMemo(() => {
@@ -145,9 +173,12 @@ export default function DamageDistPanel() {
 
   // ── Servant config cards ──
   const servantConfigs = [
-    { label: '从者1 S1', deck: deck1, setDeck: setDeck1, atk: atk1, setAtk: setAtk1, cls: cls1, setCls: setCls1 },
-    { label: '从者2 S2', deck: deck2, setDeck: setDeck2, atk: atk2, setAtk: setAtk2, cls: cls2, setCls: setCls2 },
-    { label: '从者3 S3 (当前)', deck: deck3, setDeck: setDeck3, atk: atk3, setAtk: setAtk3, cls: cls3, setCls: setCls3 },
+    { label: '从者1 S1', deck: deck1, setDeck: setDeck1, atk: atk1, setAtk: setAtk1, cls: cls1, setCls: setCls1,
+      npEnabled: npEnabled1, setNpEnabled: setNpEnabled1, npMult: npMult1, setNpMult: setNpMult1, npColor: npColor1, setNpColor: setNpColor1 },
+    { label: '从者2 S2', deck: deck2, setDeck: setDeck2, atk: atk2, setAtk: setAtk2, cls: cls2, setCls: setCls2,
+      npEnabled: npEnabled2, setNpEnabled: setNpEnabled2, npMult: npMult2, setNpMult: setNpMult2, npColor: npColor2, setNpColor: setNpColor2 },
+    { label: '从者3 S3 (当前)', deck: deck3, setDeck: setDeck3, atk: atk3, setAtk: setAtk3, cls: cls3, setCls: setCls3,
+      npEnabled: npEnabled3, setNpEnabled: setNpEnabled3, npMult: npMult3, setNpMult: setNpMult3, npColor: npColor3, setNpColor: setNpColor3 },
   ];
 
   return (
@@ -155,10 +186,10 @@ export default function DamageDistPanel() {
       <h2 className="panel-title">伤害分布 Damage Distribution</h2>
 
       {/* Servant config grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+      <div className="sv-config-grid">
         {servantConfigs.map((s) => (
-          <div key={s.label} style={{ padding: 'var(--space-sm)', background: 'var(--surface-alt)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
-            <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 'var(--space-xs)' }}>
+          <div key={s.label} className="sv-config-card">
+            <div className="dist-config-label">
               {s.label}
             </div>
             {/* Deck */}
@@ -172,9 +203,9 @@ export default function DamageDistPanel() {
             />
             <DeckBadges deck={s.deck} />
             {/* ATK + Class row */}
-            <div style={{ display: 'flex', gap: 'var(--space-xs)', marginTop: 'var(--space-sm)' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: 1 }}>ATK</div>
+            <div className="dist-config-row">
+              <div className="dist-config-field">
+                <div className="dist-config-sub-label">ATK</div>
                 <input
                   className="buff-input"
                   style={{ width: '100%' }}
@@ -184,8 +215,8 @@ export default function DamageDistPanel() {
                   min={0}
                 />
               </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: 1 }}>职阶</div>
+              <div className="dist-config-field">
+                <div className="dist-config-sub-label">职阶</div>
                 <select
                   className="buff-input"
                   style={{ width: '100%', fontSize: 'var(--font-xs)', padding: '5px 4px' }}
@@ -198,16 +229,53 @@ export default function DamageDistPanel() {
                 </select>
               </div>
             </div>
+            {/* NP config row */}
+            <div className="dist-np-row">
+              <div style={{ flex: '0 0 auto' }}>
+                <label style={{ fontSize: '9px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 2, cursor: 'pointer', marginBottom: 1 }}>
+                  <input
+                    type="checkbox"
+                    checked={s.npEnabled}
+                    onChange={(e) => s.setNpEnabled(e.target.checked)}
+                    style={{ cursor: 'pointer', margin: 0 }}
+                  />
+                  NP
+                </label>
+              </div>
+              <div style={{ flex: 1, opacity: s.npEnabled ? 1 : 0.4 }}>
+                <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: 1 }}>倍率%</div>
+                <input
+                  className="buff-input"
+                  style={{ width: '100%' }}
+                  type="number"
+                  value={s.npMult}
+                  onChange={(e) => s.setNpMult(Number(e.target.value) || 0)}
+                  disabled={!s.npEnabled}
+                  min={0}
+                  step={50}
+                />
+              </div>
+              <div style={{ flex: '0 0 64px', opacity: s.npEnabled ? 1 : 0.4 }}>
+                <div style={{ fontSize: '9px', color: 'var(--text-muted)', marginBottom: 1 }}>色</div>
+                <select
+                  className="buff-input"
+                  style={{ width: '100%', fontSize: 'var(--font-xs)', padding: '5px 2px' }}
+                  value={s.npColor}
+                  onChange={(e) => s.setNpColor(e.target.value)}
+                  disabled={!s.npEnabled}
+                >
+                  <option value="Buster">B</option>
+                  <option value="Arts">A</option>
+                  <option value="Quick">Q</option>
+                </select>
+              </div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Stats Row */}
-      <div className="dist-stats-row" style={{
-        display: 'grid', gridTemplateColumns: 'auto 1fr auto auto auto auto', gap: 'var(--space-sm)',
-        alignItems: 'stretch', marginBottom: 'var(--space-md)',
-        padding: 'var(--space-sm)', background: 'var(--surface-alt)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)'
-      }}>
+      <div className="dist-stats-row">
         {/* HP Input */}
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 130 }}>
           <label style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>
@@ -229,10 +297,7 @@ export default function DamageDistPanel() {
 
         {/* Clear Rate Card */}
         {clearRate !== null && (
-          <div className="dist-stat-card" style={{
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            padding: 'var(--space-xs) var(--space-md)', minWidth: 120
-          }}>
+          <div className="dist-stat-card" style={{ minWidth: 120 }}>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>通关率</div>
             <div style={{
               fontSize: 'var(--font-xl)', fontWeight: 800,
@@ -268,10 +333,7 @@ export default function DamageDistPanel() {
 
         {/* P25–P75 */}
         {stats && (
-          <div className="dist-stat-card" style={{
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
-            padding: 'var(--space-xs) var(--space-md)', minWidth: 90
-          }}>
+          <div className="dist-stat-card" style={{ minWidth: 80 }}>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>P25 – P75</div>
             <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>
               {fmtDmg(stats.p25)} – {fmtDmg(stats.p75)}
@@ -282,12 +344,12 @@ export default function DamageDistPanel() {
 
       {/* Best/Worst plays */}
       {extremes && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-md)' }}>
-          <div style={{ padding: 'var(--space-sm)', background: 'var(--green-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--green)' }}>
-            <div style={{ fontSize: 'var(--font-xs)', fontWeight: 700, color: 'var(--green)', marginBottom: 'var(--space-xs)' }}>
+        <div className="dist-best-worst-grid">
+          <div className="dist-best-card">
+            <div className="dist-play-label" style={{ color: 'var(--green)' }}>
               最高伤害 Best Play
             </div>
-            <div style={{ fontSize: 'var(--font-lg)', fontWeight: 800, color: 'var(--text)', marginBottom: 'var(--space-xs)' }}>
+            <div className="dist-play-damage">
               {fmtDmg(extremes.best.maxDamage)}
             </div>
             <div className="draw-pool">
@@ -298,11 +360,11 @@ export default function DamageDistPanel() {
               ))}
             </div>
           </div>
-          <div style={{ padding: 'var(--space-sm)', background: 'var(--red-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--red)' }}>
-            <div style={{ fontSize: 'var(--font-xs)', fontWeight: 700, color: 'var(--red)', marginBottom: 'var(--space-xs)' }}>
+          <div className="dist-worst-card">
+            <div className="dist-play-label" style={{ color: 'var(--red)' }}>
               最低伤害 Worst Play
             </div>
-            <div style={{ fontSize: 'var(--font-lg)', fontWeight: 800, color: 'var(--text)', marginBottom: 'var(--space-xs)' }}>
+            <div className="dist-play-damage">
               {fmtDmg(extremes.worst.minDamage)}
             </div>
             <div className="draw-pool">

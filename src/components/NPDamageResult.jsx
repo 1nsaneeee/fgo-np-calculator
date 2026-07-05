@@ -3,7 +3,7 @@ export default function NPDamageResult({ result, servant }) {
 
   return (
     <div className="section-hero">
-      <h2 className="panel-title">NP Damage</h2>
+      <h2 className="panel-title">NP 伤害</h2>
       <div className="result-row">
         <div className="result-card">
           <div className="result-label">MIN</div>
