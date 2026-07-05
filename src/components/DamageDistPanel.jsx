@@ -8,6 +8,7 @@ import {
   calcClearRate,
 } from '@/utils/damageDistribution';
 import { CLASS_LIST } from '@/constants/gameData';
+import DamageHistogram from '@/components/DamageHistogram';
 import useStore from '@/store/index';
 
 const DEFAULT_DECK = 'BBAAQ';
@@ -376,6 +377,11 @@ export default function DamageDistPanel() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Damage histogram */}
+      {distResult && (
+        <DamageHistogram results={distResult} hpThreshold={hpThreshold} />
       )}
 
       {!allValid && (

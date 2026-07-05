@@ -191,17 +191,18 @@ export function buildHistogram(results, numBuckets = 40) {
   for (let i = 0; i < numBuckets; i++) {
     const low = minVal + i * bucketWidth;
     const high = low + bucketWidth;
-    buckets.push({ low: Math.floor(low), high: Math.floor(high), count: 0 });
+    // Use Math.round for both to keep displayed boundaries self-consistent
+    // (Math.floor on both would make adjacent buckets appear to overlap, e.g. [0,108] and [108,216])
+    buckets.push({ low: Math.round(low), high: Math.round(high), count: 0 });
   }
 
+  // Assign each damage value to its bucket via floating-point comparison
   for (const dmg of damages) {
     const idx = Math.min(numBuckets - 1, Math.floor((dmg - minVal) / bucketWidth));
     buckets[idx].count++;
   }
 
-  const maxCount = Math.max(...buckets.map(b => b.count), 1);
-
-  return { buckets, total: results.length, minVal, maxVal, maxCount };
+  return { buckets, total: results.length, minVal, maxVal };
 }
 
 /**
