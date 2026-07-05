@@ -37,6 +37,7 @@ export default function EnemyPanel() {
         <Slider
           min={0} max={100} value={enemy.def}
           onChange={(_, v) => updateEnemy('def', v)}
+          getAriaValueText={(v) => `防御 ${v}%`}
         />
         <Typography variant="caption" sx={{ display: 'block', textAlign: 'center', color: 'var(--text-muted)' }}>
           {enemy.def}%

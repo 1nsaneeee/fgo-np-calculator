@@ -15,6 +15,7 @@ export default function LevelConfig() {
           <Slider
             min={1} max={120} value={config.level}
             onChange={(_, v) => updateConfig('level', v)}
+            getAriaValueText={(v) => `从者等级 ${v}`}
             sx={{ flex: 1 }}
           />
           <TextField
@@ -34,6 +35,7 @@ export default function LevelConfig() {
           <Slider
             min={1} max={5} value={config.npLevel}
             onChange={(_, v) => updateConfig('npLevel', v)}
+            getAriaValueText={(v) => `宝具等级 ${v}`}
             sx={{ flex: 1 }}
           />
           <TextField
