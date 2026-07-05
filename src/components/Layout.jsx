@@ -7,6 +7,8 @@ const NAV_ITEMS = [
   { label: '从者列表', path: '/servants', icon: '☰' },
   { label: '伤害计算', path: '/calculator', icon: '✧' },
   { label: '出卡概率', path: '/cards', icon: '◇' },
+  { label: '组队规划', path: '/team', icon: '◆' },
+  { label: '回合模拟', path: '/turnsim', icon: '⟳' },
 ];
 
 export default function Layout() {
@@ -20,6 +22,8 @@ export default function Layout() {
     if (path === '/servants') return location.pathname.startsWith('/servants');
     if (path === '/calculator') return location.pathname.startsWith('/calculator');
     if (path === '/cards') return location.pathname.startsWith('/cards');
+    if (path === '/team') return location.pathname.startsWith('/team');
+    if (path === '/turnsim') return location.pathname.startsWith('/turnsim');
     return false;
   };
 

@@ -8,6 +8,7 @@ import { clamp, getAttributeAdvantage } from './helpers';
 import { CLASS_ADVANTAGE, CLASS_CORRECTION, NP_COLOR_CARD_MULT } from '@/constants/gameData';
 
 const CARD_DMG_COEF = { Arts: 1, Quick: 0.8, Buster: 1.5 };
+const TYPE_MAP = { B: 'Buster', A: 'Arts', Q: 'Quick' };
 
 /**
  * Simplified single-card damage calculation.
@@ -15,16 +16,20 @@ const CARD_DMG_COEF = { Arts: 1, Quick: 0.8, Buster: 1.5 };
  */
 function calcCardDmgRaw({
   totalAtk, cardType, position, firstCardType,
-  svClass, svAttr, buffs, enemy, options
+  svClass, svAttr, aggs, servantIndex, enemy, options
 }) {
-  const dmgCoef = CARD_DMG_COEF[cardType] || 1;
+  const buffs = aggs[servantIndex];
+  const normalizedType = TYPE_MAP[cardType] || cardType;
+  const normalizedFirst = TYPE_MAP[firstCardType] || firstCardType;
+
+  const dmgCoef = CARD_DMG_COEF[normalizedType] || 1;
   const posBonus = position === 0 ? 1 : position === 1 ? 1.2 : 1.4;
-  const firstBusterBonus = (position > 0 && firstCardType === 'Buster') ? 0.5 : 0;
+  const firstBusterBonus = (position > 0 && normalizedFirst === 'Buster') ? 0.5 : 0;
 
   let colorBuff = 0;
-  if (cardType === 'Buster') colorBuff = buffs.busterUp;
-  else if (cardType === 'Arts') colorBuff = buffs.artsUp;
-  else if (cardType === 'Quick') colorBuff = buffs.quickUp;
+  if (normalizedType === 'Buster') colorBuff = buffs.busterUp;
+  else if (normalizedType === 'Arts') colorBuff = buffs.artsUp;
+  else if (normalizedType === 'Quick') colorBuff = buffs.quickUp;
 
   const classAdv = (CLASS_ADVANTAGE[svClass] && CLASS_ADVANTAGE[svClass][enemy.class]) || 1;
   const classCorr = CLASS_CORRECTION[svClass] || 1;
@@ -56,7 +61,8 @@ function calcCardDmgRaw({
  * Simplified NP damage calculation using raw parameters.
  * Mirrors calcNPDamage() in calculations.js.
  */
-function calcNPDmgRaw({ totalAtk, npMult, npColor, svClass, svAttr, buffs, enemy }) {
+function calcNPDmgRaw({ totalAtk, npMult, npColor, svClass, svAttr, aggs, servantIndex, enemy }) {
+  const buffs = aggs[servantIndex];
   const npCardMult = NP_COLOR_CARD_MULT[npColor] || 1;
 
   let colorBuff = 0;
@@ -90,7 +96,7 @@ function calcNPDmgRaw({ totalAtk, npMult, npColor, svClass, svAttr, buffs, enemy
  * The first card's color (or NP color) determines the chain bonus.
  * Returns { max: {damage, cards}, min: {damage, cards} }.
  */
-export function findBestAndWorstPlays(hand, servantStats, buffs, enemy, options) {
+export function findBestAndWorstPlays(hand, servantStats, aggs, enemy, options) {
   let maxR = { damage: -Infinity, cards: null };
   let minR = { damage: Infinity, cards: null };
 
@@ -121,7 +127,8 @@ export function findBestAndWorstPlays(hand, servantStats, buffs, enemy, options)
               npColor: card.npColor || st.npColor || 'Buster',
               svClass: st.svClass,
               svAttr: st.svAttr,
-              buffs,
+              aggs,
+              servantIndex: card.servant,
               enemy,
             });
           } else {
@@ -132,7 +139,8 @@ export function findBestAndWorstPlays(hand, servantStats, buffs, enemy, options)
               firstCardType: firstType,
               svClass: st.svClass,
               svAttr: st.svAttr,
-              buffs,
+              aggs,
+              servantIndex: card.servant,
               enemy,
               options
             });
@@ -153,17 +161,17 @@ export function findBestAndWorstPlays(hand, servantStats, buffs, enemy, options)
  *
  * @param {Array} pool - 15-card pool from buildPool()
  * @param {Object} servantStats - { 1: {totalAtk, svClass, svAttr}, 2: {...}, 3: {...} }
- * @param {Object} buffs - aggregated buff object
+ * @param {Object} aggs - buff objects keyed by servant index {1,2,3}
  * @param {Object} enemy - { class, attr, def }
  * @param {Object} options - { isCrit, overkill }
  * @returns {Array} [{ hand, maxDamage, minDamage, bestPlay, worstPlay }]
  */
-export function calcDamageDistribution(pool, servantStats, buffs, enemy, options) {
+export function calcDamageDistribution(pool, servantStats, aggs, enemy, options) {
   const hands = enumerateHands(pool);
   const results = [];
 
   for (const hand of hands) {
-    const { max, min } = findBestAndWorstPlays(hand, servantStats, buffs, enemy, options);
+    const { max, min } = findBestAndWorstPlays(hand, servantStats, aggs, enemy, options);
     results.push({
       hand,
       maxDamage: max.damage,
@@ -182,7 +190,7 @@ export function calcDamageDistribution(pool, servantStats, buffs, enemy, options
  * Each play is an exact damage value; returns them sorted ascending.
  * No "best of hand" indirection — every possible 3-card sequence is a data point.
  */
-export function calcAllPlayDamages(pool, servantStats, buffs, enemy, options) {
+export function calcAllPlayDamages(pool, servantStats, aggs, enemy, options) {
   const n = pool.length;
   const damages = [];
 
@@ -207,13 +215,13 @@ export function calcAllPlayDamages(pool, servantStats, buffs, enemy, options) {
             totalDmg += calcNPDmgRaw({
               totalAtk: st.totalAtk, npMult: st.npMult || 450,
               npColor: card.npColor || st.npColor || 'Buster',
-              svClass: st.svClass, svAttr: st.svAttr, buffs, enemy,
+              svClass: st.svClass, svAttr: st.svAttr, aggs, servantIndex: card.servant, enemy,
             });
           } else {
             totalDmg += calcCardDmgRaw({
               totalAtk: st.totalAtk, cardType: card.type, position: pos,
               firstCardType: firstType, svClass: st.svClass, svAttr: st.svAttr,
-              buffs, enemy, options,
+              aggs, servantIndex: card.servant, enemy, options,
             });
           }
         }
@@ -224,6 +232,74 @@ export function calcAllPlayDamages(pool, servantStats, buffs, enemy, options) {
 
   damages.sort((a, b) => a - b);
   return damages;
+}
+
+/**
+ * Enumerate ALL 3-card plays (with ordering) from the full card pool,
+ * returning detailed card info and damage range for each sequence.
+ * P(n,3) = n×(n-1)×(n-2) plays — ~2730 for a 15-card pool.
+ * Each play includes card details, average/min/max damage, and chain info.
+ * Results are sorted by damage descending (highest damage first).
+ *
+ * @param {Array} pool - card pool from buildPool()
+ * @param {Object} servantStats - { 1: {totalAtk, svClass, svAttr, npMult, npColor}, ... }
+ * @param {Object} aggs - buff objects keyed by servant index {1,2,3}
+ * @param {Object} enemy - { class, attr, def }
+ * @param {Object} options - { isCrit, overkill }
+ * @returns {Array<{cards: Array, damage: number, min: number, max: number, firstType: string, hasNP: boolean}>}
+ */
+export function calcAllPlayDamagesDetailed(pool, servantStats, aggs, enemy, options) {
+  const n = pool.length;
+  const results = [];
+
+  for (let a = 0; a < n; a++) {
+    for (let b = 0; b < n; b++) {
+      if (b === a) continue;
+      for (let c = 0; c < n; c++) {
+        if (c === a || c === b) continue;
+
+        const cards = [pool[a], pool[b], pool[c]];
+        const firstCard = cards[0];
+        const firstType = firstCard.type === 'NP'
+          ? (firstCard.npColor || 'Buster')
+          : firstCard.type;
+        let totalDmg = 0;
+        let hasNP = false;
+
+        for (let pos = 0; pos < 3; pos++) {
+          const card = cards[pos];
+          const st = servantStats[card.servant];
+
+          if (card.type === 'NP') {
+            hasNP = true;
+            totalDmg += calcNPDmgRaw({
+              totalAtk: st.totalAtk, npMult: st.npMult || 450,
+              npColor: card.npColor || st.npColor || 'Buster',
+              svClass: st.svClass, svAttr: st.svAttr, aggs, servantIndex: card.servant, enemy,
+            });
+          } else {
+            totalDmg += calcCardDmgRaw({
+              totalAtk: st.totalAtk, cardType: card.type, position: pos,
+              firstCardType: firstType, svClass: st.svClass, svAttr: st.svAttr,
+              aggs, servantIndex: card.servant, enemy, options,
+            });
+          }
+        }
+
+        results.push({
+          cards: cards.map(c => ({ type: c.type, servant: c.servant })),
+          damage: totalDmg,
+          min: Math.floor(totalDmg * 0.9),
+          max: Math.floor(totalDmg * 1.099),
+          firstType,
+          hasNP,
+        });
+      }
+    }
+  }
+
+  results.sort((a, b) => b.damage - a.damage);
+  return results;
 }
 
 /**

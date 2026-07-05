@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Button } from '@mui/material';
 import { useServant } from '@/hooks/useServant';
 import { getSv } from '@/utils/helpers';
 import { buildPool, calcAutoProbs, parseQuery, queryProb } from '@/utils/cardDraw';
@@ -19,6 +20,15 @@ function validateDeck(raw) {
 }
 
 const pct = (v) => (v * 100).toFixed(1) + '%';
+
+const CARD_PRESETS = [
+  { label: 'S1武勇链', query: 'B1B1B1', color: 'error' },
+  { label: 'S2武勇链', query: 'B2B2B2', color: 'error' },
+  { label: 'S3武勇链', query: 'B3B3B3', color: 'error' },
+  { label: 'S3Arts链', query: 'A3A3A3', color: 'primary' },
+  { label: 'S3Quick链', query: 'Q3Q3Q3', color: 'success' },
+  { label: '三色Buster', query: 'B1B2B3', color: 'error' },
+];
 
 export default function CardDrawPanel() {
   const servant = useServant();
@@ -124,6 +134,20 @@ export default function CardDrawPanel() {
         <label style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: 'var(--space-xs)' }}>
           自定义查询 Manual Query
         </label>
+        <div className="preset-row" style={{ marginBottom: 'var(--space-sm)' }}>
+          {CARD_PRESETS.map((preset) => (
+            <Button
+              key={preset.label}
+              size="small"
+              variant="outlined"
+              color={preset.color}
+              onClick={() => setQueryStr(preset.query)}
+              sx={{ fontSize: 'var(--font-xs)', py: 0.25, px: 1, minWidth: 'auto', lineHeight: 1.4 }}
+            >
+              {preset.label}
+            </Button>
+          ))}
+        </div>
         <div className="draw-query">
           <input
             className="buff-input"

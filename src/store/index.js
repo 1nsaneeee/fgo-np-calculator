@@ -5,6 +5,7 @@ import { createConfigSlice } from './configSlice';
 import { createBuffsSlice } from './buffsSlice';
 import { createEnemySlice } from './enemySlice';
 import { createOptionsSlice } from './optionsSlice';
+import { createTeamSlice } from './teamSlice';
 
 const useStore = create(
   persist(
@@ -14,6 +15,7 @@ const useStore = create(
       ...createBuffsSlice(...args),
       ...createEnemySlice(...args),
       ...createOptionsSlice(...args),
+      ...createTeamSlice(...args),
     }),
     {
       name: 'fgo-calc-state',
@@ -27,6 +29,7 @@ const useStore = create(
         buffs: state.buffs,
         enemy: state.enemy,
         options: state.options,
+        team: state.team,
       }),
     }
   )

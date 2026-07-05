@@ -102,7 +102,7 @@ export function calcNPDamage(servant, config, buffs, enemy, options) {
     max: maxDmg,
     totalAtk,
     details: {
-      svClass, enClass, classAdv, attrAdv, classCorr,
+      svClass, svAttr, enClass, enAttr, classAdv, attrAdv, classCorr,
       npMult, npCardMult, colorBuff, atkUp, netEnemyDef,
       npStrength, powerMod, enemyDef: enemy.def, baseDmg,
       agg

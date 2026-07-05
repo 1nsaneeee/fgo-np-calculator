@@ -4,6 +4,8 @@ import Layout from '@/components/Layout';
 import ServantListPage from '@/pages/ServantListPage';
 import CalculatorPage from '@/pages/CalculatorPage';
 import CardDrawPage from '@/pages/CardDrawPage';
+import TeamPlannerPage from '@/pages/TeamPlannerPage';
+import TurnSimPage from '@/pages/TurnSimPage';
 
 export default function App() {
   return (
@@ -15,6 +17,8 @@ export default function App() {
             <Route path="/servants" element={<ServantListPage />} />
             <Route path="/calculator" element={<CalculatorPage />} />
             <Route path="/cards" element={<CardDrawPage />} />
+            <Route path="/team" element={<TeamPlannerPage />} />
+            <Route path="/turnsim" element={<TurnSimPage />} />
           </Route>
         </Routes>
       </div>

@@ -109,6 +109,8 @@ export default function DamageDistPanel() {
     return aggregateBuffs(buffs, servant, options);
   }, [buffs, servant, options]);
 
+  const aggs = useMemo(() => ({ 1: agg, 2: agg, 3: agg }), [agg]);
+
   // NP config for buildPool
   const npConfigs = useMemo(() => ({
     1: { enabled: npEnabled1, npColor: npColor1 },
@@ -132,14 +134,14 @@ export default function DamageDistPanel() {
   // Calculate distribution
   const distResult = useMemo(() => {
     if (!pool) return null;
-    return calcDamageDistribution(pool, servantStats, agg, enemy, options);
-  }, [pool, servantStats, agg, enemy, options]);
+    return calcDamageDistribution(pool, servantStats, aggs, enemy, options);
+  }, [pool, servantStats, aggs, enemy, options]);
 
   // All possible 3-card plays (P(n,3) = n×(n-1)×(n-2)), each an exact damage value
   const allDamages = useMemo(() => {
     if (!pool) return null;
-    return calcAllPlayDamages(pool, servantStats, agg, enemy, options);
-  }, [pool, servantStats, agg, enemy, options]);
+    return calcAllPlayDamages(pool, servantStats, aggs, enemy, options);
+  }, [pool, servantStats, aggs, enemy, options]);
 
   // Clear rate — exact, computed from all play damages
   const clearRate = useMemo(() => {
