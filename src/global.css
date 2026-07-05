@@ -77,6 +77,13 @@
   --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.1);
   --glow-accent: 0 0 0 3px rgba(61, 90, 128, 0.12);
+
+  /* ── Easing ── */
+  --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --anim-fast: 120ms;
+  --anim-base: 200ms;
+  --anim-slow: 350ms;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -194,7 +201,7 @@ body {
   background: none;
   text-align: left;
   width: 100%;
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
   font-family: inherit;
   border-left: 2px solid transparent;
   letter-spacing: 0.01em;
@@ -398,7 +405,7 @@ body {
   font-weight: 800;
   cursor: pointer;
   border: 2px solid var(--border);
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
   user-select: none;
   position: relative;
   background: var(--surface);
@@ -454,7 +461,7 @@ body {
   cursor: pointer;
   min-height: 32px;
   min-width: 40px;
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
   font-family: inherit;
   letter-spacing: 0.05em;
 }
@@ -475,7 +482,7 @@ body {
   cursor: pointer;
   font-size: 18px;
   font-weight: 800;
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
   font-family: inherit;
   padding: 0;
   border: 2px dashed var(--border);
@@ -559,7 +566,7 @@ body {
   border: 1px solid var(--border);
   background: var(--surface);
   text-align: center;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color var(--anim-base) var(--ease-out), box-shadow var(--anim-base) var(--ease-out);
 }
 
 .loop-card:hover {
@@ -815,7 +822,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
   padding: 0;
   line-height: 1;
   font-family: inherit;
@@ -865,7 +872,7 @@ body {
   font-size: var(--font-xs);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
   font-family: inherit;
 }
 
@@ -892,7 +899,7 @@ body {
   cursor: pointer;
   background: var(--surface);
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
   font-family: inherit;
 }
 
@@ -1131,7 +1138,7 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--anim-base) var(--ease-out);
 }
 
 .sv-card:hover {
@@ -1214,6 +1221,63 @@ select:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROUTE TRANSITION (Suspense fallback)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.route-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: var(--text-muted);
+  font-size: var(--font-md);
+  animation: pulse-text 1.5s var(--ease-in-out) infinite;
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Result cards entrance */
+.result-row .result-card {
+  animation: fade-in-up var(--anim-slow) var(--ease-out) both;
+}
+.result-row .result-card:nth-child(1) { animation-delay: 0ms; }
+.result-row .result-card:nth-child(2) { animation-delay: 100ms; }
+.result-row .result-card:nth-child(3) { animation-delay: 200ms; }
+
+/* MUI Tab indicator smooth slide */
+.MuiTabs-indicator {
+  transition: transform var(--anim-base) var(--ease-out) !important;
+}
+
+/* Card slot cycling */
+.card-slot {
+  transition: transform var(--anim-fast) var(--ease-out),
+              box-shadow var(--anim-fast) var(--ease-out),
+              border-color var(--anim-fast) var(--ease-out);
+}
+.card-slot:active {
+  transform: scale(0.93);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
