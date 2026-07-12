@@ -8,6 +8,7 @@ import TeamCardQueryPanel from '@/components/TeamCardQueryPanel';
 export default function TeamPlannerPage() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <h1 className="visually-hidden">组队规划</h1>
       {/* 3 servant slots */}
       <div className="section-card">
         <h2 className="panel-title">组队配置 Team Setup</h2>

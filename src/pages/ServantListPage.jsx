@@ -1,7 +1,7 @@
 // src/pages/ServantListPage.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, TextField, MenuItem, Select, FormControl, InputLabel, Pagination, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, TextField, MenuItem, Select, FormControl, InputLabel, Pagination, Typography, CircularProgress, Alert, Skeleton } from '@mui/material';
 import useStore from '@/store/index';
 import { fetchServantList, fetchNiceServant } from '@/services/atlasApi';
 import { transformNiceToCalc, CLASS_MAP } from '@/services/transform';
@@ -112,8 +112,34 @@ export default function ServantListPage() {
 
   if (loading && servantList.length === 0) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
+      <Box sx={{ display: 'flex', gap: 2 }}>
+        <ServantFilterPanel
+          classFilter={classFilter}
+          setClassFilter={setClassFilter}
+          rarityFilter={rarityFilter}
+          setRarityFilter={setRarityFilter}
+          npColorFilter={npColorFilter}
+          setNpColorFilter={setNpColorFilter}
+          onReset={handleReset}
+        />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
+            <Skeleton variant="rectangular" height={40} sx={{ flex: 1, minWidth: 200 }} />
+            <Skeleton variant="rectangular" width={130} height={40} />
+          </Box>
+          <Skeleton variant="text" width={120} sx={{ mb: 1.5 }} />
+          <div className="sv-grid">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="sv-card" style={{ cursor: 'default' }}>
+                <Skeleton variant="rectangular" width="100%" sx={{ aspectRatio: '1', display: 'block' }} />
+                <div className="sv-card-body">
+                  <Skeleton variant="text" width="80%" />
+                  <Skeleton variant="text" width="60%" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Box>
       </Box>
     );
   }
@@ -128,6 +154,7 @@ export default function ServantListPage() {
 
   return (
     <Box sx={{ display: 'flex', gap: 2 }}>
+      <h1 className="visually-hidden">从者列表</h1>
       <ServantFilterPanel
         classFilter={classFilter}
         setClassFilter={setClassFilter}

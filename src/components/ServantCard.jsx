@@ -6,11 +6,30 @@ import servantNamesById from '@/translations/servant-names-by-id.json';
 
 const NPC_LABEL = { Buster: 'B', Arts: 'A', Quick: 'Q' };
 
+const CLASS_ABBR = {
+  Saber: 'SBR',
+  Archer: 'ARC',
+  Lancer: 'LAN',
+  Rider: 'RID',
+  Caster: 'CAS',
+  Assassin: 'ASN',
+  Berserker: 'BSR',
+  Shielder: 'SHD',
+  Ruler: 'RUL',
+  Avenger: 'AVN',
+  MoonCancer: 'MNC',
+  AlterEgo: 'ALE',
+  Foreigner: 'FRG',
+  Pretender: 'PRE',
+  Beast: 'BST',
+};
+
 export default function ServantCard({ basic, onClick }) {
   const className = basic.className
     ? (basic.className.charAt(0).toUpperCase() + basic.className.slice(1))
     : '';
   const classColor = CLASS_COLORS[className] || '#555';
+  const classAbbr = CLASS_ABBR[className] || (className ? className.slice(0, 3).toUpperCase() : '');
   const npColor = npColors[basic.id] || 'Buster';
   const npChar = NPC_LABEL[npColor] || 'B';
   const nameCn = servantNamesById[basic.id] || basic.name || '';
@@ -33,21 +52,10 @@ export default function ServantCard({ basic, onClick }) {
           loading="lazy"
           style={{ backgroundColor: classColor }}
         />
-        <span style={{
-          position: 'absolute', top: 4, left: 4,
-          backgroundColor: classColor, color: '#fff',
-          padding: '1px 5px', borderRadius: 3,
-          fontSize: '0.6rem', fontWeight: 700, lineHeight: 1.5,
-        }}>
-          {className.slice(0, 4)}
+        <span className="sv-card-class-badge" style={{ backgroundColor: classColor }}>
+          {classAbbr}
         </span>
-        <span style={{
-          position: 'absolute', top: 4, right: 4,
-          backgroundColor: npColorVar, color: '#fff',
-          width: 18, height: 18, borderRadius: '50%',
-          fontSize: '0.6rem', fontWeight: 900,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
+        <span className="sv-card-np-badge" style={{ backgroundColor: npColorVar }}>
           {npChar}
         </span>
       </div>

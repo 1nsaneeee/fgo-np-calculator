@@ -5,6 +5,7 @@ import { Box, Tabs, Tab, Button, Dialog, DialogTitle, DialogContent } from '@mui
 import useStore from '@/store/index';
 import { useServant } from '@/hooks/useServant';
 import { useNpResult } from '@/hooks/useNpResult';
+import { useHotkeys } from '@/hooks/useHotkeys';
 import ServantStats from '@/components/ServantStats';
 import LevelConfig from '@/components/LevelConfig';
 import EnemyPanel from '@/components/EnemyPanel';
@@ -42,6 +43,14 @@ export default function CalculatorPage() {
     resetOptions();
   };
 
+  useHotkeys({
+    '1': () => setTab(0),
+    '2': () => setTab(1),
+    '3': () => setTab(2),
+    '4': () => setTab(3),
+    'r': handleReset,
+  });
+
   if (!selectedId && !isCustom) {
     return (
       <Box sx={{ textAlign: 'center', py: 6 }}>
@@ -57,6 +66,7 @@ export default function CalculatorPage() {
 
   return (
     <Box>
+      <h1 className="visually-hidden">伤害计算</h1>
       {/* DB / Custom toggle */}
       <Box sx={{ display: 'flex', gap: 0, mb: 2 }}>
         <Button
@@ -89,11 +99,34 @@ export default function CalculatorPage() {
         </Box>
       )}
 
+      {/* Shared config: level + enemy + options + presets + buffs */}
+      <div className="config-row">
+        <div className="section-card">
+          <h3 className="panel-title">等级配置</h3>
+          <LevelConfig />
+        </div>
+        <div className="section-card">
+          <h3 className="panel-title">敌方 & 选项</h3>
+          <EnemyPanel />
+          <div style={{ marginTop: 'var(--space-md)' }}>
+            <OptionsPanel />
+          </div>
+        </div>
+      </div>
+
+      <Box sx={{ mt: 2 }}>
+        <PresetButtons />
+      </Box>
+
+      <div className="section-card" style={{ marginTop: 'var(--space-md)' }}>
+        <BuffTable />
+      </div>
+
       {/* Tab bar */}
       <Tabs
         value={tab}
         onChange={(_, v) => setTab(v)}
-        sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+        sx={{ borderBottom: 1, borderColor: 'divider', mt: 3, mb: 2 }}
       >
         <Tab label="伤害计算" />
         <Tab label="三回合模拟" />
@@ -101,76 +134,25 @@ export default function CalculatorPage() {
         <Tab label="伤害分布" />
       </Tabs>
 
-      {/* Tab 0: Damage calc */}
+      {/* Tab content - only result region */}
       {tab === 0 && (
         <Box>
-          <div className="config-row">
-            <div className="section-card">
-              <h3 className="panel-title">等级配置</h3>
-              <LevelConfig />
-            </div>
-            <div className="section-card">
-              <h3 className="panel-title">敌方 & 选项</h3>
-              <EnemyPanel />
-              <div style={{ marginTop: 'var(--space-md)' }}>
-                <OptionsPanel />
-              </div>
-            </div>
-          </div>
-
-          <Box sx={{ mt: 2 }}>
-            <PresetButtons />
-          </Box>
-
-          <div className="section-card" style={{ marginTop: 'var(--space-md)' }}>
-            <BuffTable />
-          </div>
-
-          <div style={{ marginTop: 'var(--space-md)' }}>
-            <NPDamageResult result={npResult} servant={servant} />
-          </div>
+          <NPDamageResult result={npResult} servant={servant} onViewDistribution={() => setTab(3)} />
         </Box>
       )}
 
-      {/* Tab 1: 3T loop */}
       {tab === 1 && (
-        <Box>
-          <div className="config-row">
-            <div className="section-card">
-              <h3 className="panel-title">等级配置</h3>
-              <LevelConfig />
-            </div>
-            <div className="section-card">
-              <h3 className="panel-title">敌方 & 选项</h3>
-              <EnemyPanel />
-              <div style={{ marginTop: 'var(--space-md)' }}>
-                <OptionsPanel />
-              </div>
-            </div>
-          </div>
-
-          <Box sx={{ mt: 2 }}>
-            <PresetButtons />
-          </Box>
-
-          <div className="section-card" style={{ marginTop: 'var(--space-md)' }}>
-            <BuffTable />
-          </div>
-
-          <div style={{ marginTop: 'var(--space-md)' }}>
-            <ThreeTResult />
-          </div>
+        <Box sx={{ mt: 2 }}>
+          <ThreeTResult />
         </Box>
       )}
 
-      {/* Tab 2: Card chain */}
       {tab === 2 && (
         <div className="section-card">
           <CardChainPanel />
         </div>
       )}
 
-      {/* Tab 3: Damage distribution */}
       {tab === 3 && (
         <SingleDamageDist />
       )}

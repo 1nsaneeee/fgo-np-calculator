@@ -29,12 +29,13 @@ export default function CardChainPanel() {
 
   const npColor = useMemo(() => getSv(servant, 'npColor') || 'Buster', [servant]);
 
-  const cycleCard = (idx) => {
+  const cycleCard = (idx, reverse = false) => {
     setSlots((prev) => {
       const next = [...prev];
       let cur = CYCLE.indexOf(next[idx]);
+      const step = reverse ? -1 : 1;
       do {
-        cur = (cur + 1) % CYCLE.length;
+        cur = (cur + step + CYCLE.length) % CYCLE.length;
       } while (CYCLE[cur] === 'NP' && next.some((s, j) => j !== idx && s === 'NP'));
       next[idx] = CYCLE[cur];
       return next;
@@ -57,7 +58,6 @@ export default function CardChainPanel() {
     });
   };
 
-  // Resolve NP to its color for chain detection and first-card bonus
   const resolvedSlots = slots.map((s) => s === 'NP' ? npColor : s);
   const cards = showExtra ? [...slots, 'Extra'] : slots;
   const firstCard = resolvedSlots[0];
@@ -103,35 +103,33 @@ export default function CardChainPanel() {
   , [results, hp]);
 
   const getSlotColor = (ct) => ct === 'NP' ? cardColors[npColor] : cardColors[ct];
+  const breakProbClass = breakProb === null ? '' : breakProb >= 1 ? ' high' : breakProb > 0 ? ' mid' : ' low';
 
   return (
     <div className="section">
       <h2 className="panel-title">Card Chain</h2>
 
-      <div className="card-slots" style={{ marginBottom: 'var(--space-sm)' }}>
+      <div className="card-slots">
         {slots.map((ct, i) => (
           <Fragment key={i}>
             <button
               className={'card-slot ' + (ct === 'NP' ? npColor : ct) + (ct === 'NP' ? ' is-np' : '')}
               onClick={() => cycleCard(i)}
+              onContextMenu={(e) => { e.preventDefault(); cycleCard(i, true); }}
               onKeyDown={(e) => { (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), cycleCard(i)); }}
-              aria-label={`卡牌${i + 1}: ${ct === 'NP' ? 'NP(' + npColor + ')' : ct}`}
+              aria-label={`卡牌${i + 1}: ${ct === 'NP' ? 'NP(' + npColor + ')' : ct}，左键切换，右键反向`}
+              title="左键切换 / 右键反向"
             >
               <span className="slot-pos">{i + 1}</span>
               {cardLabel[ct]}
             </button>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div className="chain-card-options">
               {ct !== 'NP' && (
                 <button
                   onClick={() => toggleCardCrit(i)}
                   aria-pressed={cardOptions[i]?.isCrit || false}
                   aria-label={`卡牌${i + 1}暴击`}
-                  className="chain-crit-btn"
-                  style={{
-                    background: cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--surface)',
-                    color: cardOptions[i]?.isCrit ? '#fff' : 'var(--text-muted)',
-                    borderColor: cardOptions[i]?.isCrit ? 'var(--gold)' : 'var(--border)',
-                  }}
+                  className={'chain-crit-btn' + (cardOptions[i]?.isCrit ? ' active' : '')}
                 >
                   CRIT
                 </button>
@@ -140,12 +138,7 @@ export default function CardChainPanel() {
                 onClick={() => toggleCardOverkill(i)}
                 aria-pressed={cardOptions[i]?.overkill || false}
                 aria-label={`卡牌${i + 1}overkill`}
-                className="chain-ok-btn"
-                style={{
-                  background: cardOptions[i]?.overkill ? 'var(--red)' : 'var(--surface)',
-                  color: cardOptions[i]?.overkill ? '#fff' : 'var(--text-muted)',
-                  borderColor: cardOptions[i]?.overkill ? 'var(--red)' : 'var(--border)',
-                }}
+                className={'chain-ok-btn' + (cardOptions[i]?.overkill ? ' active' : '')}
               >
                 OK
               </button>
@@ -155,7 +148,7 @@ export default function CardChainPanel() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+      <div className="chain-extra-row">
         <button
           className={'extra-toggle' + (showExtra ? ' on' : '')}
           onClick={() => setShowExtra(!showExtra)}
@@ -166,17 +159,12 @@ export default function CardChainPanel() {
           EX
         </button>
         {showExtra && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div className="chain-card-options">
             <button
               onClick={() => toggleCardOverkill(3)}
               aria-pressed={cardOptions[3]?.overkill || false}
               aria-label="Extra卡overkill"
-              className="chain-ok-btn"
-              style={{
-                background: cardOptions[3]?.overkill ? 'var(--red)' : 'var(--surface)',
-                color: cardOptions[3]?.overkill ? '#fff' : 'var(--text-muted)',
-                borderColor: cardOptions[3]?.overkill ? 'var(--red)' : 'var(--border)',
-              }}
+              className={'chain-ok-btn' + (cardOptions[3]?.overkill ? ' active' : '')}
             >
               OK
             </button>
@@ -185,26 +173,26 @@ export default function CardChainPanel() {
       </div>
 
       <div className="chain-bonus">
-        <span style={{ color: 'var(--text-muted)' }}>点击卡牌切换 B→A→Q→NP</span>
+        <span className="chain-bonus-hint">左键切换 B→A→Q→NP / 右键反向</span>
         <span>
-          首卡 <span style={{ color: cardColors[firstCard], fontWeight: 700 }}>
+          首卡 <span className="chain-first-card" style={{ color: cardColors[firstCard] }}>
             {slots[0] === 'NP' ? 'NP(' + npColor + ')' : firstCard}
           </span>
-          {' → '}
-          <span style={{ fontWeight: 500 }}>
+          {' -> '}
+          <span className="chain-effect-label">
             {firstCard === 'Buster' ? '全卡伤害加成' : firstCard === 'Arts' ? '全卡NP获取加成' : '全卡掉星加成'}
           </span>
           {slots[0] === 'NP' && (
-            <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}> (NP自身不受染色)</span>
+            <span className="chain-bonus-hint"> (NP自身不受染色)</span>
           )}
         </span>
         {sameChain && (
-          <span style={{ color: cardColors[resolvedSlots[0]], fontWeight: 700 }}>
+          <span className="chain-bonus-text" style={{ color: cardColors[resolvedSlots[0]] }}>
             {resolvedSlots[0]} Chain: {resolvedSlots[0] === 'Buster' ? '每卡+20%ATK' : resolvedSlots[0] === 'Arts' ? '额外+20%NP' : '额外+10星'}
           </span>
         )}
         {triColor && (
-          <span style={{ fontWeight: 700 }}>
+          <span className="chain-bonus-text">
             三色链: <span style={{ color: 'var(--buster)' }}>伤害</span>+<span style={{ color: 'var(--arts)' }}>NP</span>+<span style={{ color: 'var(--quick)' }}>掉星</span> 全首卡效果
           </span>
         )}
@@ -217,14 +205,14 @@ export default function CardChainPanel() {
         <div className="chain-header">Stars</div>
         {results.map((r, i) => (
           <Fragment key={i}>
-            <div style={{ fontWeight: 700, color: r.isNP ? getSlotColor('NP') : cardColors[r.cardType] }}>
+            <div className="chain-card-cell" style={{ color: r.isNP ? getSlotColor('NP') : cardColors[r.cardType] }}>
               {r.isNP ? 'NP' : r.cardType} [{r.position}]
-              {!r.isNP && r.cardOpt.isCrit && <span style={{ color: 'var(--gold)', fontSize: 10 }}> CRIT</span>}
-              {r.cardOpt.overkill && <span style={{ color: 'var(--red)', fontSize: 10 }}> OK</span>}
+              {!r.isNP && r.cardOpt.isCrit && <span className="chain-crit-tag">CRIT</span>}
+              {r.cardOpt.overkill && <span className="chain-ok-tag">OK</span>}
             </div>
             <div>
               {r.dmg.avg.toLocaleString()}
-              <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>
+              <span className="chain-dmg-range">
                 {' '}({r.dmg.min.toLocaleString()}~{r.dmg.max.toLocaleString()})
               </span>
             </div>
@@ -235,7 +223,7 @@ export default function CardChainPanel() {
         <div className="chain-total">TOTAL</div>
         <div className="chain-total">
           {totals.avg.toLocaleString()}
-          <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>
+          <span className="chain-total-range">
             {' '}({totals.min.toLocaleString()}~{totals.max.toLocaleString()})
           </span>
         </div>
@@ -244,25 +232,21 @@ export default function CardChainPanel() {
       </div>
 
       <div className="break-bar">
-        <label style={{ fontSize: 'var(--font-xs)', fontWeight: 600, color: 'var(--text-muted)' }}>
+        <label className="break-bar-label-strong">
           击破率 Break
         </label>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>敌方HP</span>
+        <div className="break-bar-row">
+          <span className="break-bar-label">敌方HP</span>
           <input
-            className="buff-input"
+            className="buff-input break-bar-input"
             type="number"
-            style={{ width: 120 }}
             value={breakHP}
             onChange={(e) => setBreakHP(e.target.value)}
             placeholder="0"
             min="0"
           />
           {breakProb !== null && (
-            <span style={{
-              fontSize: 'var(--font-lg)', fontWeight: 800, whiteSpace: 'nowrap',
-              color: breakProb >= 1 ? 'var(--green)' : breakProb > 0 ? 'var(--accent)' : 'var(--red)',
-            }}>
+            <span className={'break-bar-result' + breakProbClass}>
               {(breakProb * 100).toFixed(1)}%
             </span>
           )}
