@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.0-blue" alt="Version 4.0" />
+  <img src="https://img.shields.io/badge/version-4.1-blue" alt="Version 4.1" />
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License" />
   <img src="https://img.shields.io/badge/data-Atlas%20Academy-orange" alt="Data: Atlas Academy" />
   <img src="https://img.shields.io/badge/servants-458%2B-purple" alt="458+ Servants" />
@@ -99,6 +99,16 @@ src/
 ## License
 
 MIT License © 2024
+
+---
+
+---
+
+## Changelog
+
+完整的版本更新记录见 [CHANGELOG.md](./CHANGELOG.md)。
+
+v4.1 主要变更：Design System v2 全面重构 — 暖灰黑配色体系、FGO 三色卡作为产品主色、微圆角替代零圆角、单语中文、Buff 折叠总览、Skeleton 加载、Toast 反馈、/settings 页面。
 
 ---
 
