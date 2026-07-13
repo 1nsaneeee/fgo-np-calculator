@@ -46,7 +46,7 @@ export default class ErrorBoundary extends Component {
           p: 3,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--text)' }}>
+        <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--text-strong)' }}>
           出错了
         </Typography>
         <Typography variant="body2" sx={{ color: 'var(--text-muted)', maxWidth: 420 }}>
@@ -58,10 +58,10 @@ export default class ErrorBoundary extends Component {
             sx={{
               mt: 1,
               p: 1.5,
-              bgcolor: 'var(--hover-bg)',
-              borderRadius: 1,
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
+              bgcolor: 'var(--surface-2)',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: 'var(--text-xs)',
+              color: 'var(--text-muted)',
               maxWidth: 600,
               overflow: 'auto',
               textAlign: 'left',

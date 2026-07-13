@@ -18,7 +18,7 @@ export default function CustomServantForm() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1 }}>
       <div>
         <SectionTitle>基础信息</SectionTitle>
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px 12px' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-2) var(--space-3)' }}>
           <TextField label="名称" value={sv.name || ''} onChange={(e) => set('name', e.target.value)} size="small" />
           <FormControl size="small" fullWidth>
             <InputLabel>职阶</InputLabel>
@@ -46,7 +46,7 @@ export default function CustomServantForm() {
 
       <div>
         <SectionTitle>ATK</SectionTitle>
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px 12px' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-2) var(--space-3)' }}>
           <TextField label="ATK90" type="number" value={sv.atk90 || 0} onChange={(e) => set('atk90', parseInt(e.target.value) || 0)} size="small" />
           <TextField label="ATK100" type="number" value={sv.atk100 || 0} onChange={(e) => set('atk100', parseInt(e.target.value) || 0)} size="small" />
           <TextField label="ATK120" type="number" value={sv.atk120 || 0} onChange={(e) => set('atk120', parseInt(e.target.value) || 0)} size="small" />
@@ -55,7 +55,7 @@ export default function CustomServantForm() {
 
       <div>
         <SectionTitle>命中数 & NP/星率</SectionTitle>
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px 12px' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-2) var(--space-3)' }}>
           <TextField label="B Hit" type="number" value={sv.bHits || 0} onChange={(e) => set('bHits', parseInt(e.target.value) || 0)} size="small" />
           <TextField label="A Hit" type="number" value={sv.aHits || 0} onChange={(e) => set('aHits', parseInt(e.target.value) || 0)} size="small" />
           <TextField label="Q Hit" type="number" value={sv.qHits || 0} onChange={(e) => set('qHits', parseInt(e.target.value) || 0)} size="small" />
@@ -68,7 +68,7 @@ export default function CustomServantForm() {
 
       <div>
         <SectionTitle>NP 倍率</SectionTitle>
-        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px 12px' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-2) var(--space-3)' }}>
           <TextField label="NP1%" type="number" value={sv.np1 || 0} onChange={(e) => set('np1', parseInt(e.target.value) || 0)} size="small" />
           <TextField label="NP2%" type="number" value={sv.np2 || 0} onChange={(e) => set('np2', parseInt(e.target.value) || 0)} size="small" />
           <TextField label="NP3%" type="number" value={sv.np3 || 0} onChange={(e) => set('np3', parseInt(e.target.value) || 0)} size="small" />

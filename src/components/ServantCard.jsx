@@ -62,7 +62,7 @@ export default function ServantCard({ basic, onClick }) {
       <div className="sv-card-body">
         <div className="sv-card-name">{nameCn}</div>
         <div className="sv-card-meta">
-          <Rating value={basic.rarity} readOnly size="small" max={5} sx={{ fontSize: '0.65rem', mr: 0.5 }} />
+          <Rating value={basic.rarity} readOnly size="small" max={5} sx={{ fontSize: 'var(--text-2xs)', mr: 0.5 }} />
           ATK {basic.atkMax?.toLocaleString() || '?'}
         </div>
       </div>

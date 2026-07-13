@@ -116,7 +116,7 @@ function ServantDropdown({ options, selectedOption, onSelect }) {
               <Box
                 sx={{
                   display: 'inline-flex', width: 20, height: 20, borderRadius: 0.5,
-                  fontSize: 'var(--font-xs)', background: CLASS_COLORS[svClass] || '#333',
+                  fontSize: 'var(--text-xs)', background: CLASS_COLORS[svClass] || '#333',
                   color: '#fff', alignItems: 'center', justifyContent: 'center',
                   fontWeight: 700, flexShrink: 0,
                 }}
@@ -161,20 +161,20 @@ function ServantInfoRow({ servant }) {
       sx={{
         display: 'grid',
         gridTemplateColumns: '1fr 1fr',
-        gap: '4px 12px',
+        gap: 'var(--space-1) var(--space-3)',
         px: 1, py: 0.75,
         mb: 1,
-        borderRadius: 1,
-        bgcolor: 'var(--surface-alt)',
-        border: '1px solid var(--border-light)',
-        fontSize: 'var(--font-sm)',
+        borderRadius: 'var(--radius-sm)',
+        bgcolor: 'var(--surface-2)',
+        border: '1px solid var(--border-subtle)',
+        fontSize: 'var(--text-sm)',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <Box
           sx={{
             display: 'inline-flex', width: 18, height: 18, borderRadius: 0.5,
-            fontSize: '10px', background: CLASS_COLORS[svClass] || '#333',
+            fontSize: 'var(--text-2xs)', background: CLASS_COLORS[svClass] || '#333',
             color: '#fff', alignItems: 'center', justifyContent: 'center',
             fontWeight: 700, flexShrink: 0,
           }}
@@ -182,23 +182,23 @@ function ServantInfoRow({ servant }) {
           {svClass?.slice(0, 3)}
         </Box>
         <Rating value={rarity} readOnly size="small" max={5} sx={{ fontSize: '0.6rem' }} />
-        <Typography variant="caption" color="var(--text-secondary)" sx={{ ml: 0.5 }}>
+        <Typography variant="caption" color="var(--text-muted)" sx={{ ml: 0.5 }}>
           ID:{id}
         </Typography>
       </Box>
       <Box sx={{ textAlign: 'right' }}>
         <Typography variant="caption" color="var(--text-muted)">
-          职阶: <b style={{ color: 'var(--text)' }}>{svClass}</b>
+          职阶: <b style={{ color: 'var(--text-strong)' }}>{svClass}</b>
         </Typography>
       </Box>
       <Box>
         <Typography variant="caption" color="var(--text-muted)">
-          牌型: <b style={{ color: 'var(--text)' }}>{deck}</b>
+          牌型: <b style={{ color: 'var(--text-strong)' }}>{deck}</b>
         </Typography>
       </Box>
       <Box sx={{ textAlign: 'right' }}>
         <Typography variant="caption" color="var(--text-muted)">
-          阵营: <b style={{ color: 'var(--text)' }}>{attr}</b>
+          阵营: <b style={{ color: 'var(--text-strong)' }}>{attr}</b>
         </Typography>
       </Box>
     </Box>
@@ -261,7 +261,7 @@ function NpToggles({ value, onChange }) {
 
 function AtkInputs({ config, onChange }) {
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 12px' }}>
+    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2) var(--space-3)' }}>
       <Box>
         <Typography variant="caption" component="label" sx={{ display: 'block', mb: 0.5 }}>
           芙芙 ATK
@@ -458,16 +458,16 @@ export default function TeamServantSelector({ slotIndex }) {
   return (
     <Box
       sx={{
-        border: '1px solid var(--border)',
-        borderRadius: 2,
+        border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius-lg)',
         p: 1.5,
-        bgcolor: 'var(--surface)',
+        bgcolor: 'var(--surface-2)',
         '&:hover': { borderColor: 'var(--border-strong)' },
       }}
     >
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--text)' }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'var(--text-strong)' }}>
           从者 S{slotIndex + 1}
         </Typography>
         <Tooltip title="重置">
@@ -476,7 +476,7 @@ export default function TeamServantSelector({ slotIndex }) {
             onClick={() => resetTeamServant(slotIndex)}
             sx={{
               color: 'var(--text-muted)',
-              '&:hover': { color: 'var(--red)', bgcolor: 'var(--red-bg)' },
+              '&:hover': { color: 'var(--color-negative)', bgcolor: 'var(--buster-bg)' },
             }}
           >
             <RestartAltIcon fontSize="small" />
@@ -495,12 +495,12 @@ export default function TeamServantSelector({ slotIndex }) {
             sx={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               px: 1, py: 0.5, mb: 1,
-              borderRadius: 1,
-              bgcolor: 'var(--accent-light)',
+              borderRadius: 'var(--radius-sm)',
+              bgcolor: 'var(--arts-bg)',
               border: '1px solid var(--accent-glow)',
             }}
           >
-            <Typography variant="body2" sx={{ fontWeight: 700, color: 'var(--accent)' }}>
+            <Typography variant="body2" sx={{ fontWeight: 700, color: 'var(--arts)' }}>
               ATK: {totalAtk.toLocaleString()}
             </Typography>
             <Typography variant="caption" color="var(--text-muted)">

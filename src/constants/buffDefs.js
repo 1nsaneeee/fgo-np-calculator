@@ -29,15 +29,15 @@ export function createEmptyBuffs() {
 }
 
 export const DEFAULT_SOURCES = [
-  { id: 'src_1', name: '自身Self', buffs: createEmptyBuffs() }
+  { id: 'src_1', name: '自身', buffs: createEmptyBuffs() }
 ];
 
 export const DEFAULT_NEXT_ID = 2;
 
 export const SOURCE_KEY_NAMES = {
-  ce: '礼装CE',
-  self: '自身Self',
-  support: '助战Support',
-  enemy: '敌方Enemy',
-  debuff: '减益Debuff',
+  ce: '礼装',
+  self: '自身',
+  support: '助战',
+  enemy: '敌方',
+  debuff: '减益',
 };

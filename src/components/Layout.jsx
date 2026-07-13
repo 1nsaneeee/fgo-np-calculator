@@ -1,41 +1,47 @@
 // src/components/Layout.jsx
+// 顶栏 segmented nav — 替代旧 sidebar 5 项
+// IA: 从者 / 单从者 / 队伍 三大工作区 + 设置收纳
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Box, Avatar, Button, IconButton } from '@mui/material';
 import useStore from '@/store/index';
 import { useThemeStore } from '@/store/themeStore';
 import { useUrlSync } from '@/hooks/useUrlSync';
+import { useToast } from '@/store/toastStore';
 
 const NAV_ITEMS = [
-  { label: '从者列表', path: '/servants', icon: '☰' },
-  { label: '伤害计算', path: '/calculator', icon: '✧' },
-  { label: '出卡概率', path: '/cards', icon: '◇' },
-  { label: '组队规划', path: '/team', icon: '◆' },
-  { label: '回合模拟', path: '/turnsim', icon: '⟳', wip: true },
+  {
+    label: '从者',
+    path: '/servants',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    label: '单从者',
+    path: '/calc',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M13 2L4.5 14H11l-1 8 8.5-12H12l1-8z" />
+      </svg>
+    ),
+  },
+  {
+    label: '队伍',
+    path: '/team',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    ),
+  },
 ];
-
-function SunIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" />
-      <line x1="12" y1="2" x2="12" y2="4" />
-      <line x1="12" y1="20" x2="12" y2="22" />
-      <line x1="4.93" y1="4.93" x2="6.34" y2="6.34" />
-      <line x1="17.66" y1="17.66" x2="19.07" y2="19.07" />
-      <line x1="2" y1="12" x2="4" y2="12" />
-      <line x1="20" y1="12" x2="22" y2="12" />
-      <line x1="4.93" y1="19.07" x2="6.34" y2="17.66" />
-      <line x1="17.66" y1="6.34" x2="19.07" y2="4.93" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  );
-}
 
 export default function Layout() {
   const navigate = useNavigate();
@@ -46,110 +52,112 @@ export default function Layout() {
 
   const mode = useThemeStore((s) => s.mode);
   const toggleTheme = useThemeStore((s) => s.toggle);
+  const toast = useToast();
 
   useUrlSync();
 
-  const isActive = (path) => {
-    if (path === '/servants') return location.pathname.startsWith('/servants');
-    if (path === '/calculator') return location.pathname.startsWith('/calculator');
-    if (path === '/cards') return location.pathname.startsWith('/cards');
-    if (path === '/team') return location.pathname.startsWith('/team');
-    if (path === '/turnsim') return location.pathname.startsWith('/turnsim');
-    return false;
-  };
+  const isActive = (path) => location.pathname.startsWith(path);
+
+  const currentServantName = isCustom
+    ? '自定义从者'
+    : (servantData?.name || '');
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
-      {/* Top bar */}
+    <div className="app">
+      {/* 顶栏 — 紧凑工具栏风格 */}
       <header className="app-header">
-        <Box
-          component="span"
-          onClick={() => navigate('/servants')}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate('/servants')}
-          role="button"
-          tabIndex={0}
-          aria-label="返回从者列表"
-          sx={{ cursor: 'pointer', fontWeight: 900, letterSpacing: '-0.02em' }}
-        >
-          <span className="app-title">FGO Calc</span>
-        </Box>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
-          <IconButton
-            size="small"
-            onClick={toggleTheme}
-            aria-label={mode === 'light' ? '切换到深色模式' : '切换到浅色模式'}
-            title={mode === 'light' ? '深色模式' : '浅色模式'}
-            sx={{ color: 'var(--text-secondary)' }}
+        {/* 左：产品名 + segmented nav */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+          <span
+            className="app-title"
+            onClick={() => navigate('/servants')}
+            style={{ cursor: 'pointer' }}
           >
-            {mode === 'light' ? <MoonIcon /> : <SunIcon />}
-          </IconButton>
+            FGO·NP
+          </span>
 
-          {/* Servant info */}
-          {(selectedId || isCustom) && (
-            <>
-              {servantData && (
-                <Avatar src={servantData._face} alt={servantData?.name || '从者头像'} sx={{ width: 28, height: 28 }} />
-              )}
-              <Box component="span" sx={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text)' }}>
-                {isCustom ? '自定义从者' : (servantData?.name || '')}
-              </Box>
-              {servantData && (
-                <Box component="span" sx={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {servantData.class} ★{servantData._rarity}
-                </Box>
-              )}
-              <Button
-                size="small"
-                onClick={() => navigate('/servants')}
-                sx={{ fontSize: '0.75rem', py: 0.3, px: 1.5, minWidth: 0 }}
+          <nav className="top-nav" aria-label="主导航">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.path}
+                className={`top-nav-item ${isActive(item.path) ? 'active' : ''}`}
+                onClick={() => navigate(item.path)}
+                aria-current={isActive(item.path) ? 'page' : undefined}
               >
-                切换
-              </Button>
-            </>
+                <span className="top-nav-icon">{item.icon}</span>
+                <span className="top-nav-label">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* 右：当前从者 chip + 主题切换 */}
+        <div className="app-header-right">
+          {/* 当前从者 chip — 点击跳从者列表切换 */}
+          {(selectedId || isCustom) && (
+            <button
+              className="servant-info"
+              onClick={() => navigate('/servants')}
+              style={{
+                cursor: 'pointer',
+                border: '1px solid var(--border-subtle)',
+              }}
+              aria-label="切换从者"
+            >
+              <span className="servant-info-name">
+                {currentServantName || '未选择'}
+              </span>
+              {servantData && !isCustom && (
+                <span className="servant-info-meta">
+                  {servantData.class}★{servantData._rarity}
+                </span>
+              )}
+            </button>
           )}
-        </Box>
+
+          {/* 主题切换 */}
+          <button
+            className="btn btn-small"
+            onClick={() => {
+              toggleTheme();
+              toast.show(`已切换为${mode === 'dark' ? '浅色' : '深色'}模式`);
+            }}
+            aria-label={mode === 'light' ? '切换到深色模式' : '切换到浅色模式'}
+            style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            {mode === 'light' ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+            )}
+          </button>
+
+          {/* 设置 */}
+          <button
+            className="btn btn-small"
+            onClick={() => navigate('/settings')}
+            title="设置"
+            aria-label="设置"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
+        </div>
       </header>
 
-      {/* Body: sidebar + main */}
+      {/* 主体 */}
       <div className="layout-shell">
-        <nav className="layout-sidebar">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.path}
-              className={'nav-item' + (isActive(item.path) ? ' active' : '')}
-              onClick={() => navigate(item.path)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}{item.wip ? ' (WIP)' : ''}</span>
-            </button>
-          ))}
-        </nav>
-
         <main className="layout-main">
           <Outlet />
         </main>
       </div>
-
-      {/* Mobile bottom tab bar */}
-      <nav className="mobile-tabbar" aria-label="移动端主导航">
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.path}
-            className={'mobile-tab' + (isActive(item.path) ? ' active' : '')}
-            onClick={() => navigate(item.path)}
-            aria-label={item.label}
-            aria-current={isActive(item.path) ? 'page' : undefined}
-          >
-            <span className="mobile-tab-icon" aria-hidden="true">{item.icon}</span>
-            <span className="mobile-tab-label">{item.label}</span>
-          </button>
-        ))}
-      </nav>
-
-      <footer className="app-footer">
-        FGO Damage Calculator v4.0.0 · Data from Atlas Academy API
-      </footer>
-    </Box>
+    </div>
   );
 }

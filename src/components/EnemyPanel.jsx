@@ -33,7 +33,7 @@ export default function EnemyPanel() {
         </Select>
       </FormControl>
       <Box>
-        <Typography variant="caption">敌方防御 DEF%</Typography>
+        <Typography variant="caption">敌方防御</Typography>
         <Slider
           min={0} max={100} value={enemy.def}
           onChange={(_, v) => updateEnemy('def', v)}

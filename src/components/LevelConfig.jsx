@@ -6,7 +6,7 @@ export default function LevelConfig() {
   const updateConfig = useStore((s) => s.updateConfig);
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 14px' }}>
+    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2) var(--space-3)' }}>
       <Box>
         <Typography variant="caption" component="label" sx={{ display: 'block', mb: 0.5 }}>
           从者 LV: <b>{config.level}</b>

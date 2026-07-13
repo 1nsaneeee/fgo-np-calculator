@@ -19,11 +19,11 @@ export default function NotFoundPage() {
     >
       <Typography
         variant="h2"
-        sx={{ fontWeight: 900, color: 'var(--accent)', letterSpacing: '-0.04em' }}
+        sx={{ fontWeight: 900, color: 'var(--buster)', letterSpacing: '-0.04em' }}
       >
         404
       </Typography>
-      <Typography variant="h6" sx={{ fontWeight: 700, color: 'var(--text)' }}>
+      <Typography variant="h6" sx={{ fontWeight: 700, color: 'var(--text-strong)' }}>
         页面不存在
       </Typography>
       <Typography variant="body2" sx={{ color: 'var(--text-muted)', maxWidth: 380 }}>

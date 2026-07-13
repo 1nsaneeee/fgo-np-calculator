@@ -271,8 +271,8 @@ export default function TeamResultPanel() {
   if (!hasAnyServant) {
     return (
       <div className="section-card">
-        <h2 className="panel-title">伤害分布 Damage Distribution</h2>
-        <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', padding: 'var(--space-md) 0' }}>
+        <h2 className="panel-title">伤害分布</h2>
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', padding: 'var(--space-3) 0' }}>
           请先配置三从者
         </div>
       </div>
@@ -281,21 +281,21 @@ export default function TeamResultPanel() {
 
   return (
     <div className="section-card">
-      <h2 className="panel-title">伤害分布 Damage Distribution</h2>
+      <h2 className="panel-title">伤害分布</h2>
 
       {/* ── Team summary ── */}
       <div style={{
-        background: 'var(--surface-alt)',
-        border: '1px solid var(--border)',
+        background: 'var(--surface-2)',
+        border: '1px solid var(--border-default)',
         borderRadius: 'var(--radius-sm)',
-        padding: 'var(--space-sm) var(--space-md)',
-        marginBottom: 'var(--space-md)',
+        padding: 'var(--space-2) var(--space-3)',
+        marginBottom: 'var(--space-3)',
         display: 'flex',
-        gap: 'var(--space-md)',
+        gap: 'var(--space-3)',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontSize: 'var(--font-xs)',
+        fontSize: 'var(--text-xs)',
         color: 'var(--text-muted)',
       }}>
         {slots.map((slot, i) => {
@@ -312,16 +312,16 @@ export default function TeamResultPanel() {
               gap: 2,
             }}>
               <div style={{ fontWeight: 700 }}>
-                S{i + 1}: <span style={{ color: 'var(--text)' }}>{name}</span>
+                S{i + 1}: <span style={{ color: 'var(--text-strong)' }}>{name}</span>
               </div>
-              <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center', flexWrap: 'wrap' }}>
                 <span>
-                  Lv<span style={{ color: 'var(--text)', fontWeight: 600 }}>{lv}</span>
-                  {' '}NP<span style={{ color: 'var(--text)', fontWeight: 600 }}>{np}</span>
+                  Lv<span style={{ color: 'var(--text-strong)', fontWeight: 600 }}>{lv}</span>
+                  {' '}NP<span style={{ color: 'var(--text-strong)', fontWeight: 600 }}>{np}</span>
                 </span>
                 <DeckBadges deck={decks[i]} />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--text-2xs)' }}>
                 <input
                   type="checkbox"
                   checked={npEnabled[i]}
@@ -347,8 +347,8 @@ export default function TeamResultPanel() {
         <div className="dist-stats-row">
           {/* HP Input */}
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 130 }}>
-            <label style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>
-              敌方血量 Enemy HP
+            <label style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>
+              敌方血量
             </label>
             <input
               className="buff-input"
@@ -362,29 +362,29 @@ export default function TeamResultPanel() {
           </div>
 
           {/* Divider */}
-          <div style={{ width: 1, background: 'var(--border-light)' }} />
+          <div style={{ width: 1, background: 'var(--border-subtle)' }} />
 
           {/* Clear Rate */}
           {clearRate !== null && (
             <div className="dist-stat-card" style={{ minWidth: 120 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>通关率(全局)</div>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>通关率(全局)</div>
               <div style={{
-                fontSize: 'var(--font-xl)', fontWeight: 800,
-                color: clearRate >= 0.8 ? 'var(--green)' : clearRate >= 0.5 ? 'var(--gold)' : 'var(--red)'
+                fontSize: 'var(--text-xl)', fontWeight: 800,
+                color: clearRate >= 0.8 ? 'var(--color-positive)' : clearRate >= 0.5 ? 'var(--color-warning)' : 'var(--color-negative)'
               }}>{pct(clearRate)}</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)' }}>
                 {allDamages ? allDamages.filter(d => d >= hpThreshold).length : 0} / {allDamages ? allDamages.length : 0} 种
               </div>
             </div>
           )}
           {handClearRate !== null && fitPassRate !== null && (
             <div className="dist-stat-card" style={{ minWidth: 140 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>通关率(拟合)</div>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>通关率(拟合)</div>
               <div style={{
-                fontSize: 'var(--font-xl)', fontWeight: 800,
-                color: fitPassRate.weighted >= 0.8 ? 'var(--green)' : fitPassRate.weighted >= 0.5 ? 'var(--gold)' : 'var(--red)'
+                fontSize: 'var(--text-xl)', fontWeight: 800,
+                color: fitPassRate.weighted >= 0.8 ? 'var(--color-positive)' : fitPassRate.weighted >= 0.5 ? 'var(--color-warning)' : 'var(--color-negative)'
               }}>{pct(fitPassRate.weighted)}</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)' }}>
                 出牌概率 × 击破率
               </div>
             </div>
@@ -393,24 +393,24 @@ export default function TeamResultPanel() {
           {/* Median */}
           {stats && (
             <div className="dist-stat-card">
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>中位数 Median</div>
-              <div style={{ fontSize: 'var(--font-md)', fontWeight: 700, color: 'var(--accent)' }}>{stats.median.toLocaleString()}</div>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>中位数</div>
+              <div style={{ fontSize: 'var(--text-md)', fontWeight: 700, color: 'var(--arts)' }}>{stats.median.toLocaleString()}</div>
             </div>
           )}
 
           {/* Mean */}
           {stats && (
             <div className="dist-stat-card">
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>均值 Avg</div>
-              <div style={{ fontSize: 'var(--font-md)', fontWeight: 700, color: 'var(--text-secondary)' }}>{stats.mean.toLocaleString()}</div>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>均值</div>
+              <div style={{ fontSize: 'var(--text-md)', fontWeight: 700, color: 'var(--text-muted)' }}>{stats.mean.toLocaleString()}</div>
             </div>
           )}
 
           {/* P25–P75 */}
           {stats && (
             <div className="dist-stat-card">
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>P25 – P75</div>
-              <div style={{ fontSize: 'var(--font-sm)', fontWeight: 600, color: 'var(--text-secondary)' }}>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 1 }}>P25 – P75</div>
+              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-muted)' }}>
                 {stats.p25.toLocaleString()} – {stats.p75.toLocaleString()}
               </div>
             </div>
@@ -422,8 +422,8 @@ export default function TeamResultPanel() {
       {extremes && (
         <div className="dist-best-worst-grid">
           <div className="dist-best-card">
-            <div className="dist-play-label" style={{ color: 'var(--green)' }}>
-              最优出牌 Best Play
+            <div className="dist-play-label" style={{ color: 'var(--color-positive)' }}>
+              最优出牌
             </div>
             <div className="dist-play-damage">
               {extremes.best.maxDamage.toLocaleString()}
@@ -435,8 +435,8 @@ export default function TeamResultPanel() {
             </div>
           </div>
           <div className="dist-worst-card">
-            <div className="dist-play-label" style={{ color: 'var(--red)' }}>
-              最劣出牌 Worst Play
+            <div className="dist-play-label" style={{ color: 'var(--color-negative)' }}>
+              最劣出牌
             </div>
             <div className="dist-play-damage">
               {extremes.worst.minDamage.toLocaleString()}

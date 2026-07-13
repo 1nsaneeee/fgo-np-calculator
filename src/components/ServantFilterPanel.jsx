@@ -38,7 +38,7 @@ export default function ServantFilterPanel({
 
   return (
     <div className="filter-panel">
-      <div className="filter-section-title">职阶 Class</div>
+      <div className="filter-section-title">职阶</div>
       {allClasses.map(cls => (
         <FormControlLabel
           key={cls}
@@ -49,19 +49,19 @@ export default function ServantFilterPanel({
               onChange={() => toggleClass(cls)}
               sx={{
                 color: CLASS_COLORS[cls] || 'var(--text-muted)',
-                '&.Mui-checked': { color: CLASS_COLORS[cls] || 'var(--accent)' },
+                '&.Mui-checked': { color: CLASS_COLORS[cls] || 'var(--buster)' },
                 p: 0.5,
               }}
             />
           }
-          label={<Box component="span" sx={{ fontSize: '0.78rem' }}>{cls}</Box>}
+          label={<Box component="span" sx={{ fontSize: 'var(--text-xs)' }}>{cls}</Box>}
           sx={{ display: 'flex', ml: 0, mb: -0.5, '& .MuiFormControlLabel-label': { ml: 0.5 } }}
         />
       ))}
 
       <Divider sx={{ my: 1.5 }} />
 
-      <div className="filter-section-title">稀有度 Rarity</div>
+      <div className="filter-section-title">稀有度</div>
       {RARITY_OPTIONS.map(opt => (
         <FormControlLabel
           key={opt.label}
@@ -73,7 +73,7 @@ export default function ServantFilterPanel({
               sx={{ p: 0.5 }}
             />
           }
-          label={<Box component="span" sx={{ fontSize: '0.78rem' }}>{opt.label}</Box>}
+          label={<Box component="span" sx={{ fontSize: 'var(--text-xs)' }}>{opt.label}</Box>}
           sx={{ display: 'flex', ml: 0, mb: -0.5 }}
         />
       ))}
@@ -96,15 +96,15 @@ export default function ServantFilterPanel({
               }}
             />
           }
-          label={<Box component="span" sx={{ fontSize: '0.78rem' }}>{color}</Box>}
+          label={<Box component="span" sx={{ fontSize: 'var(--text-xs)' }}>{color}</Box>}
           sx={{ display: 'flex', ml: 0, mb: -0.5 }}
         />
       ))}
 
       <Divider sx={{ my: 1.5 }} />
 
-      <Button size="small" variant="outlined" fullWidth onClick={onReset} sx={{ fontSize: '0.78rem' }}>
-        重置 Reset
+      <Button size="small" variant="outlined" fullWidth onClick={onReset} sx={{ fontSize: 'var(--text-xs)' }}>
+        重置
       </Button>
     </div>
   );

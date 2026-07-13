@@ -5,7 +5,7 @@ import { getSv } from '@/utils/helpers';
 import { calcCardDamage, calcNPGainForCard, calcStars, calcNPInChain, calcBreakProb } from '@/utils/calculations';
 
 const cardLabel = { Buster: 'B', Arts: 'A', Quick: 'Q', Extra: 'EX', NP: 'NP' };
-const cardColors = { Buster: 'var(--buster)', Arts: 'var(--arts)', Quick: 'var(--quick)', Extra: 'var(--gold)' };
+const cardColors = { Buster: 'var(--buster)', Arts: 'var(--arts)', Quick: 'var(--quick)', Extra: 'var(--card-extra)' };
 const CYCLE = ['Buster', 'Arts', 'Quick', 'NP'];
 
 export default function CardChainPanel() {
@@ -106,7 +106,7 @@ export default function CardChainPanel() {
   const breakProbClass = breakProb === null ? '' : breakProb >= 1 ? ' high' : breakProb > 0 ? ' mid' : ' low';
 
   return (
-    <div className="section">
+    <div className="section-card">
       <h2 className="panel-title">Card Chain</h2>
 
       <div className="card-slots">
@@ -233,7 +233,7 @@ export default function CardChainPanel() {
 
       <div className="break-bar">
         <label className="break-bar-label-strong">
-          击破率 Break
+          击破率
         </label>
         <div className="break-bar-row">
           <span className="break-bar-label">敌方HP</span>

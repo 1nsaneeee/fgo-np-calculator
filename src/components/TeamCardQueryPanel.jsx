@@ -152,12 +152,12 @@ function QueryResultDisplay({ query, pool, servantStats, aggs, enemy, options })
 
   return (
     <div style={{
-      marginTop: 'var(--space-md)', padding: 'var(--space-md)',
-      background: 'var(--surface-alt)', borderRadius: 'var(--radius)',
-      border: '1px solid var(--border)',
+      marginTop: 'var(--space-3)', padding: 'var(--space-3)',
+      background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)',
+      border: '1px solid var(--border-default)',
     }}>
       {/* Card sequence as badges */}
-      <div className="draw-pool" style={{ marginBottom: 'var(--space-sm)' }}>
+      <div className="draw-pool" style={{ marginBottom: 'var(--space-2)' }}>
         {query.map((card, i) => (
           <span key={i} className={'draw-badge draw-badge-' + card.type}>
             {card.type}<sub>{card.servant}</sub>
@@ -167,28 +167,28 @@ function QueryResultDisplay({ query, pool, servantStats, aggs, enemy, options })
 
       {/* Probability */}
       {prob !== null && (
-        <div style={{ fontSize: 'var(--font-sm)', marginBottom: 'var(--space-xs)' }}>
-          <span style={{ color: 'var(--text-muted)', marginRight: 'var(--space-sm)' }}>概率:</span>
-          <span style={{ fontWeight: 700, color: 'var(--accent)' }}>{pct(prob)}</span>
+        <div style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-1)' }}>
+          <span style={{ color: 'var(--text-muted)', marginRight: 'var(--space-2)' }}>概率:</span>
+          <span style={{ fontWeight: 700, color: 'var(--arts)' }}>{pct(prob)}</span>
         </div>
       )}
 
       {/* Damage range */}
       {damage && (
-        <div style={{ fontSize: 'var(--font-sm)', marginBottom: 'var(--space-xs)' }}>
-          <span style={{ color: 'var(--text-muted)', marginRight: 'var(--space-sm)' }}>伤害:</span>
-          <span style={{ color: 'var(--blue)', fontWeight: 700 }}>{fmtNum(damage.min)}</span>
+        <div style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-1)' }}>
+          <span style={{ color: 'var(--text-muted)', marginRight: 'var(--space-2)' }}>伤害:</span>
+          <span style={{ color: 'var(--arts)', fontWeight: 700 }}>{fmtNum(damage.min)}</span>
           <span style={{ color: 'var(--text-muted)', margin: '0 4px' }}>~</span>
-          <span style={{ color: 'var(--red)', fontWeight: 700 }}>{fmtNum(damage.max)}</span>
-          <span style={{ color: 'var(--text-muted)', marginLeft: 'var(--space-xs)' }}>
-            (avg <span style={{ fontWeight: 700, color: 'var(--green)' }}>{fmtNum(damage.avg)}</span>)
+          <span style={{ color: 'var(--color-negative)', fontWeight: 700 }}>{fmtNum(damage.max)}</span>
+          <span style={{ color: 'var(--text-muted)', marginLeft: 'var(--space-1)' }}>
+            (avg <span style={{ fontWeight: 700, color: 'var(--color-positive)' }}>{fmtNum(damage.avg)}</span>)
           </span>
         </div>
       )}
 
       {/* Color chain badge */}
       {chainInfo && (
-        <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-secondary)' }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
           色卡链:{' '}
           {chainInfo.map((c, idx) => {
             const name = { B: 'Buster', A: 'Arts', Q: 'Quick' }[c];
@@ -276,8 +276,8 @@ export default function TeamCardQueryPanel() {
 
       {!hasTeam && (
         <div style={{
-          fontSize: 'var(--font-sm)', color: 'var(--text-muted)',
-          padding: 'var(--space-md)', textAlign: 'center',
+          fontSize: 'var(--text-sm)', color: 'var(--text-muted)',
+          padding: 'var(--space-3)', textAlign: 'center',
         }}>
           请先在组队配置中选择从者
         </div>
@@ -286,7 +286,7 @@ export default function TeamCardQueryPanel() {
       {hasTeam && (
         <>
           {/* Preset buttons */}
-          <div className="preset-row" style={{ marginBottom: 'var(--space-sm)' }}>
+          <div className="preset-row" style={{ marginBottom: 'var(--space-2)' }}>
             {CARD_PRESETS.map((preset) => (
               <Button
                 key={preset.label}
@@ -295,7 +295,7 @@ export default function TeamCardQueryPanel() {
                 color={preset.color}
                 onClick={() => setQueryStr(preset.query)}
                 sx={{
-                  fontSize: 'var(--font-xs)', py: 0.25, px: 1,
+                  fontSize: 'var(--text-xs)', py: 0.25, px: 1,
                   minWidth: 'auto', lineHeight: 1.4,
                 }}
               >
@@ -318,8 +318,8 @@ export default function TeamCardQueryPanel() {
           </div>
 
           <div style={{
-            fontSize: 'var(--font-xs)', color: 'var(--text-muted)',
-            marginTop: 'var(--space-xs)',
+            fontSize: 'var(--text-xs)', color: 'var(--text-muted)',
+            marginTop: 'var(--space-1)',
           }}>
             字母=卡色(B/A/Q) 数字=从者编号(1/2/3)　例: A3A3A3 = 从者3的3张Arts
           </div>

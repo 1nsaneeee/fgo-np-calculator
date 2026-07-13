@@ -19,21 +19,21 @@ function CustomTooltip({ active, payload, hpThreshold }) {
   const above = hpThreshold > 0 && d.damage >= hpThreshold;
   return (
     <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
+      background: 'var(--surface-2)',
+      border: '1px solid var(--border-default)',
       borderRadius: 'var(--radius-sm)',
-      padding: 'var(--space-sm) var(--space-md)',
-      fontSize: 'var(--font-sm)',
-      boxShadow: 'var(--shadow-md)',
+      padding: 'var(--space-2) var(--space-3)',
+      fontSize: 'var(--text-sm)',
+      boxShadow: 'var(--shadow-popover)',
     }}>
-      <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-xs)', marginBottom: 2 }}>
+      <div style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', marginBottom: 2 }}>
         第 {d.rank} 种出牌 · 百分位 {fmtPct(d.pct)}
       </div>
-      <div style={{ fontWeight: 700, color: 'var(--text)' }}>
+      <div style={{ fontWeight: 700, color: 'var(--text-strong)' }}>
         {d.damage.toLocaleString()}
       </div>
       {above && (
-        <div style={{ color: 'var(--green)', fontSize: 'var(--font-xs)', fontWeight: 600 }}>
+        <div style={{ color: 'var(--color-positive)', fontSize: 'var(--text-xs)', fontWeight: 600 }}>
           超过阈值
         </div>
       )}
@@ -66,13 +66,13 @@ export default function DamageHistogram({ damages, hpThreshold }) {
   if (!data) return null;
 
   return (
-    <div className="section" style={{ marginTop: 'var(--space-md)' }}>
-      <h3 className="panel-title">伤害分布 Damage CDF</h3>
+    <div className="section-card" style={{ marginTop: 'var(--space-3)' }}>
+      <h3 className="panel-title">伤害分布</h3>
       <div style={{
-        background: 'var(--surface)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)',
-        padding: 'var(--space-md)',
+        background: 'var(--surface-2)',
+        border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius-md)',
+        padding: 'var(--space-3)',
       }}>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={data} margin={{ top: 12, right: 16, bottom: 4, left: 0 }}>
@@ -82,7 +82,7 @@ export default function DamageHistogram({ damages, hpThreshold }) {
               domain={[0, 100]}
               tickFormatter={fmtPct}
               tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
-              axisLine={{ stroke: 'var(--border)' }}
+              axisLine={{ stroke: 'var(--border-default)' }}
               tickLine={false}
               tickCount={6}
               label={{ value: '累计百分位', position: 'insideBottom', offset: -4, fontSize: 10, fill: 'var(--text-muted)' }}
@@ -101,14 +101,14 @@ export default function DamageHistogram({ damages, hpThreshold }) {
             {hpThreshold > 0 && (
               <ReferenceLine
                 y={hpThreshold}
-                stroke="var(--red)"
+                stroke="var(--color-negative)"
                 strokeDasharray="6 4"
                 strokeWidth={1.5}
                 ifOverflow="extendDomain"
                 label={{
                   value: fmtDmg(hpThreshold),
                   position: 'right',
-                  fill: 'var(--red)',
+                  fill: 'var(--color-negative)',
                   fontSize: 11,
                   fontWeight: 600,
                 }}
@@ -117,7 +117,7 @@ export default function DamageHistogram({ damages, hpThreshold }) {
             <Line
               type="monotone"
               dataKey="damage"
-              stroke="var(--accent)"
+              stroke="var(--arts)"
               strokeWidth={1.5}
               dot={false}
               isAnimationActive={false}
@@ -125,18 +125,18 @@ export default function DamageHistogram({ damages, hpThreshold }) {
           </LineChart>
         </ResponsiveContainer>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 'var(--space-lg)',
-          justifyContent: 'center', marginTop: 'var(--space-sm)',
-          fontSize: 'var(--font-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
+          display: 'flex', alignItems: 'center', gap: 'var(--space-6)',
+          justifyContent: 'center', marginTop: 'var(--space-2)',
+          fontSize: 'var(--text-xs)', color: 'var(--text-muted)', flexWrap: 'wrap',
         }}>
-          <span>总出牌: <b style={{ color: 'var(--text)' }}>{(damages || []).length.toLocaleString()}</b></span>
+          <span>总出牌: <b style={{ color: 'var(--text-strong)' }}>{(damages || []).length.toLocaleString()}</b></span>
           {hpThreshold > 0 && (
             <>
-              <span>超过 {fmtDmg(hpThreshold)}: <b style={{ color: 'var(--green)' }}>{passCount.toLocaleString()}</b></span>
-              <span>通关率: <b style={{ color: 'var(--green)' }}>{(clearRate * 100).toFixed(1)}%</b></span>
+              <span>超过 {fmtDmg(hpThreshold)}: <b style={{ color: 'var(--color-positive)' }}>{passCount.toLocaleString()}</b></span>
+              <span>通关率: <b style={{ color: 'var(--color-positive)' }}>{(clearRate * 100).toFixed(1)}%</b></span>
             </>
           )}
-          <span style={{ color: 'var(--red)' }}>— 阈值线 {fmtDmg(hpThreshold)}</span>
+          <span style={{ color: 'var(--color-negative)' }}>— 阈值线 {fmtDmg(hpThreshold)}</span>
         </div>
       </div>
     </div>

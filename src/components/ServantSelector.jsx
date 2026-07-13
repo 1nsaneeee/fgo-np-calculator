@@ -71,7 +71,7 @@ export default function ServantSelector() {
                 <Box
                   sx={{
                     display: 'inline-block', width: 20, height: 20, borderRadius: 0.5,
-                    fontSize: 'var(--font-xs)', background: CLASS_COLORS[svClass] || '#333',
+                    fontSize: 'var(--text-xs)', background: CLASS_COLORS[svClass] || '#333',
                     color: '#fff', textAlign: 'center', lineHeight: '20px', fontWeight: 700
                   }}
                 >
@@ -79,14 +79,14 @@ export default function ServantSelector() {
                 </Box>
                 <span>{getSv(opt, 'name')}</span>
               </Box>
-              <span style={{ fontSize: 'var(--font-xs)', color: npColorHex, fontWeight: 700 }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: npColorHex, fontWeight: 700 }}>
                 {npColor}
               </span>
             </li>
           );
         }}
         renderInput={(params) => (
-          <TextField {...params} label="从者搜索 Servant Search" placeholder="输入从者名称或职阶..." />
+          <TextField {...params} label="从者搜索" placeholder="输入从者名称或职阶..." />
         )}
         fullWidth
         size="small"

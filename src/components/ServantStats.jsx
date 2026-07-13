@@ -5,13 +5,13 @@ import { CLASS_COLORS } from '@/constants/gameData';
 
 const Chip = ({ label, value, color, bg }) => (
   <span style={{
-    display: 'inline-flex', alignItems: 'center', gap: 4,
-    fontSize: 'var(--font-sm)', lineHeight: '24px',
+    display: 'inline-flex', alignItems: 'center', gap: 'var(--space-1)',
+    fontSize: 'var(--text-sm)', lineHeight: '24px',
     padding: '2px 10px', borderRadius: 12,
-    background: bg || 'var(--surface-alt)',
+    background: bg || 'var(--surface-2)',
   }}>
-    <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: 'var(--font-xs)' }}>{label}</span>
-    <span style={{ color: color || 'var(--text)', fontWeight: 700 }}>{value}</span>
+    <span style={{ color: 'var(--text-muted)', fontWeight: 500, fontSize: 'var(--text-xs)' }}>{label}</span>
+    <span style={{ color: color || 'var(--text-default)', fontWeight: 700 }}>{value}</span>
   </span>
 );
 
@@ -26,7 +26,7 @@ export default function ServantStats({ servant }) {
 
   if (!servant) {
     return (
-      <div style={{ color: 'var(--text-muted)', padding: 'var(--space-sm) 0' }}>Select a servant / 选择一个从者</div>
+      <div style={{ color: 'var(--text-muted)', padding: 'var(--space-2) 0' }}>请先选择从者</div>
     );
   }
 
@@ -43,12 +43,12 @@ export default function ServantStats({ servant }) {
         </span>
         <Box>
           <div className="servant-name">{getSv(sv, 'name')}</div>
-          <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', marginTop: 'var(--space-2xs)' }}>
+          <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
             {getSv(sv, 'nameEn')}
           </div>
         </Box>
         <Box sx={{ ml: 'auto', display: 'flex', gap: 0.75, flexWrap: 'wrap' }}>
-          <Chip label="ATK" value={getSv(sv, 'atk90')} color="var(--blue)" bg="var(--blue-bg)" />
+          <Chip label="ATK" value={getSv(sv, 'atk90')} color="var(--arts)" bg="var(--arts-bg)" />
           <Chip label="NP" value={npColor} color={np.color} bg={np.bg} />
           <Chip label="NP率" value={getSv(sv, 'npRate')} />
           <Chip label="配卡" value={getSv(sv, 'deck')} />
@@ -58,8 +58,8 @@ export default function ServantStats({ servant }) {
       <Button
         onClick={() => setShowDetails(!showDetails)}
         sx={{
-          display: 'block', mx: 'auto', mt: 1, fontSize: '0.75rem', py: 0.5, px: 2,
-          color: 'var(--text-muted)', border: '1px dashed var(--border)', borderRadius: 1,
+          display: 'block', mx: 'auto', mt: 1, fontSize: 'var(--text-xs)', py: 0.5, px: 2,
+          color: 'var(--text-muted)', border: '1px dashed var(--border-default)', borderRadius: 'var(--radius-sm)',
           textTransform: 'none', minWidth: 0,
         }}
       >
@@ -67,15 +67,15 @@ export default function ServantStats({ servant }) {
       </Button>
 
       {showDetails && (
-        <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
-          {getSv(sv, 'atk100') ? <Chip label="ATK100" value={getSv(sv, 'atk100')} color="var(--blue)" bg="var(--blue-bg)" /> : null}
-          {getSv(sv, 'atk120') ? <Chip label="ATK120" value={getSv(sv, 'atk120')} color="var(--accent)" bg="var(--accent-light)" /> : null}
+        <div style={{ marginTop: 'var(--space-3)', display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          {getSv(sv, 'atk100') ? <Chip label="ATK100" value={getSv(sv, 'atk100')} color="var(--arts)" bg="var(--arts-bg)" /> : null}
+          {getSv(sv, 'atk120') ? <Chip label="ATK120" value={getSv(sv, 'atk120')} color="var(--text-strong)" bg="var(--surface-3)" /> : null}
           <Chip label="NP Hit" value={getSv(sv, 'npHits')} />
           <Chip label="属性" value={getSv(sv, 'attr') || '-'} />
           <Chip label="B Hit" value={getSv(sv, 'bHits')} color="var(--buster)" bg="var(--buster-bg)" />
           <Chip label="A Hit" value={getSv(sv, 'aHits')} color="var(--arts)" bg="var(--arts-bg)" />
           <Chip label="Q Hit" value={getSv(sv, 'qHits')} color="var(--quick)" bg="var(--quick-bg)" />
-          <Chip label="EX Hit" value={getSv(sv, 'eHits')} color="var(--gold)" bg="var(--ex-bg)" />
+          <Chip label="EX Hit" value={getSv(sv, 'eHits')} color="var(--card-extra)" bg="var(--card-extra-bg)" />
           <Chip label="星率" value={`${getSv(sv, 'starRate')}%`} />
           <Chip label="NP1" value={`${getSv(sv, 'np1')}%`} />
           <Chip label="NP2" value={`${getSv(sv, 'np2')}%`} />
@@ -85,9 +85,9 @@ export default function ServantStats({ servant }) {
           {getSv(sv, 'passiveBuster') > 0 && <Chip label="红放" value={`+${getSv(sv, 'passiveBuster')}%`} color="var(--buster)" bg="var(--buster-bg)" />}
           {getSv(sv, 'passiveArts') > 0 && <Chip label="蓝放" value={`+${getSv(sv, 'passiveArts')}%`} color="var(--arts)" bg="var(--arts-bg)" />}
           {getSv(sv, 'passiveQuick') > 0 && <Chip label="绿放" value={`+${getSv(sv, 'passiveQuick')}%`} color="var(--quick)" bg="var(--quick-bg)" />}
-          {getSv(sv, 'passiveCrit') > 0 && <Chip label="爆伤" value={`+${getSv(sv, 'passiveCrit')}%`} color="var(--gold)" bg="var(--gold-bg)" />}
+          {getSv(sv, 'passiveCrit') > 0 && <Chip label="爆伤" value={`+${getSv(sv, 'passiveCrit')}%`} color="var(--card-extra)" bg="var(--card-extra-bg)" />}
           {getSv(sv, 'passiveNpGen') > 0 && <Chip label="NP率" value={`+${getSv(sv, 'passiveNpGen')}%`} color="var(--arts)" bg="var(--arts-bg)" />}
-          {getSv(sv, 'passiveNpStrength') > 0 && <Chip label="宝威" value={`+${getSv(sv, 'passiveNpStrength')}%`} color="var(--accent)" bg="var(--accent-light)" />}
+          {getSv(sv, 'passiveNpStrength') > 0 && <Chip label="宝威" value={`+${getSv(sv, 'passiveNpStrength')}%`} color="var(--text-strong)" bg="var(--surface-3)" />}
         </div>
       )}
     </div>

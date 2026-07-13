@@ -112,10 +112,10 @@ function SkillButton({ skillDef, isActivated, isSelected, onToggle, disabled }) 
   const hasSkill = isSelected && skillDef;
 
   let btnStyle = {
-    padding: '4px 12px',
-    border: '1px solid var(--border)',
+    padding: 'var(--space-1) var(--space-3)',
+    border: '1px solid var(--border-default)',
     borderRadius: 'var(--radius-sm)',
-    fontSize: 'var(--font-xs)',
+    fontSize: 'var(--text-xs)',
     fontWeight: 600,
     cursor: disabled ? 'default' : 'pointer',
     opacity: disabled ? 0.4 : 1,
@@ -123,15 +123,15 @@ function SkillButton({ skillDef, isActivated, isSelected, onToggle, disabled }) 
     fontFamily: 'inherit',
     whiteSpace: 'nowrap',
     color: 'var(--text-muted)',
-    background: 'var(--surface)',
+    background: 'var(--surface-2)',
   };
 
   if (isActiveThisTurn) {
     btnStyle = {
       ...btnStyle,
-      borderColor: 'var(--accent)',
-      background: 'var(--accent-light)',
-      color: 'var(--accent)',
+      borderColor: 'var(--arts)',
+      background: 'var(--arts-bg)',
+      color: 'var(--arts)',
       fontWeight: 700,
     };
   } else if (!hasSkill) {
@@ -160,22 +160,22 @@ function NPGauge({ value, label }) {
   const barWidth = Math.min(100, pctVal);
   const isFull = pctVal >= 100;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--font-xs)' }}>
-      <span style={{ fontWeight: 700, minWidth: 28, color: isFull ? 'var(--accent)' : 'var(--text-secondary)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-xs)' }}>
+      <span style={{ fontWeight: 700, minWidth: 28, color: isFull ? 'var(--arts)' : 'var(--text-muted)' }}>
         {label}
       </span>
       <div style={{
-        flex: 1, height: 14, background: 'var(--surface-alt)',
-        borderRadius: 3, overflow: 'hidden', border: '1px solid var(--border)',
+        flex: 1, height: 14, background: 'var(--surface-2)',
+        borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border-default)',
       }}>
         <div style={{
           width: barWidth + '%', height: '100%',
-          background: isFull ? 'var(--accent)' : 'var(--arts)',
+          background: isFull ? 'var(--arts)' : 'var(--arts)',
           transition: 'width 0.3s ease',
-          borderRadius: 2,
+          borderRadius: 'var(--radius-lg)',
         }} />
       </div>
-      <span style={{ fontWeight: 600, minWidth: 32, textAlign: 'right', color: isFull ? 'var(--accent)' : 'var(--text-muted)' }}>
+      <span style={{ fontWeight: 600, minWidth: 32, textAlign: 'right', color: isFull ? 'var(--arts)' : 'var(--text-muted)' }}>
         {pctVal}%
       </span>
     </div>
@@ -424,7 +424,7 @@ export default function TurnSimulator() {
     return (
       <div className="section-card">
         <h2 className="panel-title">三回合模拟 Turn Simulator</h2>
-        <div style={{ fontSize: 'var(--font-sm)', color: 'var(--text-muted)', padding: 'var(--space-md) 0' }}>
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', padding: 'var(--space-3) 0' }}>
           请先配置三从者
         </div>
       </div>
@@ -436,15 +436,15 @@ export default function TurnSimulator() {
       <h2 className="panel-title">三回合模拟 Turn Simulator</h2>
 
       {/* ── Turn Selector ── */}
-      <div className="preset-row" style={{ marginBottom: 'var(--space-lg)' }}>
+      <div className="preset-row" style={{ marginBottom: 'var(--space-6)' }}>
         {[1, 2, 3].map(turn => (
           <button
             key={turn}
             className="toggle-btn"
             style={{
-              borderColor: activeTurn === turn ? 'var(--accent)' : undefined,
-              color: activeTurn === turn ? 'var(--accent)' : undefined,
-              background: activeTurn === turn ? 'var(--accent-light)' : undefined,
+              borderColor: activeTurn === turn ? 'var(--arts)' : undefined,
+              color: activeTurn === turn ? 'var(--arts)' : undefined,
+              background: activeTurn === turn ? 'var(--arts-bg)' : undefined,
               fontWeight: activeTurn === turn ? 700 : 600,
               padding: '6px 20px',
             }}
@@ -457,19 +457,19 @@ export default function TurnSimulator() {
 
       {/* ── Skill Activation Panel ── */}
       <div style={{
-        background: 'var(--surface-alt)',
-        border: '1px solid var(--border)',
+        background: 'var(--surface-2)',
+        border: '1px solid var(--border-default)',
         borderRadius: 'var(--radius-sm)',
-        padding: 'var(--space-md)',
-        marginBottom: 'var(--space-md)',
+        padding: 'var(--space-3)',
+        marginBottom: 'var(--space-3)',
       }}>
         <div style={{
-          fontSize: 'var(--font-xs)',
+          fontSize: 'var(--text-xs)',
           fontWeight: 700,
           color: 'var(--text-muted)',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          marginBottom: 'var(--space-sm)',
+          marginBottom: 'var(--space-2)',
         }}>
           技能激活 Skills — Turn {activeTurn}
         </div>
@@ -482,14 +482,14 @@ export default function TurnSimulator() {
             <div key={si} style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 'var(--space-sm)',
-              padding: 'var(--space-xs) 0',
+              gap: 'var(--space-2)',
+              padding: 'var(--space-1) 0',
               flexWrap: 'wrap',
             }}>
               <span style={{
-                fontSize: 'var(--font-xs)',
+                fontSize: 'var(--text-xs)',
                 fontWeight: 700,
-                color: 'var(--text-secondary)',
+                color: 'var(--text-muted)',
                 minWidth: 90,
               }}>
                 S{si + 1} {svName.length > 6 ? svName.slice(0, 6) + '…' : svName}
@@ -519,12 +519,12 @@ export default function TurnSimulator() {
                 );
               })}
               {!servantSkills && !slot.isCustom && slot.servantId && (
-                <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                   无技能数据
                 </span>
               )}
               {(!slot.servantId || slot.isCustom) && (
-                <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                   {slot.isCustom ? '自定义从者无技能' : '未选择从者'}
                 </span>
               )}
@@ -533,8 +533,8 @@ export default function TurnSimulator() {
         })}
 
         {/* Skills activated in other turns */}
-        <div style={{ marginTop: 'var(--space-sm)', paddingTop: 'var(--space-sm)', borderTop: '1px solid var(--border-light)' }}>
-          <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>
+        <div style={{ marginTop: 'var(--space-2)', paddingTop: 'var(--space-2)', borderTop: '1px solid var(--border-subtle)' }}>
+          <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 'var(--space-1)' }}>
             已激活技能（所有回合）
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
@@ -548,12 +548,12 @@ export default function TurnSimulator() {
                 if (!skillDef) return null;
                 return (
                   <span key={`${si}-${ski}`} style={{
-                    fontSize: '10px',
+                    fontSize: 'var(--text-2xs)',
                     padding: '2px 8px',
                     borderRadius: 'var(--radius-xs)',
-                    background: actTurn === activeTurn ? 'var(--accent-light)' : 'var(--surface)',
-                    border: `1px solid ${actTurn === activeTurn ? 'var(--accent)' : 'var(--border)'}`,
-                    color: actTurn === activeTurn ? 'var(--accent)' : 'var(--text-muted)',
+                    background: actTurn === activeTurn ? 'var(--arts-bg)' : 'var(--surface-2)',
+                    border: `1px solid ${actTurn === activeTurn ? 'var(--arts)' : 'var(--border-default)'}`,
+                    color: actTurn === activeTurn ? 'var(--arts)' : 'var(--text-muted)',
                     fontWeight: actTurn === activeTurn ? 700 : 500,
                   }}>
                     T{actTurn}: {skillDef.name.length > 8 ? skillDef.name.slice(0, 8) + '…' : skillDef.name}
@@ -562,7 +562,7 @@ export default function TurnSimulator() {
               });
             })}
             {slots.every(s => !s.skillsActivated.some(a => a !== null)) && (
-              <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              <span style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                 暂无激活技能
               </span>
             )}
@@ -573,19 +573,19 @@ export default function TurnSimulator() {
       {/* ── Active Buffs (current turn) ── */}
       {turnResults && turnResults[activeTurn - 1] && (
         <div style={{
-          background: 'var(--surface-alt)',
-          border: '1px solid var(--border)',
+          background: 'var(--surface-2)',
+          border: '1px solid var(--border-default)',
           borderRadius: 'var(--radius-sm)',
-          padding: 'var(--space-md)',
-          marginBottom: 'var(--space-md)',
+          padding: 'var(--space-3)',
+          marginBottom: 'var(--space-3)',
         }}>
           <div style={{
-            fontSize: 'var(--font-xs)',
+            fontSize: 'var(--text-xs)',
             fontWeight: 700,
             color: 'var(--text-muted)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: 'var(--space-sm)',
+            marginBottom: 'var(--space-2)',
           }}>
             生效Buff — Turn {activeTurn}
           </div>
@@ -595,12 +595,12 @@ export default function TurnSimulator() {
               if (val === 0) return null;
               return (
                 <span key={def.key} style={{
-                  fontSize: 'var(--font-xs)',
+                  fontSize: 'var(--text-xs)',
                   padding: '2px 10px',
                   borderRadius: 'var(--radius-xs)',
-                  background: 'var(--accent-light)',
-                  border: '1px solid var(--accent)',
-                  color: 'var(--accent)',
+                  background: 'var(--arts-bg)',
+                  border: '1px solid var(--arts)',
+                  color: 'var(--arts)',
                   fontWeight: 600,
                 }}>
                   {def.label.replace('%', '')} +{val}%
@@ -608,7 +608,7 @@ export default function TurnSimulator() {
               );
             })}
             {Object.values(turnResults[activeTurn - 1].skillBuffs).every(v => v === 0) && (
-              <span style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                 本回合无技能Buff
               </span>
             )}
@@ -622,34 +622,34 @@ export default function TurnSimulator() {
           background: 'var(--surface-raised)',
           border: '1px solid var(--border-strong)',
           borderRadius: 'var(--radius-sm)',
-          padding: 'var(--space-md)',
-          marginBottom: 'var(--space-md)',
+          padding: 'var(--space-3)',
+          marginBottom: 'var(--space-3)',
         }}>
           <div style={{
-            fontSize: 'var(--font-xs)',
+            fontSize: 'var(--text-xs)',
             fontWeight: 700,
-            color: 'var(--accent)',
+            color: 'var(--arts)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: 'var(--space-md)',
-            paddingBottom: 'var(--space-xs)',
-            borderBottom: '1px solid var(--accent-light)',
+            marginBottom: 'var(--space-3)',
+            paddingBottom: 'var(--space-1)',
+            borderBottom: '1px solid var(--arts-bg)',
           }}>
             Turn {activeTurn} 结果
           </div>
 
           {/* NP Gauge */}
-          <div style={{ marginBottom: 'var(--space-md)' }}>
-            <div style={{ fontSize: 'var(--font-xs)', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
+          <div style={{ marginBottom: 'var(--space-3)' }}>
+            <div style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>
               NP 状态
             </div>
             <NPGauge label={`S${dpsIndex + 1}`} value={turnResults[activeTurn - 1].npAtStart} />
-            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: 4, display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', marginTop: 'var(--space-1)', display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
               {turnResults[activeTurn - 1].npChargeThisTurn > 0 && (
                 <span>技能充能 +{turnResults[activeTurn - 1].npChargeThisTurn}%</span>
               )}
               {turnResults[activeTurn - 1].canNP && (
-                <span style={{ color: 'var(--accent)', fontWeight: 600 }}>宝具发动 ✓</span>
+                <span style={{ color: 'var(--arts)', fontWeight: 600 }}>宝具发动 ✓</span>
               )}
               {turnResults[activeTurn - 1].npRefund > 0 && (
                 <span>宝具回收 +{turnResults[activeTurn - 1].npRefund.toFixed(1)}%</span>
@@ -662,7 +662,7 @@ export default function TurnSimulator() {
           </div>
 
           {/* Damage distribution */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
             <div className="result-card">
               <div className="result-label">最小伤害</div>
               <div className="result-value min">
@@ -690,7 +690,7 @@ export default function TurnSimulator() {
           </div>
 
           {/* Pool info */}
-          <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-sm)' }}>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
             卡池: {turnResults[activeTurn - 1].pool?.length || 0} 张卡
             {turnResults[activeTurn - 1].canNP ? '（DPS宝具已入池）' : '（DPS宝具未入池）'}
             {' · '}{turnResults[activeTurn - 1].allDamages?.length || 0} 种出牌序列
@@ -701,18 +701,18 @@ export default function TurnSimulator() {
       {/* ── 3-Turn Summary ── */}
       {turnResults && allValid && (
         <div style={{
-          background: 'var(--surface-alt)',
-          border: '1px solid var(--border)',
+          background: 'var(--surface-2)',
+          border: '1px solid var(--border-default)',
           borderRadius: 'var(--radius-sm)',
-          padding: 'var(--space-md)',
+          padding: 'var(--space-3)',
         }}>
           <div style={{
-            fontSize: 'var(--font-xs)',
+            fontSize: 'var(--text-xs)',
             fontWeight: 700,
             color: 'var(--text-muted)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            marginBottom: 'var(--space-md)',
+            marginBottom: 'var(--space-3)',
           }}>
             三回合总览
           </div>
@@ -721,7 +721,7 @@ export default function TurnSimulator() {
             <table style={{
               width: '100%',
               borderCollapse: 'collapse',
-              fontSize: 'var(--font-sm)',
+              fontSize: 'var(--text-sm)',
             }}>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--border-strong)' }}>
@@ -738,42 +738,42 @@ export default function TurnSimulator() {
               <tbody>
                 {turnResults.map((tr, i) => (
                   <tr key={tr.turn} style={{
-                    borderBottom: '1px solid var(--border-light)',
-                    background: tr.turn === activeTurn ? 'var(--accent-light)' : undefined,
+                    borderBottom: '1px solid var(--border-subtle)',
+                    background: tr.turn === activeTurn ? 'var(--arts-bg)' : undefined,
                   }}>
                     <td style={tdStyle}>
                       <span style={{
                         fontWeight: 700,
-                        color: tr.turn === activeTurn ? 'var(--accent)' : 'var(--text)',
+                        color: tr.turn === activeTurn ? 'var(--arts)' : 'var(--text-strong)',
                       }}>
                         T{tr.turn}
                       </span>
                     </td>
                     <td style={tdStyle}>
-                      <span style={{ color: tr.npAtStart >= 100 ? 'var(--green)' : 'var(--text-secondary)' }}>
+                      <span style={{ color: tr.npAtStart >= 100 ? 'var(--color-positive)' : 'var(--text-muted)' }}>
                         {Math.floor(tr.npAtStart)}%
                       </span>
                     </td>
                     <td style={tdStyle}>
                       {tr.npChargeThisTurn > 0
-                        ? <span style={{ color: 'var(--accent)', fontWeight: 600 }}>+{tr.npChargeThisTurn}%</span>
+                        ? <span style={{ color: 'var(--arts)', fontWeight: 600 }}>+{tr.npChargeThisTurn}%</span>
                         : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                     </td>
                     <td style={tdStyle}>
                       {tr.canNP
-                        ? <span style={{ color: 'var(--green)', fontWeight: 700 }}>NP使用 ✓</span>
-                        : <span style={{ color: 'var(--red)', fontWeight: 500 }}>NP不足</span>}
+                        ? <span style={{ color: 'var(--color-positive)', fontWeight: 700 }}>NP使用 ✓</span>
+                        : <span style={{ color: 'var(--color-negative)', fontWeight: 500 }}>NP不足</span>}
                     </td>
                     <td style={tdStyle}>
                       <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
                         {tr.activeSkillsList.map((sk, j) => (
                           <span key={j} style={{
-                            fontSize: '10px',
+                            fontSize: 'var(--text-2xs)',
                             padding: '1px 6px',
                             borderRadius: 'var(--radius-xs)',
-                            background: 'var(--accent-light)',
-                            border: '1px solid var(--accent)',
-                            color: 'var(--accent)',
+                            background: 'var(--arts-bg)',
+                            border: '1px solid var(--arts)',
+                            color: 'var(--arts)',
                             whiteSpace: 'nowrap',
                           }}>
                             S{sk.servant} {sk.name.length > 6 ? sk.name.slice(0, 6) + '…' : sk.name}
@@ -785,18 +785,18 @@ export default function TurnSimulator() {
                         )}
                       </div>
                     </td>
-                    <td style={{ ...tdStyle, fontFamily: 'var(--font-mono)', fontSize: 'var(--font-xs)' }}>
+                    <td style={{ ...tdStyle, fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)' }}>
                       {tr.minDmg.toLocaleString()} – {tr.maxDmg.toLocaleString()}
                     </td>
-                    <td style={{ ...tdStyle, fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--accent)' }}>
+                    <td style={{ ...tdStyle, fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--arts)' }}>
                       {tr.median.toLocaleString()}
                     </td>
                     <td style={tdStyle}>
                       <span style={{
                         fontWeight: 700,
-                        color: tr.npAtEnd >= 100 ? 'var(--green)'
-                          : tr.npAtEnd >= 50 ? 'var(--gold)'
-                          : 'var(--text-secondary)',
+                        color: tr.npAtEnd >= 100 ? 'var(--color-positive)'
+                          : tr.npAtEnd >= 50 ? 'var(--color-warning)'
+                          : 'var(--text-muted)',
                       }}>
                         {Math.floor(tr.npAtEnd)}%
                       </span>
@@ -809,28 +809,28 @@ export default function TurnSimulator() {
 
           {/* Loop verdict */}
           <div style={{
-            marginTop: 'var(--space-md)',
-            padding: 'var(--space-sm) var(--space-md)',
+            marginTop: 'var(--space-3)',
+            padding: 'var(--space-2) var(--space-3)',
             borderRadius: 'var(--radius-sm)',
             background: turnResults.every(tr => tr.canNP)
               ? 'var(--green-bg)'
-              : 'var(--red-bg)',
+              : 'var(--buster-bg)',
             border: turnResults.every(tr => tr.canNP)
-              ? '1px solid var(--green)'
-              : '1px solid var(--red)',
+              ? '1px solid var(--color-positive)'
+              : '1px solid var(--color-negative)',
             textAlign: 'center',
           }}>
             <span style={{
-              fontSize: 'var(--font-md)',
+              fontSize: 'var(--text-md)',
               fontWeight: 800,
-              color: turnResults.every(tr => tr.canNP) ? 'var(--green)' : 'var(--red)',
+              color: turnResults.every(tr => tr.canNP) ? 'var(--color-positive)' : 'var(--color-negative)',
             }}>
               {turnResults.every(tr => tr.canNP)
                 ? '✓ 三连发可能！3-Turn Loop Possible!'
                 : '✗ 三连发中断 · 调整NP充能/回收'}
             </span>
             {!turnResults.every(tr => tr.canNP) && (
-              <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', marginTop: 4 }}>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
                 {turnResults.map(tr => !tr.canNP ? `T${tr.turn}: NP不足(${Math.floor(tr.npAfterCharge)}%)` : '').filter(Boolean).join(' · ')}
               </div>
             )}
@@ -843,7 +843,7 @@ export default function TurnSimulator() {
 
 const thStyle = {
   padding: '6px 10px',
-  fontSize: 'var(--font-xs)',
+  fontSize: 'var(--text-xs)',
   fontWeight: 600,
   color: 'var(--text-muted)',
   textTransform: 'uppercase',
@@ -854,7 +854,7 @@ const thStyle = {
 
 const tdStyle = {
   padding: '6px 10px',
-  fontSize: 'var(--font-sm)',
-  color: 'var(--text)',
+  fontSize: 'var(--text-sm)',
+  color: 'var(--text-strong)',
   verticalAlign: 'middle',
 };

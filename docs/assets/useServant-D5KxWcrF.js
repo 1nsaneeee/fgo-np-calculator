@@ -1,0 +1,1 @@
+import{r as o}from"./vendor-mui-DD5CSG4K.js";import{a as s}from"./index-Bk63lM85.js";function c(){const r=s(t=>t.servantData),e=s(t=>t.isCustom),n=s(t=>t.customServant);return o.useMemo(()=>e?n:r||null,[e,n,r])}export{c as u};

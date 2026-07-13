@@ -18,7 +18,7 @@ function CardBadge({ type }) {
   return (
     <span className="draw-badge" style={{
       background: CARD_COLORS[type] || '#666', color: '#fff',
-      fontWeight: 700, fontSize: '11px', padding: '2px 6px', borderRadius: 3,
+      fontWeight: 700, fontSize: 'var(--text-2xs)', padding: '2px 6px', borderRadius: 'var(--radius-sm)',
     }}>{type}</span>
   );
 }
@@ -91,7 +91,7 @@ export default function SingleDamageDist() {
   if (!servant) {
     return (
       <div className="section-card">
-        <h2 className="panel-title">伤害分布 Damage Distribution</h2>
+        <h2 className="panel-title">伤害分布</h2>
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
           请先从从者列表中选择一位从者
         </p>
@@ -102,7 +102,7 @@ export default function SingleDamageDist() {
   if (!allPlays?.detailed) {
     return (
       <div className="section-card">
-        <h2 className="panel-title">伤害分布 Damage Distribution</h2>
+        <h2 className="panel-title">伤害分布</h2>
         <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem 0' }}>
           计算中...
         </p>
@@ -112,13 +112,13 @@ export default function SingleDamageDist() {
 
   return (
     <div className="section-card">
-      <h2 className="panel-title">伤害分布 Damage Distribution</h2>
+      <h2 className="panel-title">伤害分布</h2>
 
       {/* HP input + stats row */}
-      <div className="dist-stats-row" style={{ marginBottom: 'var(--space-md)' }}>
+      <div className="dist-stats-row" style={{ marginBottom: 'var(--space-3)' }}>
         <div style={{ display: 'flex', flexDirection: 'column', minWidth: 120 }}>
-          <label style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>
-            敌方血量 Enemy HP
+          <label style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 2 }}>
+            敌方血量
           </label>
           <input
             className="buff-input"
@@ -130,54 +130,54 @@ export default function SingleDamageDist() {
           />
         </div>
 
-        <div style={{ width: 1, background: 'var(--border-light)' }} />
+        <div style={{ width: 1, background: 'var(--border-subtle)' }} />
 
         {stats && (
           <>
             <div className="dist-stat-card" style={{ minWidth: 100 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(全局)</div>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(全局)</div>
               <div style={{
-                fontSize: 'var(--font-lg)', fontWeight: 800,
-                color: (stats.kills / stats.count) >= 0.5 ? 'var(--green)' : 'var(--red)',
+                fontSize: 'var(--text-lg)', fontWeight: 800,
+                color: (stats.kills / stats.count) >= 0.5 ? 'var(--color-positive)' : 'var(--color-negative)',
               }}>
                 {((stats.kills / stats.count) * 100).toFixed(1)}%
               </div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)' }}>
                 {stats.kills} / {stats.count} 种出牌
               </div>
             </div>
             {fitPassRate && (
               <div className="dist-stat-card" style={{ minWidth: 100 }}>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(拟合)</div>
+                <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600 }}>致命率(拟合)</div>
                 <div style={{
-                  fontSize: 'var(--font-lg)', fontWeight: 800,
-                  color: fitPassRate.weighted >= 0.5 ? 'var(--green)' : 'var(--red)',
+                  fontSize: 'var(--text-lg)', fontWeight: 800,
+                  color: fitPassRate.weighted >= 0.5 ? 'var(--color-positive)' : 'var(--color-negative)',
                 }}>
                   {pct(fitPassRate.weighted)}
                 </div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)' }}>
                   概率 × 击破率
                 </div>
               </div>
             )}
 
             <div className="dist-stat-card" style={{ minWidth: 70 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>最高 Max</div>
-              <div style={{ fontSize: 'var(--font-sm)', fontWeight: 700, color: 'var(--green)' }}>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600 }}>最高</div>
+              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--color-positive)' }}>
                 {fmtNum(stats.max.max)}
               </div>
             </div>
 
             <div className="dist-stat-card" style={{ minWidth: 70 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>中位 Median</div>
-              <div style={{ fontSize: 'var(--font-sm)', fontWeight: 700, color: 'var(--accent)' }}>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600 }}>中位</div>
+              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-strong)' }}>
                 {fmtNum(stats.median)}
               </div>
             </div>
 
             <div className="dist-stat-card" style={{ minWidth: 70 }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontWeight: 600 }}>最低 Min</div>
-              <div style={{ fontSize: 'var(--font-sm)', fontWeight: 700, color: 'var(--red)' }}>
+              <div style={{ fontSize: 'var(--text-2xs)', color: 'var(--text-muted)', fontWeight: 600 }}>最低</div>
+              <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--color-negative)' }}>
                 {fmtNum(stats.min.min)}
               </div>
             </div>
@@ -187,12 +187,12 @@ export default function SingleDamageDist() {
 
       {/* Best / Worst plays */}
       {stats && (
-        <div className="dist-best-worst-grid" style={{ marginBottom: 'var(--space-md)' }}>
+        <div className="dist-best-worst-grid" style={{ marginBottom: 'var(--space-3)' }}>
           <div className="dist-best-card">
-            <div className="dist-play-label" style={{ color: 'var(--green)', marginBottom: 4 }}>
-              最高伤害 Best Play
+            <div className="dist-play-label" style={{ color: 'var(--color-positive)', marginBottom: 'var(--space-1)' }}>
+              最高伤害
             </div>
-            <div className="dist-play-damage" style={{ fontSize: 'var(--font-md)', fontWeight: 700, marginBottom: 4 }}>
+            <div className="dist-play-damage" style={{ fontSize: 'var(--text-md)', fontWeight: 700, marginBottom: 'var(--space-1)' }}>
               {fmtNum(stats.max.damage)} ({fmtNum(stats.max.min)} ~ {fmtNum(stats.max.max)})
             </div>
             <div style={{ display: 'flex', gap: 4 }}>
@@ -200,10 +200,10 @@ export default function SingleDamageDist() {
             </div>
           </div>
           <div className="dist-worst-card">
-            <div className="dist-play-label" style={{ color: 'var(--red)', marginBottom: 4 }}>
-              最低伤害 Worst Play
+            <div className="dist-play-label" style={{ color: 'var(--color-negative)', marginBottom: 'var(--space-1)' }}>
+              最低伤害
             </div>
-            <div className="dist-play-damage" style={{ fontSize: 'var(--font-md)', fontWeight: 700, marginBottom: 4 }}>
+            <div className="dist-play-damage" style={{ fontSize: 'var(--text-md)', fontWeight: 700, marginBottom: 'var(--space-1)' }}>
               {fmtNum(stats.min.damage)} ({fmtNum(stats.min.min)} ~ {fmtNum(stats.min.max)})
             </div>
             <div style={{ display: 'flex', gap: 4 }}>
@@ -214,24 +214,24 @@ export default function SingleDamageDist() {
       )}
 
       {/* Top 5 plays */}
-      <h3 style={{ fontSize: 'var(--font-sm)', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)' }}>
-        伤害排名 Top 5
+      <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-muted)', marginBottom: 'var(--space-1)' }}>
+        伤害排名 前 5
       </h3>
-      <div style={{ marginBottom: 'var(--space-md)' }}>
+      <div style={{ marginBottom: 'var(--space-3)' }}>
         {allPlays.detailed.slice(0, 5).map((play, i) => (
           <div key={i} style={{
-            display: 'flex', alignItems: 'center', gap: 'var(--space-sm)',
-            padding: '2px 0', borderBottom: '1px solid var(--border-light)',
-            background: play.damage >= hpThreshold ? 'rgba(76,175,80,0.06)' : undefined,
+            display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+            padding: '2px 0', borderBottom: '1px solid var(--border-subtle)',
+            background: play.damage >= hpThreshold ? 'rgba(88, 196, 122, 0.06)' : undefined,
           }}>
-            <span style={{ width: 22, fontSize: 'var(--font-xs)', color: 'var(--text-muted)' }}>#{i + 1}</span>
+            <span style={{ width: 22, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>#{i + 1}</span>
             <div style={{ display: 'flex', gap: 3 }}>
               {play.cards.map((c, j) => <CardBadge key={j} type={c.type} />)}
             </div>
-            <span style={{ marginLeft: 'auto', fontSize: 'var(--font-sm)', fontWeight: 600 }}>
-              <span style={{ color: 'var(--blue)' }}>{fmtNum(play.min)}</span>
+            <span style={{ marginLeft: 'auto', fontSize: 'var(--text-sm)', fontWeight: 600 }}>
+              <span style={{ color: 'var(--arts)' }}>{fmtNum(play.min)}</span>
               <span style={{ color: 'var(--text-muted)', margin: '0 3px' }}>~</span>
-              <span style={{ color: 'var(--red)' }}>{fmtNum(play.max)}</span>
+              <span style={{ color: 'var(--color-negative)' }}>{fmtNum(play.max)}</span>
             </span>
           </div>
         ))}

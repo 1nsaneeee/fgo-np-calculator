@@ -1,7 +1,7 @@
-// src/pages/ServantListPage.jsx
+// src/pages/ServantListPage.jsx - 极简从者列表
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, TextField, MenuItem, Select, FormControl, InputLabel, Pagination, Typography, CircularProgress, Alert, Skeleton } from '@mui/material';
+import { Skeleton } from '@mui/material';
 import useStore from '@/store/index';
 import { fetchServantList, fetchNiceServant } from '@/services/atlasApi';
 import { transformNiceToCalc, CLASS_MAP } from '@/services/transform';
@@ -110,9 +110,39 @@ export default function ServantListPage() {
     setSortBy('collectionNo');
   };
 
+  // 加载状态 - Skeleton 网格，匹配 sv-card 布局
   if (loading && servantList.length === 0) {
     return (
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <div className="servant-list-page">
+        <h1 className="visually-hidden">从者列表</h1>
+        <div className="sv-grid">
+          {Array.from({ length: 15 }).map((_, i) => (
+            <div key={i} className="sv-card" style={{ cursor: 'default' }}>
+              <Skeleton variant="rectangular" width="100%" sx={{ aspectRatio: '1', borderRadius: 'var(--radius-sm)', marginBottom: 'var(--space-2)' }} />
+              <Skeleton variant="text" width="80%" height={14} sx={{ borderRadius: 'var(--radius-sm)' }} />
+              <Skeleton variant="text" width="60%" height={12} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 错误状态
+  if (error && servantList.length === 0) {
+    return (
+      <div className="error">
+        无法加载从者列表: {error}
+      </div>
+    );
+  }
+
+  return (
+    <div className="servant-list-page">
+      <h1 className="visually-hidden">从者列表</h1>
+      
+      <div className="servant-list-layout">
+        {/* 过滤面板 */}
         <ServantFilterPanel
           classFilter={classFilter}
           setClassFilter={setClassFilter}
@@ -122,85 +152,77 @@ export default function ServantListPage() {
           setNpColorFilter={setNpColorFilter}
           onReset={handleReset}
         />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-            <Skeleton variant="rectangular" height={40} sx={{ flex: 1, minWidth: 200 }} />
-            <Skeleton variant="rectangular" width={130} height={40} />
-          </Box>
-          <Skeleton variant="text" width={120} sx={{ mb: 1.5 }} />
+
+        {/* 主内容区 */}
+        <div className="servant-list-content">
+          {/* 搜索和排序 */}
+          <div className="servant-list-toolbar">
+            <input
+              className="input-field"
+              placeholder="搜索从者名称或编号..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ flex: 1, minWidth: '200px' }}
+            />
+            <select
+              className="input-field"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              style={{ width: '120px' }}
+            >
+              <option value="collectionNo">ID 顺序</option>
+              <option value="rarity">稀有度</option>
+              <option value="atkMax">ATK</option>
+              <option value="hpMax">HP</option>
+            </select>
+          </div>
+
+          {/* 从者数量 */}
+          <div className="servant-count">
+            共 {filtered.length} 位从者
+          </div>
+
+          {/* 从者网格 */}
           <div className="sv-grid">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="sv-card" style={{ cursor: 'default' }}>
-                <Skeleton variant="rectangular" width="100%" sx={{ aspectRatio: '1', display: 'block' }} />
-                <div className="sv-card-body">
-                  <Skeleton variant="text" width="80%" />
-                  <Skeleton variant="text" width="60%" />
-                </div>
-              </div>
+            {pageItems.map((basic) => (
+              <ServantCard key={basic.id} basic={basic} onClick={() => handleSelect(basic)} />
             ))}
           </div>
-        </Box>
-      </Box>
-    );
-  }
 
-  if (error && servantList.length === 0) {
-    return (
-      <Box>
-        <Alert severity="error">无法加载从者列表: {error}</Alert>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ display: 'flex', gap: 2 }}>
-      <h1 className="visually-hidden">从者列表</h1>
-      <ServantFilterPanel
-        classFilter={classFilter}
-        setClassFilter={setClassFilter}
-        rarityFilter={rarityFilter}
-        setRarityFilter={setRarityFilter}
-        npColorFilter={npColorFilter}
-        setNpColorFilter={setNpColorFilter}
-        onReset={handleReset}
-      />
-
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-          <TextField
-            size="small"
-            placeholder="搜索从者名称或编号..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            sx={{ flex: 1, minWidth: 200 }}
-          />
-          <FormControl size="small" sx={{ minWidth: 130 }}>
-            <InputLabel>排序</InputLabel>
-            <Select value={sortBy} label="排序" onChange={(e) => setSortBy(e.target.value)}>
-              <MenuItem value="collectionNo">ID 顺序</MenuItem>
-              <MenuItem value="rarity">稀有度</MenuItem>
-              <MenuItem value="atkMax">ATK</MenuItem>
-              <MenuItem value="hpMax">HP</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
-        <Typography variant="body2" sx={{ mb: 1.5, color: 'var(--text-muted)' }}>
-          共 {filtered.length} 位从者
-        </Typography>
-
-        <div className="sv-grid">
-          {pageItems.map((basic) => (
-            <ServantCard key={basic.id} basic={basic} onClick={() => handleSelect(basic)} />
-          ))}
+          {/* 分页 */}
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                className="pagination-btn"
+                disabled={page <= 1}
+                onClick={() => setPage(p => p - 1)}
+              >
+                ←
+              </button>
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const pageNum = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+                if (pageNum > totalPages) return null;
+                return (
+                  <button
+                    key={pageNum}
+                    className={`pagination-btn ${page === pageNum ? 'active' : ''}`}
+                    onClick={() => setPage(pageNum)}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+              <button
+                className="pagination-btn"
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => p + 1)}
+              >
+                →
+              </button>
+            </div>
+          )}
         </div>
-
-        {totalPages > 1 && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-            <Pagination count={totalPages} page={page} onChange={(_, p) => setPage(p)} size="small" />
-          </Box>
-        )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

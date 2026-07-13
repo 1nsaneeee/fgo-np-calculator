@@ -37,7 +37,7 @@ export default function PresetButtons() {
     if (sources.length === 0) {
       sources.push({
         id: 'src_1',
-        name: '自身Self',
+        name: '自身',
         buffs: createEmptyBuffs(),
       });
       nextId = 2;
@@ -52,7 +52,7 @@ export default function PresetButtons() {
 
   return (
     <div className="preset-row">
-      <span className="preset-label">预设 Presets</span>
+      <span className="preset-label">预设</span>
       {Object.entries(PRESETS).map(([label, preset]) => (
         <Button
           key={label}
@@ -60,7 +60,7 @@ export default function PresetButtons() {
           variant="outlined"
           color={presetColors[label] || 'inherit'}
           onClick={() => handleApply(preset)}
-          sx={{ fontSize: 'var(--font-sm)', py: 0.5, px: 1.5 }}
+          sx={{ fontSize: 'var(--text-sm)', py: 0.5, px: 1.5 }}
         >
           {label}
         </Button>

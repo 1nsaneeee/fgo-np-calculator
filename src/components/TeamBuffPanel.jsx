@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { Tabs, Tab, Box } from '@mui/material'
 import useStore from '@/store/index'
-import { BUFF_DEFS, CORE_BUFF_KEYS } from '@/constants/buffDefs'
-
-const CRIT_CHILDREN = new Set(['busterCritDmg', 'artsCritDmg', 'quickCritDmg'])
-const CRIT_KEYS = ['critDmg', 'busterCritDmg', 'artsCritDmg', 'quickCritDmg']
+import { BUFF_DEFS } from '@/constants/buffDefs'
+import { CRIT_CHILDREN, getVisibleBuffDefs, isCritBuffKey, checkCritCapped } from '@/utils/buffUtils'
 
 export default function TeamBuffPanel() {
   const [activeTab, setActiveTab] = useState(0)
@@ -24,9 +22,7 @@ export default function TeamBuffPanel() {
   const slotBuffs = slots[activeTab]?.buffs
   const sources = slotBuffs?.sources || []
 
-  const visibleDefs = showAll
-    ? BUFF_DEFS
-    : BUFF_DEFS.filter(d => CORE_BUFF_KEYS.has(d.key) || CRIT_CHILDREN.has(d.key))
+  const visibleDefs = getVisibleBuffDefs(showAll)
 
   const handleAddSource = () => {
     if (newName.trim()) {
@@ -42,17 +38,14 @@ export default function TeamBuffPanel() {
   }
 
   // Per-row CAP check
+  const critCapped = checkCritCapped(getTotal)
+
   const isCapped = (def) => {
     if (def.key === 'flatDmg') return false
+    if (isCritBuffKey(def.key)) return critCapped
     const total = getTotal(def.key)
-    if (critAffected(def.key)) {
-      const critTotal = CRIT_KEYS.reduce((s, k) => s + getTotal(k), 0)
-      return critTotal > 500
-    }
     return total >= def.cap
   }
-
-  const critAffected = (key) => key === 'critDmg' || CRIT_CHILDREN.has(key)
 
   return (
     <div className="section-card">
@@ -89,7 +82,7 @@ export default function TeamBuffPanel() {
         <table className="buff-table">
           <thead>
             <tr>
-              <th className="buff-label-col">Buff</th>
+              <th className="buff-label-col">增益</th>
               {sources.map(src => (
                 <th key={src.id}>
                   <div className="source-header">
@@ -151,7 +144,7 @@ export default function TeamBuffPanel() {
                       <input
                         className="buff-input"
                         type="number"
-                        value={src.buffs?.[def.key] || 0}
+                        value={src.buffs?.[def.key] || ''}
                         onChange={e => updateTeamBuffValue(activeTab, src.id, def.key, parseFloat(e.target.value) || 0)}
                         aria-label={`${def.label} - ${src.name}`}
                       />
@@ -185,13 +178,13 @@ export default function TeamBuffPanel() {
           </div>
         ) : (
           <button className="add-source-btn" onClick={() => setAdding(true)}>
-            + 添加来源 Add Source
+            + 添加来源
           </button>
         )}
         <button className="toggle-btn" onClick={() => setShowAll(prev => !prev)}>
-          {showAll
-            ? '▲ 收起 Collapse'
-            : `▼ 展开全部 Show All (${BUFF_DEFS.length})`}
+{showAll
+    ? '▲ 收起'
+    : `▼ 展开全部 (${BUFF_DEFS.length})`}
         </button>
       </div>
     </div>

@@ -59,21 +59,21 @@ export default function CardDrawPanel() {
     <div className="section">
       <h2 className="panel-title">出卡计算器 Card Draw</h2>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-sm)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--space-2)' }}>
         {[
           { label: '从者1 S1', value: deck1, setter: setDeck1, readOnly: false },
           { label: '从者2 S2', value: deck2, setter: setDeck2, readOnly: false },
           { label: '从者3 S3 (当前)', value: deck3, setter: null, readOnly: true },
         ].map((d) => (
           <div key={d.label}>
-            <label style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: 2 }}>
+            <label style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: 2 }}>
               {d.label}
             </label>
             <input
               className="buff-input"
               style={{
                 width: '100%', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700,
-                background: d.readOnly ? 'var(--surface-alt)' : undefined,
+                background: d.readOnly ? 'var(--surface-2)' : undefined,
               }}
               value={d.value}
               onChange={d.readOnly ? undefined : (e) => d.setter(validateDeck(e.target.value))}
@@ -87,7 +87,7 @@ export default function CardDrawPanel() {
       </div>
 
       {!allValid && (
-        <div style={{ fontSize: 'var(--font-xs)', color: 'var(--red)', marginTop: 'var(--space-xs)' }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-negative)', marginTop: 'var(--space-1)' }}>
           每个从者需要恰好5张卡牌 (B/A/Q)
         </div>
       )}
@@ -130,11 +130,11 @@ export default function CardDrawPanel() {
         </div>
       )}
 
-      <div style={{ marginTop: 'var(--space-md)' }}>
-        <label style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: 'var(--space-xs)' }}>
+      <div style={{ marginTop: 'var(--space-3)' }}>
+        <label style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: 'var(--space-1)' }}>
           自定义查询 Manual Query
         </label>
-        <div className="preset-row" style={{ marginBottom: 'var(--space-sm)' }}>
+        <div className="preset-row" style={{ marginBottom: 'var(--space-2)' }}>
           {CARD_PRESETS.map((preset) => (
             <Button
               key={preset.label}
@@ -142,7 +142,7 @@ export default function CardDrawPanel() {
               variant="outlined"
               color={preset.color}
               onClick={() => setQueryStr(preset.query)}
-              sx={{ fontSize: 'var(--font-xs)', py: 0.25, px: 1, minWidth: 'auto', lineHeight: 1.4 }}
+              sx={{ fontSize: 'var(--text-xs)', py: 0.25, px: 1, minWidth: 'auto', lineHeight: 1.4 }}
             >
               {preset.label}
             </Button>
@@ -161,7 +161,7 @@ export default function CardDrawPanel() {
           )}
         </div>
         {query.length > 0 && (
-          <div className="draw-pool" style={{ marginTop: 'var(--space-xs)' }}>
+          <div className="draw-pool" style={{ marginTop: 'var(--space-1)' }}>
             {query.map((card, i) => (
               <span key={i} className={'draw-badge draw-badge-' + card.type}>
                 {card.type}<sub>{card.servant}</sub>
@@ -169,7 +169,7 @@ export default function CardDrawPanel() {
             ))}
           </div>
         )}
-        <div style={{ fontSize: 'var(--font-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-xs)' }}>
+        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-1)' }}>
           字母=卡色(B/A/Q) 数字=从者编号(1/2/3)　例: A3A3A3 = 从者3的3张Arts
         </div>
       </div>
